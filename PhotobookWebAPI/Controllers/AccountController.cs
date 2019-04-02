@@ -156,7 +156,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("ChangePassword")]
         public async Task<ActionResult> ChangePassword(AccountModels.ChangePassModel model)
         {
-            var user = new AppUser { UserName = model.Email, Email = model.Email };
+            var user = _userManager.FindByEmailAsync(model.Email);
 
             var result = await _userManager.ChangePasswordAsync(user, model.CurrPassword, model.NewPassword);
 
