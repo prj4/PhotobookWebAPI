@@ -10,11 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using Microsoft.IdentityModel.Protocols;
-using PhotoBook.Repository.HostRepository;
-using PhotoBookDatabase.Model;
+
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -25,11 +21,11 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class AccountController : ControllerBase
     {
-        private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
+        private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
         readonly IConfiguration _configuration;
 
-        public AccountController(Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
+        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
@@ -46,9 +42,9 @@ namespace PhotobookWebAPI.Controllers
         // GET: api/Account
         [HttpGet]
         //[Authorize("IsAdmin")]
-        public async Task<List<AppUser>> GetAccounts()
+        public string GetAccounts()
         {
-            return await _userManager.Users.ToListAsync();
+            return "hej";
         }
 
 

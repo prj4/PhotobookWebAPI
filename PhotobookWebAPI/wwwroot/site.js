@@ -75,11 +75,11 @@ function addItem() {
         contentType: "application/json",
         data: JSON.stringify(item),
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in additem!, You must be ADMIN");
+            alert("Something went wrong in additem!");
         },
         success: function (result) {
             getData();
-            $("#AccountName").val(""),
+            $("#AccountName").val("");
             $("#AccountEmail").val("");
             $("#AccountPassword").val("");
             $("#AccountConfirmPassword").val();
