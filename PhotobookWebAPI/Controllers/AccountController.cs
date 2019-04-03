@@ -253,8 +253,14 @@ namespace PhotobookWebAPI.Controllers
                 new {token = resettoken, oldEmail = user.Email, newEmail = model.NewEmail},
                 protocol: HttpContext.Request.Scheme);
 
-            return Ok();
-        }
+            var result = await _userManager.ChangeEmailAsync(user, model.NewEmail, resettoken);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return NotFound();
+        //return Ok();
+    }
 
         [AllowAnonymous]
         [Route("ChangeEmail")]

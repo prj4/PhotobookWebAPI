@@ -52,7 +52,8 @@ namespace PhotobookWebAPI
             {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ";
             }
-        ).AddEntityFrameworkStores<AppDBContext>();
+
+        ).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
