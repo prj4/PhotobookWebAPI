@@ -24,7 +24,7 @@ function getData() {
         url: uri,
         cache: false,
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in getdata!");
+            alert("Something went wrong in getdata!, You must be ADMIN");
         },
         success: function (data) {
             const tBody = $("#accounts");
@@ -74,7 +74,7 @@ function addItem() {
         contentType: "application/json",
         data: JSON.stringify(item),
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in additem!");
+            alert("Something went wrong in additem!, You must be ADMIN");
         },
         success: function (result) {
             getData();
@@ -84,6 +84,8 @@ function addItem() {
         }
     });
 }
+
+
 
 function deleteItem(key) {
 
@@ -97,7 +99,7 @@ function deleteItem(key) {
         type: "DELETE",
         
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in deleteitem!");
+            alert("Something went wrong in deleteitem!, You must be ADMIN");
         },
         success: function (result) {
             getData();
@@ -153,4 +155,27 @@ $(".my-form").on("submit", function () {
 
 function closeInput() {
     $("#spoiler").css({ display: "none" });
+}
+
+function login() {
+    const item = {
+        Email: $("#AccountUser").val(),
+        Password: $("#AccountPass").val()
+    };
+
+    $.ajax({
+        type: "POST",
+        accepts: "application/json",
+        url: "api/Account/Login",
+        contentType: "application/json",
+        data: JSON.stringify(item),
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert("Something went wrong in login!");
+        },
+        success: function (result) {
+            getData();
+            $("#AccountUser").val("");
+            $("#AccountPass").val("");
+        }
+    });
 }

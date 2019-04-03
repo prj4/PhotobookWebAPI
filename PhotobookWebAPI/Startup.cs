@@ -42,6 +42,9 @@ namespace PhotobookWebAPI
 
                 options.AddPolicy("IsGuest",
                     policyBuilder => policyBuilder.RequireClaim("Role", "Guest"));
+
+                options.AddPolicy("IsAdmin",
+                    policyBuilder => policyBuilder.RequireClaim("Role", "Admin"));
             });
 
 

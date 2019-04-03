@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -38,7 +40,7 @@ namespace PhotobookWebAPI.Controllers
 
         // GET: api/Account
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         public async Task<List<AppUser>> GetAccounts()
         {
             return await _userManager.Users.ToListAsync();
@@ -47,7 +49,7 @@ namespace PhotobookWebAPI.Controllers
 
         // GET: api/Account/Email@gmail.com
         [HttpGet("{Email}")]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         public async Task<AppUser> GetAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
@@ -57,9 +59,9 @@ namespace PhotobookWebAPI.Controllers
 
 
         // PUT: api/Account/Email@gmail.com
-        [AllowAnonymous]
         [HttpPut("{Email}")]
-        public async Task<IActionResult> PutTodoItem(string Email, AppUser newData)
+        [Authorize("IsAdmin")]
+        public async Task<IActionResult> PutAccount(string Email, AppUser newData)
         {
             AppUser user = await _userManager.FindByEmailAsync(Email);
 
@@ -82,7 +84,7 @@ namespace PhotobookWebAPI.Controllers
 
         // DELETE: api/Account/Email@gmail.com
         [HttpDelete("{Email}")]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> DeleteAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
@@ -95,6 +97,32 @@ namespace PhotobookWebAPI.Controllers
             await _userManager.DeleteAsync(user);
 
             return NoContent();
+        }
+
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("RegisterAdmin")]
+        public async Task<ActionResult> RegisterAdmin(AccountModels.RegisterAdminModel model)
+        {
+
+            var user = new AppUser
+                {UserName = model.Email};
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                var roleClaim = new Claim("Role", "Admin");
+                await _userManager.AddClaimAsync(user, roleClaim);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+
+                return Ok();
+            }
+
+            return NotFound();
         }
 
 
@@ -114,6 +142,8 @@ namespace PhotobookWebAPI.Controllers
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
+                //Create Host in DB
+
                 return Ok();
             }
 
@@ -130,6 +160,9 @@ namespace PhotobookWebAPI.Controllers
 
             var user = new AppUser { UserName = model.UserName};
 
+
+            //Check if event exsists with model.password then do the following
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
@@ -137,6 +170,10 @@ namespace PhotobookWebAPI.Controllers
                 var roleClaim = new Claim("Role", "Guest");
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
+
+                //Add Guest to DB and connect to the found event. 
+
+                
 
                 return Ok();
             }
@@ -176,8 +213,8 @@ namespace PhotobookWebAPI.Controllers
         }
 
         //[HttpPost]
-        [AllowAnonymous]
         [Route("ChangePassword")]
+        [Authorize("IsHost")]
         public async Task<ActionResult> ChangePassword(AccountModels.ChangePassModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -193,9 +230,14 @@ namespace PhotobookWebAPI.Controllers
 
         [Authorize("IsHost")]
         [Route("TestRoleHost")]
-        public async Task<IActionResult> TestRoleHost()
+        [HttpGet]
+        public string TestRoleHost()
         {
-            return Ok();
+            var test = HttpContext.User.Claims.ElementAt(1).Value;
+
+
+
+            return test;
 
         }
 
