@@ -12,6 +12,9 @@ using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.IdentityModel.Protocols;
+using PhotoBook.Repository.HostRepository;
+using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -134,7 +137,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<ActionResult> RegisterHost(AccountModels.RegisterHostModel model)
         {
 
-            var user = new AppUser {UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName};
+            var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -144,8 +147,17 @@ namespace PhotobookWebAPI.Controllers
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                //Create Host in DB
+                
+                /*
+                Host host = new Host{Name = "Morten", Email = "Morten@test.com", Username = "testuser", PW = "1234"};
 
+                HostRepository hs = new HostRepository(
+                    "Server=tcp:katrinesphotobook.database.windows.net,1433;Initial Catalog=PhotoBook4;Persist Security Info=False;User ID=Ingeniørhøjskolen@katrinesphotobook.database.windows.net;Password=Katrinebjergvej22;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+
+                hs.InsertHost(host);
+                */
+
+    
                 return Ok();
             }
 

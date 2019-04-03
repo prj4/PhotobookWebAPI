@@ -62,8 +62,7 @@ function getData() {
 function addItem() {
     const item = {
         Email: $("#AccountEmail").val(),
-        FirstName: $("#AccountFN").val(),
-        LastName: $("#AccountLN").val(),
+        FirstName: $("#AccountName").val(),
         Password: $("#AccountPassword").val(),
         ConfirmPassword: $("#AccountConfirmPassword").val(),
         Role: "Host"
@@ -80,8 +79,7 @@ function addItem() {
         },
         success: function (result) {
             getData();
-            $("#AccountFN").val(""),
-            $("#AccountLN").val(""),
+            $("#AccountName").val(""),
             $("#AccountEmail").val("");
             $("#AccountPassword").val("");
             $("#AccountConfirmPassword").val();
