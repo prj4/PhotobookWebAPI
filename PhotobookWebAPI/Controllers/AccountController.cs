@@ -32,6 +32,8 @@ namespace PhotobookWebAPI.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+
+            
         }
 
 
@@ -40,7 +42,7 @@ namespace PhotobookWebAPI.Controllers
 
         // GET: api/Account
         [HttpGet]
-        [Authorize("IsAdmin")]
+        //[Authorize("IsAdmin")]
         public async Task<List<AppUser>> GetAccounts()
         {
             return await _userManager.Users.ToListAsync();
@@ -49,7 +51,7 @@ namespace PhotobookWebAPI.Controllers
 
         // GET: api/Account/Email@gmail.com
         [HttpGet("{Email}")]
-        [Authorize("IsAdmin")]
+        //[Authorize("IsAdmin")]
         public async Task<AppUser> GetAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
@@ -60,7 +62,7 @@ namespace PhotobookWebAPI.Controllers
 
         // PUT: api/Account/Email@gmail.com
         [HttpPut("{Email}")]
-        [Authorize("IsAdmin")]
+        //[Authorize("IsAdmin")]
         public async Task<IActionResult> PutAccount(string Email, AppUser newData)
         {
             AppUser user = await _userManager.FindByEmailAsync(Email);
@@ -84,7 +86,7 @@ namespace PhotobookWebAPI.Controllers
 
         // DELETE: api/Account/Email@gmail.com
         [HttpDelete("{Email}")]
-        [Authorize("IsAdmin")]
+        //[Authorize("IsAdmin")]
         public async Task<IActionResult> DeleteAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
@@ -108,7 +110,7 @@ namespace PhotobookWebAPI.Controllers
         {
 
             var user = new AppUser
-                {UserName = model.Email};
+                {UserName = model.UserName};
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -132,7 +134,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<ActionResult> RegisterHost(AccountModels.RegisterHostModel model)
         {
 
-            var user = new AppUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName};
+            var user = new AppUser {UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName};
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -189,7 +191,7 @@ namespace PhotobookWebAPI.Controllers
         {
 
 
-            var result = await _signInManager.PasswordSignInAsync(loginInfo.Email,
+            var result = await _signInManager.PasswordSignInAsync(loginInfo.UserName,
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {

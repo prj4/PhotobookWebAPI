@@ -62,6 +62,8 @@ function getData() {
 function addItem() {
     const item = {
         Email: $("#AccountEmail").val(),
+        FirstName: $("#AccountFN").val(),
+        LastName: $("#AccountLN").val(),
         Password: $("#AccountPassword").val(),
         ConfirmPassword: $("#AccountConfirmPassword").val(),
         Role: "Host"
@@ -70,7 +72,7 @@ function addItem() {
     $.ajax({
         type: "POST",
         accepts: "application/json",
-        url: "api/Account/Register",
+        url: "api/Account/RegisterHost",
         contentType: "application/json",
         data: JSON.stringify(item),
         error: function (jqXHR, textStatus, errorThrown) {
@@ -78,6 +80,8 @@ function addItem() {
         },
         success: function (result) {
             getData();
+            $("#AccountFN").val(""),
+            $("#AccountLN").val(""),
             $("#AccountEmail").val("");
             $("#AccountPassword").val("");
             $("#AccountConfirmPassword").val();
@@ -159,7 +163,7 @@ function closeInput() {
 
 function login() {
     const item = {
-        Email: $("#AccountUser").val(),
+        UserName: $("#AccountUser").val(),
         Password: $("#AccountPass").val()
     };
 

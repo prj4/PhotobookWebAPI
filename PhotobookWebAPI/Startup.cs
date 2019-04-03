@@ -48,7 +48,11 @@ namespace PhotobookWebAPI
             });
 
 
-            services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDBContext>();
+            services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ";
+            }
+        ).AddEntityFrameworkStores<AppDBContext>();
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
