@@ -30,9 +30,20 @@
     </style>
 </head>
 <body>
-    <h1>PhotoAPI</h1>
+<h1>PhotoAPI</h1>
+
+<h3>Login</h3>
+<form action="javascript:void(0)" method="POST" onsubmit="login()">
+    <input type="text" id="AccountUser" placeholder="UserName"><br>
+    <input type="text" id="AccountPass" placeholder="Password"><br>
+    <input type="submit" value="Login">
+</form>
+
+
 <h3>Add</h3>
 <form action="javascript:void(0);" method="POST" onsubmit="addItem()">
+    <input type="text" id="AccountFN" placeholder="First Name"><br>
+    <input type="text" id="AccountLN" placeholder="Last Name"><br>
     <input type="text" id="AccountEmail" placeholder="Email"><br>
     <input type="text" id="AccountPassword" placeholder="Password"><br>
     <input type="text" id="AccountConfirmPassword" placeholder="Confirm Password"><br>

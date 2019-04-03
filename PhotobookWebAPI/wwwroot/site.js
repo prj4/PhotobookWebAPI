@@ -24,7 +24,7 @@ function getData() {
         url: uri,
         cache: false,
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in getdata!");
+            alert("Something went wrong in getdata!, You must be ADMIN");
         },
         success: function (data) {
             const tBody = $("#accounts");
@@ -62,6 +62,8 @@ function getData() {
 function addItem() {
     const item = {
         Email: $("#AccountEmail").val(),
+        FirstName: $("#AccountFN").val(),
+        LastName: $("#AccountLN").val(),
         Password: $("#AccountPassword").val(),
         ConfirmPassword: $("#AccountConfirmPassword").val(),
         Role: "Host"
@@ -70,20 +72,24 @@ function addItem() {
     $.ajax({
         type: "POST",
         accepts: "application/json",
-        url: "api/Account/Register",
+        url: "api/Account/RegisterHost",
         contentType: "application/json",
         data: JSON.stringify(item),
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in additem!");
+            alert("Something went wrong in additem!, You must be ADMIN");
         },
         success: function (result) {
             getData();
+            $("#AccountFN").val(""),
+            $("#AccountLN").val(""),
             $("#AccountEmail").val("");
             $("#AccountPassword").val("");
             $("#AccountConfirmPassword").val();
         }
     });
 }
+
+
 
 function deleteItem(key) {
 
@@ -97,7 +103,7 @@ function deleteItem(key) {
         type: "DELETE",
         
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Something went wrong in deleteitem!");
+            alert("Something went wrong in deleteitem!, You must be ADMIN");
         },
         success: function (result) {
             getData();
@@ -153,4 +159,27 @@ $(".my-form").on("submit", function () {
 
 function closeInput() {
     $("#spoiler").css({ display: "none" });
+}
+
+function login() {
+    const item = {
+        UserName: $("#AccountUser").val(),
+        Password: $("#AccountPass").val()
+    };
+
+    $.ajax({
+        type: "POST",
+        accepts: "application/json",
+        url: "api/Account/Login",
+        contentType: "application/json",
+        data: JSON.stringify(item),
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert("Something went wrong in login!");
+        },
+        success: function (result) {
+            getData();
+            $("#AccountUser").val("");
+            $("#AccountPass").val("");
+        }
+    });
 }

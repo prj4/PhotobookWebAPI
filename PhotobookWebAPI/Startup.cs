@@ -42,14 +42,19 @@ namespace PhotobookWebAPI
 
                 options.AddPolicy("IsGuest",
                     policyBuilder => policyBuilder.RequireClaim("Role", "Guest"));
+
+                options.AddPolicy("IsAdmin",
+                    policyBuilder => policyBuilder.RequireClaim("Role", "Admin"));
             });
 
 
-            services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
+            services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ";
+            }
+        ).AddEntityFrameworkStores<AppDBContext>();
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
-
-            //services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
