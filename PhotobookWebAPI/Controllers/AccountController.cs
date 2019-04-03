@@ -242,6 +242,52 @@ namespace PhotobookWebAPI.Controllers
             return NotFound();
         }
 
+        //[HttpPost]
+        [AllowAnonymous]
+        [Route("InitChangeEmail")]
+        public async Task<ActionResult> InitChangeEmail(AccountModels.ChangeEmailModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.OldEmail);
+
+            string resettoken;
+            try
+            {
+                resettoken = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                throw;
+            }
+            
+
+            var resetLink = Url.Action("ChangeEmail", "Account",
+                new {token = resettoken, oldEmail = user.Email, newEmail = model.NewEmail},
+                protocol: HttpContext.Request.Scheme);
+
+            var result = await _userManager.ChangeEmailAsync(user, model.NewEmail, resettoken);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return NotFound();
+        //return Ok();
+    }
+
+        [AllowAnonymous]
+        [Route("ChangeEmail")]
+        public async Task<ActionResult> ChangeEmail([FromQuery]string token, [FromQuery]string oldEmail, [FromQuery]string newEmail)
+        {
+            var user = await _userManager.FindByEmailAsync(oldEmail);
+
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return NotFound();
+        }
+
         [Authorize("IsHost")]
         [Route("TestRoleHost")]
         [HttpGet]

@@ -98,5 +98,16 @@ namespace PhotobookWebAPI.Models
             //[Compare("Current Password", ErrorMessage = "The new password must be different from the old one.")]
             public string NewPassword { get; set; }
         }
+
+        public class ChangeEmailModel
+        {
+            [Required]
+            [Display(Name = "Old Email")]
+            public string OldEmail { get; set; }
+
+            [Required]
+            [Display(Name = "New Email")]
+            public string NewEmail { get; set; }
+        }
     }
 }
