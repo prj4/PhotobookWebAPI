@@ -41,16 +41,17 @@ namespace PhotobookWebAPI.Controllers
 
         // GET: api/Account
         [HttpGet]
-        //[Authorize("IsAdmin")]
-        public string GetAccounts()
+        [AllowAnonymous]
+        public async Task<List<AppUser>> GetAccounts()
         {
-            return "hej";
+            return await _userManager.Users.ToListAsync();
         }
 
 
         // GET: api/Account/Email@gmail.com
         [HttpGet("{Email}")]
         //[Authorize("IsAdmin")]
+        [AllowAnonymous]
         public async Task<AppUser> GetAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
@@ -62,6 +63,7 @@ namespace PhotobookWebAPI.Controllers
         // PUT: api/Account/Email@gmail.com
         [HttpPut("{Email}")]
         //[Authorize("IsAdmin")]
+        [AllowAnonymous]
         public async Task<IActionResult> PutAccount(string Email, AppUser newData)
         {
             AppUser user = await _userManager.FindByEmailAsync(Email);
@@ -86,6 +88,7 @@ namespace PhotobookWebAPI.Controllers
         // DELETE: api/Account/Email@gmail.com
         [HttpDelete("{Email}")]
         //[Authorize("IsAdmin")]
+        [AllowAnonymous]
         public async Task<IActionResult> DeleteAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
@@ -195,6 +198,7 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [Route("Login")]
+        [HttpPost]
         public async Task<IActionResult> Login(AccountModels.LoginModel loginInfo)
         {
 
@@ -214,6 +218,7 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [Route("Logout")]
+        [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

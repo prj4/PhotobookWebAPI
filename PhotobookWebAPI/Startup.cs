@@ -51,6 +51,11 @@ namespace PhotobookWebAPI
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ";
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
             }
 
         ).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
