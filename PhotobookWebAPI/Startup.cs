@@ -46,6 +46,8 @@ namespace PhotobookWebAPI
 
 
             services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDBContext>();
+
+            services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

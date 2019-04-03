@@ -24,7 +24,7 @@ namespace PhotobookWebAPI.Controllers
         private SignInManager<AppUser> _signInManager;
         readonly IConfiguration _configuration;
 
-        public AccountController(Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+        public AccountController(Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
@@ -100,17 +100,17 @@ namespace PhotobookWebAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("Register")]
-        public async Task<ActionResult> Register(AccountModels.RegisterModel model)
+        [Route("RegisterHost")]
+        public async Task<ActionResult> RegisterHost(AccountModels.RegisterHostModel model)
         {
 
-            var user = new AppUser { UserName = model.Email, Email = model.Email };
+            var user = new AppUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName};
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                var roleClaim = new Claim("Role", model.Role);
+                var roleClaim = new Claim("Role", "Host");
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
@@ -119,6 +119,30 @@ namespace PhotobookWebAPI.Controllers
 
             
             
+            return NotFound();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("RegisterGuest")]
+        public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
+        {
+
+            var user = new AppUser { UserName = model.UserName};
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                var roleClaim = new Claim("Role", "Guest");
+                await _userManager.AddClaimAsync(user, roleClaim);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                return Ok();
+            }
+
+
+
             return NotFound();
         }
 
