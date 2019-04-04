@@ -10,8 +10,8 @@ using PhotobookWebAPI.Data;
 namespace PhotobookWebAPI.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20190403100440_NewMigration")]
-    partial class NewMigration
+    [Migration("20190403115451_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -184,13 +184,11 @@ namespace PhotobookWebAPI.Migrations
 
                     b.Property<bool>("EmailConfirmed");
 
-                    b.Property<string>("FirstName");
-
-                    b.Property<string>("LastName");
-
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
+
+                    b.Property<string>("Name");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256);
