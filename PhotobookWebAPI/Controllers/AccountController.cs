@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -27,13 +28,8 @@ namespace PhotobookWebAPI.Controllers
     public class AccountController : ControllerBase
     {
 
-        private readonly string _connectionString =
-            "Server=tcp:katrinesphotobook.database.windows.net,1433;Initial Catalog=PhotoBook4;" +
-            "Persist Security Info=False;User ID=Ingeniørhøjskolen@katrinesphotobook.database.windows.net;" +
-            "Password=Katrinebjergvej22;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
-        readonly IConfiguration _configuration;
         
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
@@ -41,17 +37,16 @@ namespace PhotobookWebAPI.Controllers
         private IEventGuestRepository _eventGuestRepo;
         
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
-            IConfiguration configuration, IHostRepository hostRepo, IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
+             IHostRepository hostRepo, IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
         {
             
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
+
             _hostRepo = hostRepo;
             _guestRepo = guestRepo;
             _eventGuestRepo = eventGuestRepo;
             _eventRepo = eventRepo;
-          // _hostRepo = new HostRepository(_connectionString);
 
         }
 
@@ -110,12 +105,37 @@ namespace PhotobookWebAPI.Controllers
         {
             var user = await _userManager.FindByEmailAsync(Email);
 
+
+            //var claims = await _userManager.GetClaimsAsync(user);
+           
+
             if (user == null)
             {
                 return NotFound();
             }
+            /*
+            if (claims.Count > 0)
+            {
+                IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
+                if (hostList.Contains(user))
+                {
+                    _hostRepo.DeleteHost(user.Id);
+                }
+            }
 
+
+            if (claims.Count > 1)
+            {
+                IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
+                if (guestList.Contains(user))
+                {
+                    _guestRepo.DeleteGuest(user.Id);
+                }
+            }
+
+    */
             await _userManager.DeleteAsync(user);
+            
 
             return NoContent();
         }
