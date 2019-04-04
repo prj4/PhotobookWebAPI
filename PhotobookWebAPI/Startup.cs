@@ -62,23 +62,24 @@ namespace PhotobookWebAPI
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 6;
             }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
-
-            services.AddTransient<IHostRepository, HostRepository>(serviceProvider =>
+            
+            services.AddScoped<IHostRepository, HostRepository>(serviceProvider =>
                 {
                     return new HostRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
-            services.AddTransient<IGuestRepository, GuestRepository>(serviceProvider =>
+            services.AddScoped<IGuestRepository, GuestRepository>(serviceProvider =>
                 {
                     return new GuestRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
-            services.AddTransient<IEventRepository, EventRepository>(serviceProvider =>
+            services.AddScoped<IEventRepository, EventRepository>(serviceProvider =>
                 {
                     return new EventRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
-            services.AddTransient<IEventGuestRepository, EventGuestRepository>(serviceProvider =>
+            services.AddScoped<IEventGuestRepository, EventGuestRepository>(serviceProvider =>
                 {
                     return new EventGuestRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
+                
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
