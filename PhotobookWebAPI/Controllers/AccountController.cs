@@ -10,6 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
+using PhotoBook.Repository.EventGuestRepository;
+using PhotoBook.Repository.EventRepository;
+using PhotoBook.Repository.GuestRepository;
+using PhotoBook.Repository.HostRepository;
 
 
 namespace PhotobookWebAPI.Controllers
@@ -24,19 +28,23 @@ namespace PhotobookWebAPI.Controllers
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
         readonly IConfiguration _configuration;
+        private IHostRepository _hostRepo;
+        private IGuestRepository _guestRepo;
+        private IEventRepository _eventRepo;
+        private IEventGuestRepository _eventGuestRepo;
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration, IHostRepository hostRepo, IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _hostRepo = hostRepo;
+            _guestRepo = guestRepo;
+            _eventGuestRepo = eventGuestRepo;
+            _eventRepo = eventRepo;
 
-            
         }
-
-
-
 
 
         // GET: api/Account
