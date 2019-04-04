@@ -7,12 +7,17 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PhotobookWebAPI.Data;
+using PhotoBook.Repository.EventGuestRepository;
+using PhotoBook.Repository.EventRepository;
+using PhotoBook.Repository.GuestRepository;
+using PhotoBook.Repository.HostRepository;
 
 namespace PhotobookWebAPI
 {
@@ -56,9 +61,12 @@ namespace PhotobookWebAPI
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 6;
-            }
+            }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
 
-        ).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
+            services.AddTransient<IHostRepository, HostRepository>();
+            services.AddTransient<IGuestRepository, GuestRepository>();
+            services.AddTransient<IEventRepository, EventRepository>();
+            services.AddTransient<IEventGuestRepository, EventGuestRepository>();
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
