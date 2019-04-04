@@ -7,12 +7,17 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PhotobookWebAPI.Data;
+using PhotoBook.Repository.EventGuestRepository;
+using PhotoBook.Repository.EventRepository;
+using PhotoBook.Repository.GuestRepository;
+using PhotoBook.Repository.HostRepository;
 
 namespace PhotobookWebAPI
 {
@@ -56,9 +61,25 @@ namespace PhotobookWebAPI
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 6;
-            }
-
-        ).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
+            }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
+            
+            services.AddScoped<IHostRepository, HostRepository>(serviceProvider =>
+                {
+                    return new HostRepository(Configuration.GetConnectionString("RemoteConnection"));
+                });
+            services.AddScoped<IGuestRepository, GuestRepository>(serviceProvider =>
+                {
+                    return new GuestRepository(Configuration.GetConnectionString("RemoteConnection"));
+                });
+            services.AddScoped<IEventRepository, EventRepository>(serviceProvider =>
+                {
+                    return new EventRepository(Configuration.GetConnectionString("RemoteConnection"));
+                });
+            services.AddScoped<IEventGuestRepository, EventGuestRepository>(serviceProvider =>
+                {
+                    return new EventGuestRepository(Configuration.GetConnectionString("RemoteConnection"));
+                });
+                
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }

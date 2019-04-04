@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -8,10 +9,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
+using PhotoBook.Repository.EventGuestRepository;
+using PhotoBook.Repository.EventRepository;
+using PhotoBook.Repository.GuestRepository;
+using PhotoBook.Repository.HostRepository;
+using PhotoBookDatabase.Model;
 
 
 namespace PhotobookWebAPI.Controllers
@@ -23,24 +27,28 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class AccountController : ControllerBase
     {
+
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
-        readonly IConfiguration _configuration;
         
-
+        private IHostRepository _hostRepo;
+        private IGuestRepository _guestRepo;
+        private IEventRepository _eventRepo;
+        private IEventGuestRepository _eventGuestRepo;
+        
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
-            IConfiguration configuration)
+             IHostRepository hostRepo, IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
         {
+            
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
-            
 
+            _hostRepo = hostRepo;
+            _guestRepo = guestRepo;
+            _eventGuestRepo = eventGuestRepo;
+            _eventRepo = eventRepo;
 
         }
-
-
-
 
 
         // GET: api/Account
@@ -48,8 +56,6 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<List<AppUser>> GetAccounts()
         {
-           
-
             return await _userManager.Users.ToListAsync();
         }
 
@@ -99,12 +105,37 @@ namespace PhotobookWebAPI.Controllers
         {
             var user = await _userManager.FindByEmailAsync(Email);
 
+
+            //var claims = await _userManager.GetClaimsAsync(user);
+           
+
             if (user == null)
             {
                 return NotFound();
             }
+            /*
+            if (claims.Count > 0)
+            {
+                IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
+                if (hostList.Contains(user))
+                {
+                    _hostRepo.DeleteHost(user.Id);
+                }
+            }
 
+
+            if (claims.Count > 1)
+            {
+                IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
+                if (guestList.Contains(user))
+                {
+                    _guestRepo.DeleteGuest(user.Id);
+                }
+            }
+
+    */
             await _userManager.DeleteAsync(user);
+            
 
             return NoContent();
         }
@@ -153,9 +184,10 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
                 
+                Host host = new Host{Name = user.Name, Email = user.Email};
 
-
-    
+                _hostRepo.InsertHost(host);
+                
                 return Ok();
             }
 
@@ -169,14 +201,43 @@ namespace PhotobookWebAPI.Controllers
         [Route("RegisterGuest")]
         public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
-
-            var user = new AppUser { UserName = model.UserName};
-
-
             //Check if event exsists with model.password then do the following
+            IQueryable<Event> Events = await _eventRepo.GetEvents();
+            foreach (var _event in Events)
+            {
+                if (_event.Pin == int.Parse(model.Password))
+                {
+                    //Create user in Identity core
+                    var user = new AppUser { UserName = model.UserName };
+                    var result = await _userManager.CreateAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        var roleClaim = new Claim("Role", "Guest");
+                        await _userManager.AddClaimAsync(user, roleClaim);
+                        await _signInManager.SignInAsync(user, isPersistent: false);
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+                        //Add Guest to DB and connect to the found event. 
+                        /*
+                        Guest guest_ = new Guest();
+                        _guestRepo.InsertGuest(guest_);
 
+                        EventGuest Eguest_ = new EventGuest(guest_,_event.Pin);
+                        _eventGuestRepo.InsertEventGuest(new EventGuest());
+                        */
+                        return Ok();
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+                
+            }
+
+            //var user = new AppUser { UserName = model.UserName };
+
+            //var result = await _userManager.CreateAsync(user, model.Password);
+            /*
             if (result.Succeeded)
             {
                 var roleClaim = new Claim("Role", "Guest");
@@ -192,7 +253,7 @@ namespace PhotobookWebAPI.Controllers
 
 
 
-            return NotFound();
+            return NotFound();*/
         }
 
         [AllowAnonymous]
@@ -287,6 +348,29 @@ namespace PhotobookWebAPI.Controllers
             }
             return NotFound();
         }
+
+        [Authorize("IsHost")]
+        [Route("TestRoleHost")]
+        [HttpGet]
+        public string TestRoleHost()
+        {
+            var test = HttpContext.User.Claims.ElementAt(1).Value;
+
+
+
+            return test;
+
+        }
+
+
+        [Authorize("IsGuest")]
+        [Route("TestRoleGuest")]
+        public async Task<IActionResult> TestRoleGuest()
+        {
+            return Ok();
+
+        }
+
 
 
     }
