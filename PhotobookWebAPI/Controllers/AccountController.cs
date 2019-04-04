@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
+using PhotoBook.Repository.HostRepository;
 
 
 namespace PhotobookWebAPI.Controllers
@@ -24,15 +25,16 @@ namespace PhotobookWebAPI.Controllers
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
         readonly IConfiguration _configuration;
+        private HostRepository _hostRepo;
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration, HostRepository hostRepo)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _hostRepo = hostRepo;
 
-            
         }
 
 
