@@ -63,10 +63,10 @@ namespace PhotobookWebAPI
                 options.Password.RequiredLength = 6;
             }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
 
-            services.AddTransient<IHostRepository, HostRepository>();
-            services.AddTransient<IGuestRepository, GuestRepository>();
-            services.AddTransient<IEventRepository, EventRepository>();
-            services.AddTransient<IEventGuestRepository, EventGuestRepository>();
+            services.AddScoped<IHostRepository, HostRepository>();
+            services.AddScoped<IGuestRepository, GuestRepository>();
+            services.AddScoped<IEventRepository, EventRepository>();
+            services.AddScoped<IEventGuestRepository, EventGuestRepository>();
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
