@@ -36,9 +36,6 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-
-
-
         // GET: api/Account
         [HttpGet]
         //[Authorize("IsAdmin")]
