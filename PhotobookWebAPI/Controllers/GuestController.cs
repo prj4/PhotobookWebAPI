@@ -15,7 +15,6 @@ using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
 
-
 namespace PhotobookWebAPI.Controllers
 {
     public class GuestController : Controller
@@ -62,7 +61,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Register")]
-        public async Task<ActionResult> Register(AccountModels.RegisterGuestModel model)
+        public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
         {
             //Check if event exsists with model.password then do the following
             IQueryable<Event> Events = await _eventRepo.GetEvents();
@@ -95,17 +94,21 @@ namespace PhotobookWebAPI.Controllers
                             Guest = guest
                         };
                         _eventGuestRepo.InsertEventGuest(eventGuest);
-
-                        return Ok();
+                        
+                        return new AccountModels.ReturnGuestModel
+                        {
+                            Event = _event,
+                            Name = guest.Name
+                        };
                     }
                     else
                     {
-                        return NotFound();
+                        return null;
                     }
                 }
 
             }
-            return NotFound();
+            return null;
         }
     }
 }

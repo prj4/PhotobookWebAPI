@@ -51,6 +51,15 @@ namespace PhotobookWebAPI.Controllers
 
             _hostRepo.InsertHost(host);
 
+            //Finder information til returnering af host data.
+            Host toReturn = await _hostRepo.GetHost(host.Name);
+            AccountModels.ReturnHostModel ret = new AccountModels.ReturnHostModel
+            {
+                Name = toReturn.Name,
+                Email = toReturn.Email,
+                Events = toReturn.Events
+            };
+
             return Ok();
 
         }

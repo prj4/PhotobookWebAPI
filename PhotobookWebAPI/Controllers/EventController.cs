@@ -50,48 +50,7 @@ namespace PhotobookWebAPI.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        [Route("ReturnEvent")]
-        public GetEventModel ReturnEvent()
-        {
-            List<Event> test = new List<Event>();
-            test.Add(new Event
-            {
-                Description = "Ting kommer til at ske",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now,
-                Location = "Der hjemme",
-                Name = "PartyUartig",
-                Pin = 1234
-            });
-            test.Add(new Event
-            {
-                Description = "Flere ting kommer til at ske",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now,
-                Location = "Der hjemme",
-                Name = "PartyMereUartig",
-                Pin = 3456
-            });
-            test.Add(new Event
-            {
-                Description = "Flest ting kommer til at ske",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now,
-                Location = "Der hjemme",
-                Name = "PartyMestUartig",
-                Pin = 5678
-            });
-                
-            GetEventModel _model = new GetEventModel();
-            _model.Events = test;
-            return _model;
-        }
-
-
-        [HttpPost]
-        //[Authorize("IsHost")]
-        [AllowAnonymous]
+        [Authorize("IsHost")]
         [Route("CreateEvent")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
         {

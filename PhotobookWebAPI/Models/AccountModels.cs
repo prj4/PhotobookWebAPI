@@ -73,24 +73,28 @@ namespace PhotobookWebAPI.Models
             public string Password { get; set; }
         }
 
-        public class HostReturnModel
+        public class ReturnHostModel
         {
             [Required]
             [Display(Name = "Name")]
             public string Name { get; set; }
 
+            [Required]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+
             [Display(Name = "Events")]
-            public Event Events { get; set; }
+            public List<Event> Events { get; set; }
         }
 
-        public class GuestReturnModel
+        public class ReturnGuestModel
         {
             [Required]
             [Display(Name = "Name")]
             public string Name { get; set; }
 
             [Display(Name = "Event")]
-            public Event Event_ { get; set; }
+            public Event Event { get; set; }
         }
 
         public class ChangePassModel
