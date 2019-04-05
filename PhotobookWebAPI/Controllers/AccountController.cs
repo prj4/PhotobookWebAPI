@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventGuestRepository;
@@ -32,7 +31,11 @@ namespace PhotobookWebAPI.Controllers
 
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
-        readonly IConfiguration _configuration;
+
+        private IHostRepository _hostRepo;
+        private IGuestRepository _guestRepo;
+        private IEventRepository _eventRepo;
+        private IEventGuestRepository _eventGuestRepo;
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
              IHostRepository hostRepo, IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
@@ -40,9 +43,13 @@ namespace PhotobookWebAPI.Controllers
             
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
 
-            
+            _hostRepo = hostRepo;
+            _guestRepo = guestRepo;
+            _eventRepo = eventRepo;
+            _eventGuestRepo = eventGuestRepo;
+
+
         }
 
 
@@ -181,14 +188,12 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
                 
-                /*
-                Host host = new Host{Name = "Morten", Email = "Morten@test.com", Username = "testuser", PW = "1234"};
+                
+                Host host = new Host{Name = user.Name, Email = user.Email};
 
-                HostRepository hs = new HostRepository(
-                    "Server=tcp:katrinesphotobook.database.windows.net,1433;Initial Catalog=PhotoBook4;Persist Security Info=False;User ID=Ingeniørhøjskolen@katrinesphotobook.database.windows.net;Password=Katrinebjergvej22;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
-
-                hs.InsertHost(host);
-                */
+               
+                _hostRepo.InsertHost(host);
+                
 
     
                 return Ok();
@@ -257,6 +262,7 @@ namespace PhotobookWebAPI.Controllers
 
 
             return NotFound();*/
+            return NotFound();
         }
 
         [AllowAnonymous]
