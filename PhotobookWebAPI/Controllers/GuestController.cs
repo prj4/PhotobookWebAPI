@@ -59,7 +59,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         [Route("Register")]
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
-        {
+        {//Note til selv... Den her funktion kan nok finpudses.. tror jeg.
             //Check if event exsists with model.password then do the following
             IQueryable<Event> Events = await _eventRepo.GetEvents();
             foreach (var _event in Events)
@@ -88,7 +88,6 @@ namespace PhotobookWebAPI.Controllers
                         Name = guest.Name
                     };
                 }
-
             }
             return null;
         }
