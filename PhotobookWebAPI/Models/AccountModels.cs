@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Models
 {
@@ -74,9 +75,26 @@ namespace PhotobookWebAPI.Models
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
+        }
 
+        public class HostReturnModel
+        {
+            [Required]
+            [Display(Name = "Name")]
+            public string Name { get; set; }
 
+            [Display(Name = "Events")]
+            public Event Events { get; set; }
+        }
 
+        public class GuestReturnModel
+        {
+            [Required]
+            [Display(Name = "Name")]
+            public string Name { get; set; }
+
+            [Display(Name = "Event")]
+            public Event Event_ { get; set; }
         }
 
         public class ChangePassModel
