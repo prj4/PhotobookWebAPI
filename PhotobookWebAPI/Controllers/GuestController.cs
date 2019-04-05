@@ -28,7 +28,6 @@ namespace PhotobookWebAPI.Controllers
 
         public GuestController(IConfiguration iconfig)
         {
-            _configuration = iconfig;
             _connectionString = _configuration.GetConnectionString("RemoteConnection");
 
             _guestRepo = new GuestRepository(_connectionString);
