@@ -16,6 +16,7 @@ function getCount(data) {
 
 $(document).ready(function () {
     getData();
+    getHosts();
 });
 
 function getData() {
@@ -59,12 +60,13 @@ function getData() {
     });
 }
 
+
+
 function addItem() {
     const item = {
         Email: $("#AccountEmail").val(),
         Name: $("#AccountName").val(),
         Password: $("#AccountPassword").val(),
-        ConfirmPassword: $("#AccountConfirmPassword").val(),
         Role: "Host"
     };
 
@@ -82,7 +84,6 @@ function addItem() {
             $("#AccountName").val("");
             $("#AccountEmail").val("");
             $("#AccountPassword").val("");
-            $("#AccountConfirmPassword").val("");
         }
     });
 }

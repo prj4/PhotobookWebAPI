@@ -31,14 +31,17 @@
 </head>
 <body>
 <h1>PhotoAPI</h1>
-
+<div>
+    <a href="/Host/Index">See Host database</a><br>
+    <a href="/Guest/Index">See Guest database</a><br>
+    <a href="/api/Event/Index">See Event database</a><br>
+</div>
 
 <h3>Add</h3>
 <form action="javascript:void(0);" method="POST" onsubmit="addItem()">
     <input type="text" id="AccountName" placeholder="Name"><br>
     <input type="text" id="AccountEmail" placeholder="Email"><br>
     <input type="text" id="AccountPassword" placeholder="Password"><br>
-    <input type="text" id="AccountConfirmPassword" placeholder="Confirm Password"><br>
     <input type="submit" value="Add">
 </form>
 
@@ -65,6 +68,7 @@
         <tbody id="accounts"></tbody>
     </table>
 </div>
+    
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
