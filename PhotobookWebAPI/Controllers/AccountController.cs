@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 
@@ -45,8 +44,6 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<List<AppUser>> GetAccounts()
         {
-           
-
             return await _userManager.Users.ToListAsync();
         }
 

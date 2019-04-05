@@ -19,8 +19,7 @@ namespace PhotobookWebAPI.Controllers
 {
     public class GuestController : Controller
     {
-        private readonly string _connectionString;
-        private IConfiguration _configuration;
+
 
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
@@ -32,7 +31,6 @@ namespace PhotobookWebAPI.Controllers
         public GuestController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, 
             IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
         {
-            _connectionString = _configuration.GetConnectionString("RemoteConnection");
 
             _userManager = userManager;
             _signInManager = signInManager;

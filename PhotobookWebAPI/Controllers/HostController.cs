@@ -14,19 +14,13 @@ namespace PhotobookWebAPI.Controllers
 {
     public class HostController : Controller
     {
-        private readonly string _connectionString;
-        private IConfiguration _configuration;
 
+        private IHostRepository _hostRepo;
 
-        private HostRepository _hostRepo;
-
-        public HostController(IConfiguration iconfig)
+        public HostController(IHostRepository hostRepo)
         {
-            _configuration = iconfig;
 
-            _connectionString = _configuration.GetConnectionString("RemoteConnection");
-
-            _hostRepo = new HostRepository(_connectionString);
+            _hostRepo = hostRepo;
         }
 
         public async Task<IActionResult> Index()
