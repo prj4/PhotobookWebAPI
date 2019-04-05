@@ -45,6 +45,7 @@ namespace PhotobookWebAPI.Controllers
 
         public async Task<IActionResult> Index()
         {
+           
 
             return View(await _guestRepo.GetGuests());
         }

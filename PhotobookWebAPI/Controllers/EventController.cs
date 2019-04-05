@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventGuestRepository;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
+using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Controllers
@@ -24,18 +27,22 @@ namespace PhotobookWebAPI.Controllers
         private readonly string _connectionString;
         private IConfiguration _configuration;
 
-        private UserManager<AppUser> _userManager;
+        private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
 
         private IEventRepository _eventRepo;
+        private IHostRepository _hostRepo;
 
-        public EventController(IEventRepository eventRepo)
+        public EventController(IEventRepository eventRepo, IHostRepository hostRepo)
         {
             _connectionString = _configuration.GetConnectionString("RemoteConnection");
 
             _eventRepo = eventRepo;
+            _hostRepo = hostRepo;
         }
 
+        [Route("Index")]
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
 
@@ -83,10 +90,21 @@ namespace PhotobookWebAPI.Controllers
 
 
         [HttpPost]
-        [Authorize("IsHost")]
+        //[Authorize("IsHost")]
+        [AllowAnonymous]
         [Route("CreateEvent")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
         {
+           
+
+            var currentUserName = HttpContext.User.Identity.Name;
+
+            var currentUser = await _userManager.FindByNameAsync(currentUserName);
+
+            var currentHost = _hostRepo.GetHost(currentUser.Name);
+            
+
+
             int _min = 0000;
             int _max = 9999;
             Random _rdm = new Random();
@@ -100,10 +118,9 @@ namespace PhotobookWebAPI.Controllers
                 EndDate = model.EndDate,
                 Location = model.Location,
                 StartDate = model.StartDate,
-                Pin = pin
+                HostId = currentHost.Result.PictureTakerId
 
             };
-            
 
             _eventRepo.InsertEvent(e);
 
