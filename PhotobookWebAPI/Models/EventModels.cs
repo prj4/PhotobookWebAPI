@@ -7,7 +7,7 @@ using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Models
 {
-    public class GetEventModel
+    public class GetEventsModel
     {
         [Required]
         [Display(Name = "Events")]
