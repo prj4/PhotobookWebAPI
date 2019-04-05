@@ -35,6 +35,7 @@ namespace PhotobookWebAPI.Controllers
             return View(await _hostRepo.GetHosts());
         }
 
+
         public async Task<ActionResult> Delete(string name)
         {
             _hostRepo.DeleteHost(name);
@@ -43,24 +44,34 @@ namespace PhotobookWebAPI.Controllers
 
         }
 
+        public async Task<AccountModels.RegisterHostModel> LogIn(string name)
+        {
 
-        public async Task<ActionResult> Register(AccountModels.RegisterHostModel model)
+
+            return new AccountModels.ReturnHostModel
+            {
+                Name = host.Name,
+                Email = host.Email,
+                Events =
+            };
+
+        }
+
+        public async Task<AccountModels.ReturnHostModel> Register(AccountModels.RegisterHostModel model)
         {
             Host host = new Host { Name = model.Name, Email = model.Email };
 
 
             _hostRepo.InsertHost(host);
 
-            //Finder information til returnering af host data.
-            Host toReturn = await _hostRepo.GetHost(host.Name);
-            AccountModels.ReturnHostModel ret = new AccountModels.ReturnHostModel
+            //Returnering af host data (Nyoprettet dermed ingen events).
+            return new AccountModels.ReturnHostModel
             {
-                Name = toReturn.Name,
-                Email = toReturn.Email,
-                Events = toReturn.Events
+                Name = host.Name,
+                Email = host.Email
             };
 
-            return Ok();
+            //return Ok();
 
         }
 
