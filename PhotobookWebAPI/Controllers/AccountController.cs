@@ -8,15 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
-using PhotoBook.Repository.EventGuestRepository;
-using PhotoBook.Repository.EventRepository;
-using PhotoBook.Repository.GuestRepository;
-using PhotoBook.Repository.HostRepository;
-using PhotoBookDatabase.Model;
+
 
 
 namespace PhotobookWebAPI.Controllers
@@ -32,22 +26,14 @@ namespace PhotobookWebAPI.Controllers
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
 
-        private IHostRepository _hostRepo;
-        private IGuestRepository _guestRepo;
-        private IEventRepository _eventRepo;
-        private IEventGuestRepository _eventGuestRepo;
+ 
 
-        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager,
-             IHostRepository hostRepo, IGuestRepository guestRepo, IEventRepository eventRepo, IEventGuestRepository eventGuestRepo)
+        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager)
         {
             
             _userManager = userManager;
             _signInManager = signInManager;
 
-            _hostRepo = hostRepo;
-            _guestRepo = guestRepo;
-            _eventRepo = eventRepo;
-            _eventGuestRepo = eventGuestRepo;
         }
 
 
@@ -121,7 +107,9 @@ namespace PhotobookWebAPI.Controllers
                 IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
                 if (hostList.Contains(user))
                 {
-                    _hostRepo.DeleteHost(user.Name);
+                    await _userManager.DeleteAsync(user);
+                    return RedirectToAction("Delete", "Host", new {name= user.Name });
+                    
                 }
             }
 
@@ -131,12 +119,13 @@ namespace PhotobookWebAPI.Controllers
                 IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
                 if (guestList.Contains(user))
                 {
-                    _guestRepo.DeleteGuest(user.Name);
+                    await _userManager.DeleteAsync(user);
+                    return RedirectToAction("Delete", "Guest", new { name = user.Name });
                 }
             }
 
     
-            await _userManager.DeleteAsync(user);
+            
             
 
             return NoContent();
@@ -185,16 +174,8 @@ namespace PhotobookWebAPI.Controllers
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                
-                
-                Host host = new Host{Name = user.Name, Email = user.Email};
-
-               
-                _hostRepo.InsertHost(host);
-                
-
     
-                return Ok();
+                return RedirectToAction("Register", "Host", model);
             }
 
             

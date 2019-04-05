@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using PhotobookWebAPI.Models;
 using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
 
@@ -17,7 +18,7 @@ namespace PhotobookWebAPI.Controllers
         private IConfiguration _configuration;
 
 
-        private HostRepository _hostRepository;
+        private HostRepository _hostRepo;
 
         public HostController(IConfiguration iconfig)
         {
@@ -25,19 +26,40 @@ namespace PhotobookWebAPI.Controllers
 
             _connectionString = _configuration.GetConnectionString("RemoteConnection");
 
-            _hostRepository = new HostRepository(_connectionString);
+            _hostRepo = new HostRepository(_connectionString);
         }
 
         public async Task<IActionResult> Index()
         {
 
-            return View(await _hostRepository.GetHosts());
+            return View(await _hostRepo.GetHosts());
+        }
+
+        public async Task<ActionResult> Delete(string name)
+        {
+            _hostRepo.DeleteHost(name);
+
+            return Ok();
+
+        }
+
+
+        public async Task<ActionResult> Register(AccountModels.RegisterHostModel model)
+        {
+            Host host = new Host { Name = model.Name, Email = model.Email };
+
+
+            _hostRepo.InsertHost(host);
+
+            return Ok();
+
         }
 
 
 
-        
 
-        
+
+
+
     }
 }
