@@ -36,7 +36,13 @@ namespace PhotobookWebAPI.Controllers
             _eventRepo = eventRepo;
         }
 
-        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+
+            return View(await _eventRepo.GetEvents());
+        }
+
+        [HttpPost]
         [AllowAnonymous]
         [Route("ReturnEvent")]
         public GetEventModel ReturnEvent()
@@ -74,5 +80,35 @@ namespace PhotobookWebAPI.Controllers
             _model.Events = test;
             return _model;
         }
+
+
+        [HttpPost]
+        [Authorize("IsHost")]
+        [Route("CreateEvent")]
+        public async Task<ActionResult> CreateEvent(CreateEventModel model)
+        {
+            int _min = 0000;
+            int _max = 9999;
+            Random _rdm = new Random();
+            int pin = _rdm.Next(_min, _max);
+
+
+            Event e = new Event
+            {
+                Name = model.Name,
+                Description = model.Description,
+                EndDate = model.EndDate,
+                Location = model.Location,
+                StartDate = model.StartDate,
+                Pin = pin
+
+            };
+            
+
+            _eventRepo.InsertEvent(e);
+
+            return Ok();
+        }
+
     }
 }

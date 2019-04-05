@@ -14,4 +14,17 @@ namespace PhotobookWebAPI.Models
         public List<Event> Events { get; set; }
         
     }
+
+    public class CreateEventModel
+    {
+        [Required]
+        public string Location { get; set; }
+        public string Description { get; set; }
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public DateTime StartDate { get; set; }
+        [Required]
+        public DateTime EndDate { get; set; }
+    }
 }
