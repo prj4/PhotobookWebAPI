@@ -43,6 +43,20 @@ namespace PhotobookWebAPI.Controllers
             _eventGuestRepo = eventGuestRepo;
         }
 
+        public async Task<IActionResult> Index()
+        {
+
+            return View(await _guestRepo.GetGuests());
+        }
+
+        public async Task<ActionResult> Delete(string name)
+        {
+            _guestRepo.DeleteGuest(name);
+
+            return Ok();
+
+        }
+
         // GET: /<controller>/
         [HttpPost]
         [AllowAnonymous]
