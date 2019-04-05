@@ -34,6 +34,10 @@ namespace PhotobookWebAPI.Controllers
             return View(await _hostRepository.GetHosts());
         }
 
+
+
+        
+
         
     }
 }
