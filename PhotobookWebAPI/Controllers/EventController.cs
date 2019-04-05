@@ -12,9 +12,13 @@ using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventGuestRepository;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
+using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
     public class EventController : Controller
     {
         private readonly string _connectionString;
@@ -32,28 +36,43 @@ namespace PhotobookWebAPI.Controllers
             _eventRepo = eventRepo;
         }
 
-        [HttpPost]
+        [HttpGet]
         [AllowAnonymous]
-        [Route("RegisterAdmin")]
-        public async Task<ActionResult> RegisterAdmin(AccountModels.RegisterAdminModel model)
+        [Route("ReturnEvent")]
+        public GetEventModel ReturnEvent()
         {
-
-            var user = new AppUser
-                { UserName = model.UserName };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
+            List<Event> test = new List<Event>();
+            test.Add(new Event
             {
-                var roleClaim = new Claim("Role", "Admin");
-                await _userManager.AddClaimAsync(user, roleClaim);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
-
-                return Ok();
-            }
-
-            return NotFound();
+                Description = "Ting kommer til at ske",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now,
+                Location = "Der hjemme",
+                Name = "PartyUartig",
+                Pin = 1234
+            });
+            test.Add(new Event
+            {
+                Description = "Flere ting kommer til at ske",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now,
+                Location = "Der hjemme",
+                Name = "PartyMereUartig",
+                Pin = 3456
+            });
+            test.Add(new Event
+            {
+                Description = "Flest ting kommer til at ske",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now,
+                Location = "Der hjemme",
+                Name = "PartyMestUartig",
+                Pin = 5678
+            });
+                
+            GetEventModel _model = new GetEventModel();
+            _model.Events = test;
+            return _model;
         }
     }
 }

@@ -10,8 +10,8 @@ namespace PhotobookWebAPI.Models
     public class GetEventModel
     {
         [Required]
-        [Display(Name = "Event")]
-        public Event _event { get; set; }
+        [Display(Name = "Events")]
+        public List<Event> Events { get; set; }
         
     }
 }
