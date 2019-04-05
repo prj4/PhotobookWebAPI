@@ -220,13 +220,13 @@ namespace PhotobookWebAPI.Controllers
                         await _signInManager.SignInAsync(user, isPersistent: false);
 
                         //Add Guest to DB and connect to the found event. 
-                        /*
+                        
                         Guest guest_ = new Guest();
                         _guestRepo.InsertGuest(guest_);
 
                         EventGuest Eguest_ = new EventGuest(guest_,_event.Pin);
                         _eventGuestRepo.InsertEventGuest(new EventGuest());
-                        */
+                        
                         return Ok();
                     }
                     else
