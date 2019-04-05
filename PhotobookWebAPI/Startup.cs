@@ -103,7 +103,12 @@ namespace PhotobookWebAPI
             app.UseStaticFiles();
             app.UseHttpsRedirection();
 
-            app.UseMvc();
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "Host",
+                    template: "{controller}/{action=Index}/{id?}");
+            });
 
         }
     }
