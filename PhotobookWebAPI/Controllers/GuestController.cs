@@ -95,7 +95,10 @@ namespace PhotobookWebAPI.Controllers
                         _eventGuestRepo.InsertEventGuest(eventGuest);
                         
                         return new AccountModels.ReturnGuestModel
-                            { Event = _event, Name = guest.Name };
+                        {
+                            Event = _event,
+                            Name = guest.Name
+                        };
                     }
                     else
                     {
