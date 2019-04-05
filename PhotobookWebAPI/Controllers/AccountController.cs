@@ -48,8 +48,6 @@ namespace PhotobookWebAPI.Controllers
             _guestRepo = guestRepo;
             _eventRepo = eventRepo;
             _eventGuestRepo = eventGuestRepo;
-
-
         }
 
 
@@ -209,60 +207,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("RegisterGuest")]
         public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
-            //Check if event exsists with model.password then do the following
-            IQueryable<Event> Events = await _eventRepo.GetEvents();
-            foreach (var _event in Events)
-            {
-                if (_event.Pin == int.Parse(model.Password))
-                {
-                    //Create user in Identity core
-                    var user = new AppUser { UserName = model.UserName };
-                    var result = await _userManager.CreateAsync(user, model.Password);
-                    if (result.Succeeded)
-                    {
-                        var roleClaim = new Claim("Role", "Guest");
-                        await _userManager.AddClaimAsync(user, roleClaim);
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-
-                        //Add Guest to DB and connect to the found event. 
-                        
-                        Guest guest_ = new Guest();
-                        _guestRepo.InsertGuest(guest_);
-
-                        EventGuest Eguest_ = new EventGuest(guest_,_event.Pin);
-                        _eventGuestRepo.InsertEventGuest(new EventGuest());
-                        
-                        return Ok();
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
-                }
-                
-            }
-
-            //var user = new AppUser { UserName = model.UserName };
-
-            //var result = await _userManager.CreateAsync(user, model.Password);
-            /*
-            if (result.Succeeded)
-            {
-                var roleClaim = new Claim("Role", "Guest");
-                await _userManager.AddClaimAsync(user, roleClaim);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
-                //Add Guest to DB and connect to the found event. 
-
-                
-
-                return Ok();
-            }
-
-
-
-            return NotFound();*/
-            return NotFound();
+            return RedirectToAction("Register", "Guest", model);
         }
 
         [AllowAnonymous]
