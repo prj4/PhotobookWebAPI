@@ -67,7 +67,6 @@ function addItem() {
         Email: $("#AccountEmail").val(),
         Name: $("#AccountName").val(),
         Password: $("#AccountPassword").val(),
-        ConfirmPassword: $("#AccountConfirmPassword").val(),
         Role: "Host"
     };
 
@@ -85,7 +84,6 @@ function addItem() {
             $("#AccountName").val("");
             $("#AccountEmail").val("");
             $("#AccountPassword").val("");
-            $("#AccountConfirmPassword").val("");
         }
     });
 }

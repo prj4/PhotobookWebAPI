@@ -189,7 +189,7 @@ namespace PhotobookWebAPI.Controllers
                 
                 Host host = new Host{Name = user.Name, Email = user.Email};
 
-               
+                
                 _hostRepo.InsertHost(host);
                 
 
