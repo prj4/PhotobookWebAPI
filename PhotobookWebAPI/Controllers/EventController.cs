@@ -12,6 +12,7 @@ using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventGuestRepository;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
+using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -30,6 +31,12 @@ namespace PhotobookWebAPI.Controllers
             _connectionString = _configuration.GetConnectionString("RemoteConnection");
 
             _eventRepo = eventRepo;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+
+            return View(await _eventRepo.GetEvents());
         }
 
         [HttpPost]
@@ -55,5 +62,35 @@ namespace PhotobookWebAPI.Controllers
 
             return NotFound();
         }
+
+
+        [HttpPost]
+        [Authorize("IsHost")]
+        [Route("CreateEvent")]
+        public async Task<ActionResult> CreateEvent(CreateEventModel model)
+        {
+            int _min = 0000;
+            int _max = 9999;
+            Random _rdm = new Random();
+            int pin = _rdm.Next(_min, _max);
+
+
+            Event e = new Event
+            {
+                Name = model.Name,
+                Description = model.Description,
+                EndDate = model.EndDate,
+                Location = model.Location,
+                StartDate = model.StartDate,
+                Pin = pin
+
+            };
+            
+
+            _eventRepo.InsertEvent(e);
+
+            return Ok();
+        }
+
     }
 }
