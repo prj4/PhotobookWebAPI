@@ -110,20 +110,20 @@ namespace PhotobookWebAPI.Controllers
             var user = await _userManager.FindByEmailAsync(Email);
 
 
-            //var claims = await _userManager.GetClaimsAsync(user);
+            var claims = await _userManager.GetClaimsAsync(user);
            
 
             if (user == null)
             {
                 return NotFound();
             }
-            /*
+            
             if (claims.Count > 0)
             {
                 IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
                 if (hostList.Contains(user))
                 {
-                    _hostRepo.DeleteHost(user.Id);
+                    _hostRepo.DeleteHost(user.Name);
                 }
             }
 
@@ -133,11 +133,11 @@ namespace PhotobookWebAPI.Controllers
                 IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
                 if (guestList.Contains(user))
                 {
-                    _guestRepo.DeleteGuest(user.Id);
+                    _guestRepo.DeleteGuest(user.Name);
                 }
             }
 
-    */
+    
             await _userManager.DeleteAsync(user);
             
 

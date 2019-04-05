@@ -16,6 +16,7 @@ function getCount(data) {
 
 $(document).ready(function () {
     getData();
+    getHosts();
 });
 
 function getData() {
@@ -58,6 +59,8 @@ function getData() {
         }
     });
 }
+
+
 
 function addItem() {
     const item = {
