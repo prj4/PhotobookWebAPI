@@ -27,13 +27,14 @@ namespace PhotobookWebAPI.Controllers
 
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
-
+        private Utility _utility;
  
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager)
         {            
             _userManager = userManager;
             _signInManager = signInManager;
+            _utility = new Utility(_userManager);
         }
 
 
@@ -91,33 +92,28 @@ namespace PhotobookWebAPI.Controllers
         {
             var user = await _userManager.FindByEmailAsync(Email);
 
-            var userClaims = await _userManager.GetClaimsAsync(user);
 
             if (user == null)
             {
                 return NotFound();
             }
-            
-            if (claims.Count > 0)
+
+
+            if (_utility.IsHost(user).Result)
             {
-                IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
-                if (hostList.Contains(user))
-                {
-                    await _userManager.DeleteAsync(user);
-                    return RedirectToAction("Delete", "Host", new {name= user.Name });
-                    
-                }
+                await _userManager.DeleteAsync(user);
+                return RedirectToAction("Delete", "Host", new { name = user.Name });
             }
-            
-            if (claims.Count > 1)
+
+
+
+            if (_utility.IsGuest(user).Result)
             {
-                IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
-                if (guestList.Contains(user))
-                {
-                    await _userManager.DeleteAsync(user);
-                    return RedirectToAction("Delete", "Guest", new { name = user.Name });
-                }
+                await _userManager.DeleteAsync(user);
+                return RedirectToAction("Delete", "Guest", new { name = user.Name });
             }
+
+           
             return NoContent();
         }
 
