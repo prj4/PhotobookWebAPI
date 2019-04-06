@@ -20,6 +20,11 @@ namespace PhotobookWebAPI
             _hostRepo = hostRepo;
         }
 
+        public Utility(UserManager<AppUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
         public async Task<AppUser> GetCurrentAppUser(string currentUserName)
         {
 
@@ -34,6 +39,35 @@ namespace PhotobookWebAPI
             var currentHost = _hostRepo.GetHost(GetCurrentAppUser(currentUserName).Result.Name).Result;
 
             return currentHost;
+        }
+
+
+        public async Task<bool> IsHost(AppUser user)
+        {
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            if (claims.Count > 0)
+            {
+                IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
+                return hostList.Contains(user);
+
+            }
+
+            return false;
+        }
+
+        public async Task<bool> IsGuest(AppUser user)
+        {
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            if (claims.Count > 1)
+            {
+                IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
+                 return guestList.Contains(user);
+
+            }
+
+            return false;
         }
 
 
