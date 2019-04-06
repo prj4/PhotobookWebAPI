@@ -31,7 +31,7 @@ namespace PhotobookWebAPI.Controllers
         private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
-        private Utility _utility;
+
 
         public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
         {
@@ -39,7 +39,6 @@ namespace PhotobookWebAPI.Controllers
             _userManager = userManager;
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
-            _utility= new Utility(_userManager, _hostRepo); 
         }
 
         [Route("Index")]
@@ -50,6 +49,63 @@ namespace PhotobookWebAPI.Controllers
             return View(await _eventRepo.GetEvents());
         }
 
+
+        // GET: api/Event
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IQueryable<Event>> GetEvents()
+        {
+            return await _eventRepo.GetEvents();
+        }
+
+
+        // GET: api/Event/1234
+        [HttpGet("{pin}")]
+        [AllowAnonymous]
+        public async Task<Event> GetEvent(int pin)
+        {
+            var e = await _eventRepo.GetEvent(pin);
+            return e;
+        }
+
+        // PUT: api/Account/1234
+        [HttpPut("{pin}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> PutEvent(int pin, EditEventModel newData)
+        {
+            Event e = await _eventRepo.GetEvent(pin);
+
+            if (e== null)
+            {
+                return NotFound();
+            }
+
+            if (newData.Description != null)
+                e.Description = newData.Description;
+            if (newData.Location != null)
+                e.Location = newData.Location;
+            if (newData.Name != null)
+                e.Name = newData.Name;
+
+                e.EndDate = newData.EndDate;
+                e.StartDate = newData.StartDate;
+
+
+            _eventRepo.UpdateEvent(e);
+            return NoContent();
+        }
+
+        // DELETE: api/Event/1234
+        [HttpDelete("{pin}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeleteEvent(int pin)
+        {
+            _eventRepo.DeleteEvent(pin);
+
+            return NoContent();
+        }
+
+
         [HttpPost]
         [Authorize("IsHost")]
         [Route("CreateEvent")]
@@ -59,7 +115,7 @@ namespace PhotobookWebAPI.Controllers
             var currentUserName = HttpContext.User.Identity.Name;
 
             //Gets the corresponding Host in the DB
-            var currentHost = _utility.GetCurrentHost(currentUserName).Result;
+            var currentHost = GetCurrentHost(currentUserName).Result;
 
 
             //Gets a pin that is not used
@@ -113,6 +169,24 @@ namespace PhotobookWebAPI.Controllers
             }
 
             return pin;
+        }
+
+
+
+        private async Task<AppUser> GetCurrentAppUser(string currentUserName)
+        {
+
+            var currentUser = await _userManager.FindByNameAsync(currentUserName);
+
+            return currentUser;
+        }
+
+        private async Task<Host> GetCurrentHost(string currentUserName)
+        {
+
+            var currentHost = _hostRepo.GetHost(GetCurrentAppUser(currentUserName).Result.Name).Result;
+
+            return currentHost;
         }
 
     }

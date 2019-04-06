@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
-
+using PhotoBookDatabase.Model;
 
 
 namespace PhotobookWebAPI.Controllers
@@ -27,14 +27,13 @@ namespace PhotobookWebAPI.Controllers
 
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
-        private Utility _utility;
+ 
  
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager)
         {            
             _userManager = userManager;
             _signInManager = signInManager;
-            _utility = new Utility(_userManager);
         }
 
 
@@ -167,6 +166,7 @@ namespace PhotobookWebAPI.Controllers
                 var roleClaim = new Claim("Role", "Host");
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
+               
     
                 return RedirectToAction("Register", "Host", model);
             }
@@ -178,7 +178,12 @@ namespace PhotobookWebAPI.Controllers
         [Route("RegisterGuest")]
         public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
+
             var user = new AppUser { UserName = model.Name };
+
+            //IQueryable<Event> Events = await _eventRepo.GetEvents();
+
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -282,6 +287,34 @@ namespace PhotobookWebAPI.Controllers
             return NotFound();
         }
 
+
+        private async Task<bool> IsHost(AppUser user)
+        {
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            if (claims.Count > 0)
+            {
+                IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
+                return hostList.Contains(user);
+
+            }
+
+            return false;
+        }
+
+        private async Task<bool> IsGuest(AppUser user)
+        {
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            if (claims.Count > 1)
+            {
+                IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
+                return guestList.Contains(user);
+
+            }
+
+            return false;
+        }
 
     }
 }

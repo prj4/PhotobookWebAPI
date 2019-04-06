@@ -79,6 +79,7 @@ namespace PhotobookWebAPI
                 {
                     return new EventGuestRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
+           
                 
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
