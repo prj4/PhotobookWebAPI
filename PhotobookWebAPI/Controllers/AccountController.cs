@@ -91,7 +91,7 @@ namespace PhotobookWebAPI.Controllers
         {
             var user = await _userManager.FindByEmailAsync(Email);
 
-            var claims = await _userManager.GetClaimsAsync(user);
+            var userClaims = await _userManager.GetClaimsAsync(user);
 
             if (user == null)
             {
