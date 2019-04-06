@@ -7,6 +7,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using PhotobookWebAPI.Data;
@@ -16,6 +17,7 @@ using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
+using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -29,6 +31,7 @@ namespace PhotobookWebAPI.Controllers
         private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
+        private Utility _utility;
 
         public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
         {
@@ -36,6 +39,7 @@ namespace PhotobookWebAPI.Controllers
             _userManager = userManager;
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
+            _utility= new Utility(_userManager, _hostRepo); 
         }
 
         [Route("Index")]
@@ -51,23 +55,18 @@ namespace PhotobookWebAPI.Controllers
         [Route("CreateEvent")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
         {
-           
-
+            //Gets the username of the current AppUser
             var currentUserName = HttpContext.User.Identity.Name;
 
-            var currentUser = await _userManager.FindByNameAsync(currentUserName);
-
-            var currentHost = _hostRepo.GetHost(currentUser.Name).Result;
-            
-            
-
-            int _min = 0000;
-            int _max = 9999;
-            Random _rdm = new Random();
-            int pin = _rdm.Next(_min, _max);
+            //Gets the corresponding Host in the DB
+            var currentHost = _utility.GetCurrentHost(currentUserName).Result;
 
 
-            Event e = new Event
+            //Gets a pin that is not used
+            int pin = getRandomPin().Result;
+
+            //Creates Event
+            Event newEvent = new Event
             {
                 Name = model.Name,
                 Description = model.Description,
@@ -75,12 +74,45 @@ namespace PhotobookWebAPI.Controllers
                 Location = model.Location,
                 StartDate = model.StartDate,
                 HostId = currentHost.PictureTakerId
+                //Pin is missing for now
 
             };
 
-            _eventRepo.InsertEvent(e);
+            //Inserts the Event in the DB
+            _eventRepo.InsertEvent(newEvent);
 
-            return Ok();
+            //Validating that it is in the DB
+
+           // Event testEvent = _eventRepo.GetEvent(pin).Result;
+            //if (testEvent!=null)
+            //{
+                return Ok();
+            //}
+
+         
+            return NotFound();
+        }
+
+
+        private async Task<int> getRandomPin()
+        {
+            int _min = 0000;
+            int _max = 9999;
+            Random _rdm = new Random();
+            int pin = _rdm.Next(_min, _max);
+
+            IQueryable<Event> events = await _eventRepo.GetEvents();
+
+
+            Event testEvent = _eventRepo.GetEvent(pin).Result;
+            //Generates new pins until it finds one that is not used
+            while (testEvent!=null)
+            {
+                testEvent = _eventRepo.GetEvent(pin).Result;
+                pin = _rdm.Next(_min, _max);
+            }
+
+            return pin;
         }
 
     }

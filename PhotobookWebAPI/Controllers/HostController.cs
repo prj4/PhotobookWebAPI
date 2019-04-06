@@ -38,6 +38,7 @@ namespace PhotobookWebAPI.Controllers
 
         }
 
+        /*
         public async Task<AccountModels.RegisterHostModel> LogIn(string name)
         {
 
@@ -46,10 +47,11 @@ namespace PhotobookWebAPI.Controllers
             {
                 Name = host.Name,
                 Email = host.Email,
-                Events =
+                Events = 
             };
 
         }
+        */
 
         public async Task<AccountModels.ReturnHostModel> Register(AccountModels.RegisterHostModel model)
         {
