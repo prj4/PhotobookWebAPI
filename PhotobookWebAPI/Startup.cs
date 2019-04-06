@@ -60,7 +60,7 @@ namespace PhotobookWebAPI
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 6;
+                options.Password.RequiredLength = 1;
             }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
             
             services.AddScoped<IHostRepository, HostRepository>(serviceProvider =>
