@@ -19,20 +19,15 @@ namespace PhotobookWebAPI.Controllers
 {
     public class GuestController : Controller
     {
-        private readonly string _connectionString;
-        private IConfiguration _configuration;
-        
         private IGuestRepository _guestRepo;
         private IEventGuestRepository _eventGuestRepo;
         private IEventRepository _eventRepo;
 
-        public GuestController(IConfiguration iconfig)
+        public GuestController(IGuestRepository guestRepo, IEventGuestRepository eventGuestRepo, IEventRepository eventRepo)
         {
-            _connectionString = _configuration.GetConnectionString("RemoteConnection");
-
-            _guestRepo = new GuestRepository(_connectionString);
-            _eventRepo = new EventRepository(_connectionString);
-            _eventGuestRepo = new EventGuestRepository(_connectionString);
+            _guestRepo = guestRepo;
+            _eventRepo = eventRepo;
+            _eventGuestRepo = eventGuestRepo;
         }
 
         public async Task<IActionResult> Index()
@@ -61,6 +56,8 @@ namespace PhotobookWebAPI.Controllers
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
         {//Note til selv... Den her funktion kan nok finpudses.. tror jeg.
             //Check if event exsists with model.password then do the following
+            User.HasClaim()
+
             IQueryable<Event> Events = await _eventRepo.GetEvents();
             foreach (var _event in Events)
             {
