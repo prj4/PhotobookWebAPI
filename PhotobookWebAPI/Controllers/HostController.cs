@@ -38,20 +38,19 @@ namespace PhotobookWebAPI.Controllers
 
         }
 
-        /*
-        public async Task<AccountModels.RegisterHostModel> LogIn(string name)
+        
+        public async Task<AccountModels.ReturnHostModel> LogIn(string name, string email)
         {
-
-
+            var host = await _hostRepo.GetHost(name);
             return new AccountModels.ReturnHostModel
             {
-                Name = host.Name,
-                Email = host.Email,
-                Events = 
+                Name = name,
+                Email = email,
+                Events = host.Events
             };
 
         }
-        */
+        
 
         public async Task<AccountModels.ReturnHostModel> Register(AccountModels.RegisterHostModel model)
         {

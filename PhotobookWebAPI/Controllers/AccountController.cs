@@ -121,7 +121,7 @@ namespace PhotobookWebAPI.Controllers
             }
             */
            
-            return NoContent();
+            //return NoContent();
         }
 
 
@@ -205,7 +205,8 @@ namespace PhotobookWebAPI.Controllers
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return Ok();
+                var user = await _userManager.FindByEmailAsync(loginInfo.UserName);
+                return RedirectToAction("Login", "Host", new {name = user.Name, email = loginInfo.UserName});
             }
 
             return NotFound();
