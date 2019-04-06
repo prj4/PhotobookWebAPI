@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 
@@ -29,11 +31,9 @@ namespace PhotobookWebAPI.Controllers
  
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager)
-        {
-            
+        {            
             _userManager = userManager;
             _signInManager = signInManager;
-
         }
 
 
@@ -42,8 +42,6 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<List<AppUser>> GetAccounts()
         {
-           
-
             return await _userManager.Users.ToListAsync();
         }
 
@@ -92,9 +90,9 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> DeleteAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
-            
+
             var claims = await _userManager.GetClaimsAsync(user);
-           
+
             if (user == null)
             {
                 return NotFound();
@@ -107,10 +105,10 @@ namespace PhotobookWebAPI.Controllers
                 {
                     await _userManager.DeleteAsync(user);
                     return RedirectToAction("Delete", "Host", new {name= user.Name });
+                    
                 }
             }
-
-
+            
             if (claims.Count > 1)
             {
                 IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
@@ -145,8 +143,10 @@ namespace PhotobookWebAPI.Controllers
 
                 return Ok();
             }
+
             return NotFound();
         }
+
 
         [HttpPost]
         [AllowAnonymous]
@@ -163,13 +163,9 @@ namespace PhotobookWebAPI.Controllers
                 var roleClaim = new Claim("Role", "Host");
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
-
     
                 return RedirectToAction("Register", "Host", model);
             }
-
-            
-            
             return NotFound();
         }
 
@@ -178,7 +174,17 @@ namespace PhotobookWebAPI.Controllers
         [Route("RegisterGuest")]
         public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
-            return RedirectToAction("Register", "Guest", model);
+            var user = new AppUser { UserName = model.Name };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                var roleClaim = new Claim("Role", "Guest");
+                await _userManager.AddClaimAsync(user, roleClaim);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                return RedirectToAction("Register", "Guest", model);
+            }
+            return NotFound();
         }
 
         [AllowAnonymous]
@@ -186,8 +192,6 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(AccountModels.LoginModel loginInfo)
         {
-
-
             var result = await _signInManager.PasswordSignInAsync(loginInfo.UserName,
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)

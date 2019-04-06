@@ -24,19 +24,16 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class EventController : Controller
     {
-        private readonly string _connectionString;
-        private IConfiguration _configuration;
+
 
         private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
-        private SignInManager<AppUser> _signInManager;
-
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
 
-        public EventController(IEventRepository eventRepo, IHostRepository hostRepo)
+        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
         {
-            _connectionString = _configuration.GetConnectionString("RemoteConnection");
 
+            _userManager = userManager;
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
         }
@@ -54,12 +51,16 @@ namespace PhotobookWebAPI.Controllers
         [Route("CreateEvent")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
         {
+           
+
             var currentUserName = HttpContext.User.Identity.Name;
 
             var currentUser = await _userManager.FindByNameAsync(currentUserName);
 
-            var currentHost = _hostRepo.GetHost(currentUser.Name);
-         
+            var currentHost = _hostRepo.GetHost(currentUser.Name).Result;
+            
+            
+
             int _min = 0000;
             int _max = 9999;
             Random _rdm = new Random();
@@ -73,7 +74,8 @@ namespace PhotobookWebAPI.Controllers
                 EndDate = model.EndDate,
                 Location = model.Location,
                 StartDate = model.StartDate,
-                HostId = currentHost.Result.PictureTakerId
+                HostId = currentHost.PictureTakerId
+
             };
 
             _eventRepo.InsertEvent(e);
