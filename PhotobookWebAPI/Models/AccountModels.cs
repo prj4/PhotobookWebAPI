@@ -42,7 +42,6 @@ namespace PhotobookWebAPI.Models
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
-
         }
 
         public class RegisterAdminModel
@@ -56,7 +55,6 @@ namespace PhotobookWebAPI.Models
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
-
         }
         
 

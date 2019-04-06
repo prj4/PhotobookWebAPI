@@ -54,16 +54,12 @@ namespace PhotobookWebAPI.Controllers
         [Route("CreateEvent")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
         {
-           
-
             var currentUserName = HttpContext.User.Identity.Name;
 
             var currentUser = await _userManager.FindByNameAsync(currentUserName);
 
             var currentHost = _hostRepo.GetHost(currentUser.Name);
-            
-
-
+         
             int _min = 0000;
             int _max = 9999;
             Random _rdm = new Random();
@@ -78,7 +74,6 @@ namespace PhotobookWebAPI.Controllers
                 Location = model.Location,
                 StartDate = model.StartDate,
                 HostId = currentHost.Result.PictureTakerId
-
             };
 
             _eventRepo.InsertEvent(e);
