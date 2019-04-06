@@ -93,24 +93,37 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> DeleteAccount(string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
-
             if (user == null)
             {
                 return NotFound();
             }
 
-            if (IsHost(user).Result)
+            string userRole = null;
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            foreach (var userClaim in userClaims)
             {
-                await _userManager.DeleteAsync(user);
-                return RedirectToAction("Delete", "Host", new { name = user.Name });
+                if (userClaim.Type == "Role")
+                    userRole = userClaim.Value;
             }
 
-            if (IsGuest(user).Result)
+            if(userRole == null)
+                return NoContent();
+
+            //if (_utility.IsHost(user).Result)
+            //{
+                await _userManager.DeleteAsync(user);
+                return RedirectToAction("Delete", userRole, new { name = user.Name });
+            //}
+
+
+            /*
+            if (_utility.IsGuest(user).Result)
             {
                 await _userManager.DeleteAsync(user);
                 return RedirectToAction("Delete", "Guest", new { name = user.Name });
             }
-
+            */
+           
             return NoContent();
         }
 
