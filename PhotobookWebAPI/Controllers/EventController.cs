@@ -50,6 +50,63 @@ namespace PhotobookWebAPI.Controllers
             return View(await _eventRepo.GetEvents());
         }
 
+
+        // GET: api/Event
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IQueryable<Event>> GetEvents()
+        {
+            return await _eventRepo.GetEvents();
+        }
+
+
+        // GET: api/Event/1234
+        [HttpGet("{pin}")]
+        [AllowAnonymous]
+        public async Task<Event> GetEvent(int pin)
+        {
+            var e = await _eventRepo.GetEvent(pin);
+            return e;
+        }
+
+        // PUT: api/Account/1234
+        [HttpPut("{pin}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> PutEvent(int pin, EditEventModel newData)
+        {
+            Event e = await _eventRepo.GetEvent(pin);
+
+            if (e== null)
+            {
+                return NotFound();
+            }
+
+            if (newData.Description != null)
+                e.Description = newData.Description;
+            if (newData.Location != null)
+                e.Location = newData.Location;
+            if (newData.Name != null)
+                e.Name = newData.Name;
+
+                e.EndDate = newData.EndDate;
+                e.StartDate = newData.StartDate;
+
+
+            _eventRepo.UpdateEvent(e);
+            return NoContent();
+        }
+
+        // DELETE: api/Event/1234
+        [HttpDelete("{pin}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeleteEvent(int pin)
+        {
+            _eventRepo.DeleteEvent(pin);
+
+            return NoContent();
+        }
+
+
         [HttpPost]
         [Authorize("IsHost")]
         [Route("CreateEvent")]

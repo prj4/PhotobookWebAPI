@@ -92,12 +92,10 @@ namespace PhotobookWebAPI.Controllers
         {
             var user = await _userManager.FindByEmailAsync(Email);
 
-
             if (user == null)
             {
                 return NotFound();
             }
-
 
             if (_utility.IsHost(user).Result)
             {
@@ -105,15 +103,12 @@ namespace PhotobookWebAPI.Controllers
                 return RedirectToAction("Delete", "Host", new { name = user.Name });
             }
 
-
-
             if (_utility.IsGuest(user).Result)
             {
                 await _userManager.DeleteAsync(user);
                 return RedirectToAction("Delete", "Guest", new { name = user.Name });
             }
 
-           
             return NoContent();
         }
 
