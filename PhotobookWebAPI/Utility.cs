@@ -71,12 +71,16 @@ namespace PhotobookWebAPI
             return false;
         }
 
-
-
-        public string UserRole(IList<Claim> userClaims)
+        public async string UserRole(AppUser user)
         {
-            var claimToReturn = userClaims.FirstOrDefault(c => c.Type == "Role");
-            return claimToReturn.Value;
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            foreach (var userClaim in userClaims)
+            {
+                if (userClaim.Type == "Role")
+                    return userClaim.Value;
+            }
+
+            return null;
         }
     }
 }
