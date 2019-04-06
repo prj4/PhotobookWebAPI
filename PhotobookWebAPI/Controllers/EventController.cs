@@ -31,7 +31,7 @@ namespace PhotobookWebAPI.Controllers
         private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
-        private Utility _utility;
+
 
         public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
         {
@@ -39,7 +39,6 @@ namespace PhotobookWebAPI.Controllers
             _userManager = userManager;
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
-            _utility= new Utility(_userManager, _hostRepo); 
         }
 
         [Route("Index")]
@@ -116,7 +115,7 @@ namespace PhotobookWebAPI.Controllers
             var currentUserName = HttpContext.User.Identity.Name;
 
             //Gets the corresponding Host in the DB
-            var currentHost = _utility.GetCurrentHost(currentUserName).Result;
+            var currentHost = GetCurrentHost(currentUserName).Result;
 
 
             //Gets a pin that is not used
@@ -170,6 +169,24 @@ namespace PhotobookWebAPI.Controllers
             }
 
             return pin;
+        }
+
+
+
+        private async Task<AppUser> GetCurrentAppUser(string currentUserName)
+        {
+
+            var currentUser = await _userManager.FindByNameAsync(currentUserName);
+
+            return currentUser;
+        }
+
+        private async Task<Host> GetCurrentHost(string currentUserName)
+        {
+
+            var currentHost = _hostRepo.GetHost(GetCurrentAppUser(currentUserName).Result.Name).Result;
+
+            return currentHost;
         }
 
     }
