@@ -181,19 +181,19 @@ namespace PhotobookWebAPI.Controllers
         [Route("RegisterGuest")]
         public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
+            string username = model.Name + ";" + model.Pin;
+            var user = new AppUser { UserName = model.Name, Name = model.Name};
 
-            var user = new AppUser { UserName = model.Name };
-
-            Event e = await _eventRepo.GetEvent(int.Parse(model.Password));
+            Event e = await _eventRepo.GetEvent(int.Parse(model.Pin));
 
             if (e!=null)
             {
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var result = await _userManager.CreateAsync(user, model.Pin);
                 if (result.Succeeded)
                 {
                     var roleClaim = new Claim("Role", "Guest");
                     await _userManager.AddClaimAsync(user, roleClaim);
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _signInManager.SignInAsync(user, isPersistent: true);
 
                     return RedirectToAction("Register", "Guest", model);
                 }

@@ -55,35 +55,28 @@ namespace PhotobookWebAPI.Controllers
         [Route("Register")]
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
         {
+            var e = await _eventRepo.GetEvent(int.Parse(model.Pin));
 
-            Event e = await _eventRepo.GetEvent(int.Parse(model.Password));
-
-            if (e != null)
+            Guest guest = new Guest
             {
-                Guest guest = new Guest
-                {
-                    Name = model.Name
-                };
-                _guestRepo.InsertGuest(guest);
+                Name = model.Name
+            };
+            _guestRepo.InsertGuest(guest);
 
-                EventGuest eventGuest = new EventGuest
-                {
-                    Event = e,
-                    EventPin = int.Parse(model.Password),
-                    Guest = guest,
-                    //GuestID = guest.PictureTakerId
-                };
-                _eventGuestRepo.InsertEventGuest(eventGuest);
+            EventGuest eventGuest = new EventGuest
+            {
+                Event = e,
+                EventPin = int.Parse(model.Pin),
+                Guest = guest,
+                //GuestID = guest.PictureTakerId
+            };
+            _eventGuestRepo.InsertEventGuest(eventGuest);
 
-                return new AccountModels.ReturnGuestModel
-                {
-                    Event = e,
-                    Name = guest.Name
-                };
-            }
-
-
-            return null;
+            return new AccountModels.ReturnGuestModel
+            {
+                Event = e,
+                Name = guest.Name
+            };
         }
     }
 }
