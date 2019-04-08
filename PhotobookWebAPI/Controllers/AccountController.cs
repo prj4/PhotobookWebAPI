@@ -87,7 +87,7 @@ namespace PhotobookWebAPI.Controllers
 
 
         // DELETE: api/Account/"username"
-        [HttpDelete("{Email}")]
+        [HttpDelete("{UserName}")]
         //[Authorize("IsAdmin")]
         [AllowAnonymous]
         public async Task<IActionResult> DeleteAccount(string UserName)
@@ -111,8 +111,13 @@ namespace PhotobookWebAPI.Controllers
 
             //if (_utility.IsHost(user).Result)
             //{
-                await _userManager.DeleteAsync(user);
+               var result =  await _userManager.DeleteAsync(user);
+              
+               
                 return RedirectToAction("Delete", userRole, new { name = user.Name });
+            
+
+               
             //}
 
 

@@ -36,7 +36,7 @@ function getData() {
 
             $.each(data, function (key, item) {
                 const tr = $("<tr></tr>")
-                    .append($("<td></td>").text(item.email))
+                    .append($("<td></td>").text(item.userName))
                     .append(
                         $("<td></td>").append(
                             $("<button>Edit</button>").on("click", function () {
