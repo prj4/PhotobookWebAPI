@@ -49,25 +49,25 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-        // GET: api/Account/Email@gmail.com
-        [HttpGet("{Email}")]
+        // GET: api/Account/"username"
+        [HttpGet("{UserName}")]
         //[Authorize("IsAdmin")]
         [AllowAnonymous]
-        public async Task<AppUser> GetAccount(string Email)
+        public async Task<AppUser> GetAccount(string UserName)
         {
-            var user = await _userManager.FindByEmailAsync(Email);
+            var user = await _userManager.FindByNameAsync(UserName);
             return user;
         }
 
 
 
-        // PUT: api/Account/Email@gmail.com
-        [HttpPut("{Email}")]
+        // PUT: api/Account/"username"
+        [HttpPut("{UserName}")]
         //[Authorize("IsAdmin")]
         [AllowAnonymous]
-        public async Task<IActionResult> PutAccount(string Email, AppUser newData)
+        public async Task<IActionResult> PutAccount(string UserName, AppUser newData)
         {
-            AppUser user = await _userManager.FindByEmailAsync(Email);
+            AppUser user = await _userManager.FindByNameAsync(UserName);
 
             if (user == null)
             {
@@ -86,13 +86,13 @@ namespace PhotobookWebAPI.Controllers
 
 
 
-        // DELETE: api/Account/Email@gmail.com
+        // DELETE: api/Account/"username"
         [HttpDelete("{Email}")]
         //[Authorize("IsAdmin")]
         [AllowAnonymous]
-        public async Task<IActionResult> DeleteAccount(string Email)
+        public async Task<IActionResult> DeleteAccount(string UserName)
         {
-            var user = await _userManager.FindByEmailAsync(Email);
+            var user = await _userManager.FindByNameAsync(UserName);
             if (user == null)
             {
                 return NotFound();
