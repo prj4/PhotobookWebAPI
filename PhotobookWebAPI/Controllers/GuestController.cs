@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
-using PhotoBook.Repository.EventGuestRepository;
+
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -20,14 +20,13 @@ namespace PhotobookWebAPI.Controllers
     public class GuestController : Controller
     {
         private IGuestRepository _guestRepo;
-        private IEventGuestRepository _eventGuestRepo;
         private IEventRepository _eventRepo;
 
-        public GuestController(IGuestRepository guestRepo, IEventGuestRepository eventGuestRepo, IEventRepository eventRepo)
+        public GuestController(IGuestRepository guestRepo, IEventRepository eventRepo)
         {
             _guestRepo = guestRepo;
             _eventRepo = eventRepo;
-            _eventGuestRepo = eventGuestRepo;
+
         }
 
         public async Task<IActionResult> Index()
@@ -55,7 +54,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("Register")]
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
         {
-            var e = await _eventRepo.GetEvent(int.Parse(model.Pin));
+            var e = await _eventRepo.GetEvent(model.Pin);
 
             Guest guest = new Guest
             {
@@ -63,14 +62,6 @@ namespace PhotobookWebAPI.Controllers
             };
             _guestRepo.InsertGuest(guest);
 
-            EventGuest eventGuest = new EventGuest
-            {
-                Event = e,
-                EventPin = int.Parse(model.Pin),
-                Guest = guest,
-                //GuestID = guest.PictureTakerId
-            };
-            _eventGuestRepo.InsertEventGuest(eventGuest);
 
             return new AccountModels.ReturnGuestModel
             {

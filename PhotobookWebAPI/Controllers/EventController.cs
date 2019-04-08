@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
-using PhotoBook.Repository.EventGuestRepository;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -62,7 +62,7 @@ namespace PhotobookWebAPI.Controllers
         // GET: api/Event/1234
         [HttpGet("{pin}")]
         [AllowAnonymous]
-        public async Task<Event> GetEvent(int pin)
+        public async Task<Event> GetEvent(string pin)
         {
             var e = await _eventRepo.GetEvent(pin);
             return e;
@@ -71,7 +71,7 @@ namespace PhotobookWebAPI.Controllers
         // PUT: api/Account/1234
         [HttpPut("{pin}")]
         [AllowAnonymous]
-        public async Task<IActionResult> PutEvent(int pin, EditEventModel newData)
+        public async Task<IActionResult> PutEvent(string pin, EditEventModel newData)
         {
             Event e = await _eventRepo.GetEvent(pin);
 
@@ -98,7 +98,7 @@ namespace PhotobookWebAPI.Controllers
         // DELETE: api/Event/1234
         [HttpDelete("{pin}")]
         [AllowAnonymous]
-        public async Task<IActionResult> DeleteEvent(int pin)
+        public async Task<IActionResult> DeleteEvent(string pin)
         {
             _eventRepo.DeleteEvent(pin);
 
@@ -108,8 +108,8 @@ namespace PhotobookWebAPI.Controllers
 
         [HttpPost]
         [Authorize("IsHost")]
-        [Route("CreateEvent")]
-        public async Task<ActionResult> CreateEvent(CreateEventModel model)
+        [Route("Create")]
+        public async Task<ActionResult> Create(CreateEventModel model)
         {
             //Gets the username of the current AppUser
             var currentUserName = HttpContext.User.Identity.Name;
@@ -119,7 +119,7 @@ namespace PhotobookWebAPI.Controllers
 
 
             //Gets a pin that is not used
-            int pin = getRandomPin().Result;
+            string pin = RandomPassword();
 
             //Creates Event
             Event newEvent = new Event
@@ -129,8 +129,8 @@ namespace PhotobookWebAPI.Controllers
                 EndDate = model.EndDate,
                 Location = model.Location,
                 StartDate = model.StartDate,
-                HostId = currentHost.PictureTakerId
-                //Pin is missing for now
+                HostId = currentHost.PictureTakerId,
+                Pin = pin
 
             };
 
@@ -139,37 +139,16 @@ namespace PhotobookWebAPI.Controllers
 
             //Validating that it is in the DB
 
-           // Event testEvent = _eventRepo.GetEvent(pin).Result;
-            //if (testEvent!=null)
-            //{
+            Event testEvent = _eventRepo.GetEvent(pin).Result;
+            if (testEvent!=null)
+            {
                 return Ok();
-            //}
+            }
 
          
             return NotFound();
         }
 
-
-        private async Task<int> getRandomPin()
-        {
-            int _min = 0000;
-            int _max = 9999;
-            Random _rdm = new Random();
-            int pin = _rdm.Next(_min, _max);
-
-            IQueryable<Event> events = await _eventRepo.GetEvents();
-
-
-            Event testEvent = _eventRepo.GetEvent(pin).Result;
-            //Generates new pins until it finds one that is not used
-            while (testEvent!=null)
-            {
-                testEvent = _eventRepo.GetEvent(pin).Result;
-                pin = _rdm.Next(_min, _max);
-            }
-
-            return pin;
-        }
 
 
 
@@ -188,6 +167,43 @@ namespace PhotobookWebAPI.Controllers
 
             return currentHost;
         }
+
+
+
+
+        // Generate a random number between two numbers    
+        private int RandomNumber(int min, int max)
+        {
+            Random random = new Random();
+            return random.Next(min, max);
+        }
+
+        // Generate a random string with a given size    
+        public string RandomString(int size, bool lowerCase)
+        {
+            StringBuilder builder = new StringBuilder();
+            Random random = new Random();
+            char ch;
+            for (int i = 0; i < size; i++)
+            {
+                ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * random.NextDouble() + 65)));
+                builder.Append(ch);
+            }
+            if (lowerCase)
+                return builder.ToString().ToLower();
+            return builder.ToString();
+        }
+
+        // Generate a random password    
+        public string RandomPassword()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(RandomString(4, true));
+            builder.Append(RandomNumber(1000, 9999));
+            builder.Append(RandomString(2, true));
+            return builder.ToString();
+        }
+
 
     }
 }

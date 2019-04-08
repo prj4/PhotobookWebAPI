@@ -187,9 +187,9 @@ namespace PhotobookWebAPI.Controllers
         public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
-            var user = new AppUser { UserName = model.Name, Name = model.Name};
+            var user = new AppUser { UserName = username, Name = model.Name};
 
-            Event e = await _eventRepo.GetEvent(int.Parse(model.Pin));
+            Event e = await _eventRepo.GetEvent(model.Pin);
 
             if (e!=null)
             {
