@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
+using PhotoBook.Repository.EventRepository;
 using PhotoBookDatabase.Model;
 
 
@@ -27,13 +28,15 @@ namespace PhotobookWebAPI.Controllers
 
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
+        private IEventRepository _eventRepo;
  
  
 
-        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo)
         {            
             _userManager = userManager;
             _signInManager = signInManager;
+            _eventRepo = eventRepo;
         }
 
 
@@ -181,18 +184,21 @@ namespace PhotobookWebAPI.Controllers
 
             var user = new AppUser { UserName = model.Name };
 
-            //IQueryable<Event> Events = await _eventRepo.GetEvents();
+            Event e = await _eventRepo.GetEvent(int.Parse(model.Password));
 
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
+            if (e!=null)
             {
-                var roleClaim = new Claim("Role", "Guest");
-                await _userManager.AddClaimAsync(user, roleClaim);
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    var roleClaim = new Claim("Role", "Guest");
+                    await _userManager.AddClaimAsync(user, roleClaim);
+                    await _signInManager.SignInAsync(user, isPersistent: false);
 
-                return RedirectToAction("Register", "Guest", model);
+                    return RedirectToAction("Register", "Guest", model);
+                }
             }
+
             return NotFound();
         }
 

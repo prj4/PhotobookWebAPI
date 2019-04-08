@@ -50,42 +50,39 @@ namespace PhotobookWebAPI.Controllers
         }
 
         // GET: /<controller>/
-        [HttpPost]
+     
         [AllowAnonymous]
         [Route("Register")]
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
-        {//Note til selv... Den her funktion kan nok finpudses.. tror jeg.
-            //Check if event exsists with model.password then do the following
-            //User.HasClaim()
+        {
 
-            IQueryable<Event> Events = await _eventRepo.GetEvents();
-            foreach (var _event in Events)
+            Event e = await _eventRepo.GetEvent(int.Parse(model.Password));
+
+            if (e != null)
             {
-                if (_event.Pin == int.Parse(model.Password))
+                Guest guest = new Guest
                 {
-                    //Add Guest to DB and connect to the found event. 
-                    Guest guest = new Guest
-                    {
-                        Name = model.Name
-                    };
-                    _guestRepo.InsertGuest(guest);
+                    Name = model.Name
+                };
+                _guestRepo.InsertGuest(guest);
 
-                    EventGuest eventGuest = new EventGuest
-                    {
-                        Event = _event,
-                        EventPin = int.Parse(model.Password),
-                        Guest = guest,
-                        //GuestID = guest.PictureTakerId
-                    };
-                    _eventGuestRepo.InsertEventGuest(eventGuest);
-                        
-                    return new AccountModels.ReturnGuestModel
-                    {
-                        Event = _event,
-                        Name = guest.Name
-                    };
-                }
+                EventGuest eventGuest = new EventGuest
+                {
+                    Event = e,
+                    EventPin = int.Parse(model.Password),
+                    Guest = guest,
+                    //GuestID = guest.PictureTakerId
+                };
+                _eventGuestRepo.InsertEventGuest(eventGuest);
+
+                return new AccountModels.ReturnGuestModel
+                {
+                    Event = e,
+                    Name = guest.Name
+                };
             }
+
+
             return null;
         }
     }
