@@ -82,7 +82,7 @@ namespace PhotobookWebAPI.Models
             public string Email { get; set; }
 
             [Display(Name = "Events")]
-            public List<Event> Events { get; set; }
+            public IQueryable<Event> Events { get; set; }
         }
 
         public class ReturnGuestModel

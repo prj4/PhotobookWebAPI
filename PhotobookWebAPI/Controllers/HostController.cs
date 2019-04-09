@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using PhotobookWebAPI.Models;
+using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
 
@@ -16,10 +17,11 @@ namespace PhotobookWebAPI.Controllers
     {
 
         private IHostRepository _hostRepo;
+        private IEventRepository _eventRepo;
 
-        public HostController(IHostRepository hostRepo)
+        public HostController(IHostRepository hostRepo, IEventRepository eventRepo)
         {
-
+            _eventRepo = eventRepo;
             _hostRepo = hostRepo;
         }
 
@@ -42,11 +44,12 @@ namespace PhotobookWebAPI.Controllers
         public async Task<AccountModels.ReturnHostModel> LogIn(string name, string email)
         {
             var host = await _hostRepo.GetHost(name);
+            var events = await _eventRepo.GetEvents(host.PictureTakerId);
             return new AccountModels.ReturnHostModel
             {
                 Name = name,
                 Email = email,
-                Events = host.Events
+                Events = events
             };
 
         }
