@@ -16,7 +16,7 @@ namespace PhotobookWebAPI.Models
 
     }
 
-    public class RetrievePictureModel
+    public class PictureModel
     {
         [Required]
         public string EventPin { get; set; }
