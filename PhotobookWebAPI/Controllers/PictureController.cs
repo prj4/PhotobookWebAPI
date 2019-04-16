@@ -29,8 +29,6 @@ namespace PhotobookWebAPI.Controllers
         private IGuestRepository _guestRepo;
         private IHostRepository _hostRepo;
         private IPictureRepository _picRepo;
-        private IGuestRepository _guestRepo;
-        private IHostRepository _hostRepo;
 
         public PictureController(UserManager<AppUser> userManager, IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
             IPictureRepository picRepo)
