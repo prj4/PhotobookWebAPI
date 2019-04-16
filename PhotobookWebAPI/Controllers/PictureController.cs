@@ -43,6 +43,7 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet]
+        [Route("GetId's")]
         public async Task<RequestPicturesAnswerModel> GetPictureIds(RequestPicturesModel eventpin)
         {
             //Finder først eventets billeder
