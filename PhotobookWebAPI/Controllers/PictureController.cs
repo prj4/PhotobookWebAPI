@@ -41,14 +41,28 @@ namespace PhotobookWebAPI.Controllers
            
         }
 
+        [Route("Index")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
+        {
+
+            return View(await _picRepo.GetPictures());
+        }
+
         [AllowAnonymous]
         [HttpGet]
-        [Route("GetId's")]
+        [Route("Id's")]
         public async Task<RequestPicturesAnswerModel> GetPictureIds(RequestPicturesModel eventpin)
         {
             //Finder først eventets billeder
             var event_ = await _eventRepo.GetEvent(eventpin.EventPin);
-            var pictures_ = event_.Pictures;
+
+            if (event_.Pictures == null)
+            {
+                return null;
+            }
+
+            List<Picture> pictures_ = event_.Pictures;
 
             //Gemmer billedernes Id'er over i en retur liste
             RequestPicturesAnswerModel ret = new RequestPicturesAnswerModel();
@@ -159,7 +173,7 @@ namespace PhotobookWebAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpDelete]
         public async Task<IActionResult> DeletePicture(PictureModel model)
         {
             //Sætter stien til filen, ud fra det givne object
