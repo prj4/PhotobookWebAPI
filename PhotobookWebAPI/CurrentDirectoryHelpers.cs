@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
+
+/// <summary>
+/// Source https://stackoverflow.com/questions/54508735/directory-getcurrentdirectory-doesnt-return-the-correct-directory
+/// </summary>
 namespace PhotobookWebAPI
 {
     public class CurrentDirectoryHelpers
