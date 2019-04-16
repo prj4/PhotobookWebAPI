@@ -32,9 +32,9 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-        public async Task<ActionResult> Delete(string name)
+        public async Task<ActionResult> Delete(string email)
         {
-            _hostRepo.DeleteHost(name);
+            _hostRepo.DeleteHostByEmail(email);
 
             return Ok();
 
@@ -43,8 +43,8 @@ namespace PhotobookWebAPI.Controllers
         
         public async Task<AccountModels.ReturnHostModel> LogIn(string name, string email)
         {
-            var host = await _hostRepo.GetHost(name);
-            var events = await _eventRepo.GetEvents(host.PictureTakerId);
+            var host = await _hostRepo.GetHostByEmail(email);
+            var events = await _eventRepo.GetEventsByHostId(host.PictureTakerId);
             return new AccountModels.ReturnHostModel
             {
                 Name = name,

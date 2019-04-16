@@ -55,7 +55,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<RequestPicturesAnswerModel> GetPictureIds(RequestPicturesModel eventpin)
         {
             //Finder først eventets billeder
-            var event_ = await _eventRepo.GetEvent(eventpin.EventPin);
+            var event_ = await _eventRepo.GetEventByPin(eventpin.EventPin);
 
             if (event_.Pictures == null)
             {
@@ -110,11 +110,11 @@ namespace PhotobookWebAPI.Controllers
             //Getting guest or host
             if (userRole=="Guest")
             {
-                Guest guest = await _guestRepo.GetGuest(user.Name);
+                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
                 pictureTakerId = guest.PictureTakerId;
             }else if (userRole == "Host")
             {
-                Host host = await _hostRepo.GetHost(user.Name);
+                Host host = await _hostRepo.GetHostByEmail(user.Email);
                 pictureTakerId = host.PictureTakerId;
             }
 
@@ -126,8 +126,7 @@ namespace PhotobookWebAPI.Controllers
             Picture newPicture = new Picture
             {
                 EventPin = model.EventPin,
-                TakerId = pictureTakerId,
-                URL = "TestString"
+                TakerId = pictureTakerId
             };
 
             //Inserting picture in database
@@ -164,7 +163,7 @@ namespace PhotobookWebAPI.Controllers
 
             int picId = random.Next(min, max);
 
-            while (_picRepo.GetPicture(picId).Result != null)
+            while (_picRepo.GetPictureById(picId).Result != null)
             {
                 picId = random.Next(min, max);
             }
@@ -196,7 +195,7 @@ namespace PhotobookWebAPI.Controllers
 
             if (userRole == "Guest") //Hvis det er en Guest
             {
-                var guest = await _guestRepo.GetGuest(user.Name);
+                var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
                 foreach (var picture in guest.Pictures)
                 {
                     if (picture.PictureId == model.PictureId)//Hvis billedet findes i Guestens samling af billeder
@@ -215,7 +214,7 @@ namespace PhotobookWebAPI.Controllers
 
             if (userRole == "Host") //Hvis det er en Host
             {
-                var host = await _hostRepo.GetHost(user.Name);
+                var host = await _hostRepo.GetHostByEmail(user.Email);
                 foreach (var event_ in host.Events)
                 {
                     if (event_.Pin == model.EventPin)//Hvis Hosten er host af dette event

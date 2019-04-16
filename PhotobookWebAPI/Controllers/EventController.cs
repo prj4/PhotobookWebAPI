@@ -53,7 +53,7 @@ namespace PhotobookWebAPI.Controllers
         // GET: api/Event
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IQueryable<Event>> GetEvents()
+        public async Task<IEnumerable<Event>> GetEvents()
         {
             return await _eventRepo.GetEvents();
         }
@@ -64,7 +64,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<Event> GetEvent(string pin)
         {
-            var e = await _eventRepo.GetEvent(pin);
+            var e = await _eventRepo.GetEventByPin(pin);
             return e;
         }
 
@@ -73,7 +73,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> PutEvent(string pin, EditEventModel newData)
         {
-            Event e = await _eventRepo.GetEvent(pin);
+            Event e = await _eventRepo.GetEventByPin(pin);
 
             if (e== null)
             {
@@ -100,7 +100,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DeleteEvent(string pin)
         {
-            _eventRepo.DeleteEvent(pin);
+            _eventRepo.DeleteEventByPin(pin);
 
             return NoContent();
         }
@@ -139,7 +139,7 @@ namespace PhotobookWebAPI.Controllers
 
             //Validating that it is in the DB
 
-            Event testEvent = _eventRepo.GetEvent(pin).Result;
+            Event testEvent = _eventRepo.GetEventByPin(pin).Result;
             if (testEvent!=null)
             {
                 return Ok();
@@ -163,7 +163,7 @@ namespace PhotobookWebAPI.Controllers
         private async Task<Host> GetCurrentHost(string currentUserName)
         {
 
-            var currentHost = _hostRepo.GetHost(GetCurrentAppUser(currentUserName).Result.Name).Result;
+            var currentHost = _hostRepo.GetHostByEmail(GetCurrentAppUser(currentUserName).Result.Email).Result;
 
             return currentHost;
         }

@@ -189,7 +189,7 @@ namespace PhotobookWebAPI.Controllers
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
 
-            Event e = await _eventRepo.GetEvent(model.Pin);
+            Event e = await _eventRepo.GetEventByPin(model.Pin);
 
             if (e!=null)
             {

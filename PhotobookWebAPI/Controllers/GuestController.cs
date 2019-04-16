@@ -36,7 +36,7 @@ namespace PhotobookWebAPI.Controllers
 
         public async Task<ActionResult> Delete(string name)
         {
-            _guestRepo.DeleteGuest(name);
+            //_guestRepo.DeleteGuest(name);
 
             return Ok();
         }
@@ -54,7 +54,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("Register")]
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
         {
-            var e = await _eventRepo.GetEvent(model.Pin);
+            var e = await _eventRepo.GetEventByPin(model.Pin);
 
             Guest guest = new Guest
             {
