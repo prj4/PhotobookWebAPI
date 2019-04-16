@@ -58,7 +58,7 @@ namespace PhotobookWebAPI.Controllers
 
             Guest guest = new Guest
             {
-                Name = model.Name
+                Name = model.Name,
             };
             _guestRepo.InsertGuest(guest);
 

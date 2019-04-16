@@ -11,6 +11,8 @@ namespace PhotobookWebAPI.Models
 
         [Required]
         public string PictureString { get; set; }
-      
+
+        [Required] public string EventPin { get; set; }
+
     }
 }

@@ -17,6 +17,7 @@ using PhotobookWebAPI.Data;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
+using PhotoBook.Repository.PictureRepository;
 
 namespace PhotobookWebAPI
 {
@@ -74,8 +75,12 @@ namespace PhotobookWebAPI
                 {
                     return new EventRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
-           
-                
+            services.AddScoped<IPictureRepository, PictureRepository>(serviceProvider =>
+            {
+                return new PictureRepository(Configuration.GetConnectionString("RemoteConnection"));
+            });
+
+
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }

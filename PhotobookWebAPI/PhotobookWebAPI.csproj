@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <Folder Include="Pictures\" />
+    <Folder Include="Pictures\yypy7597cm\" />
   </ItemGroup>
 
 </Project>
