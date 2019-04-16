@@ -13,4 +13,17 @@ namespace PhotobookWebAPI.Models
         public string PictureString { get; set; }
       
     }
+
+    public class RequestPicturesModel
+    {
+        [Required]
+        public string EventId { get; set; }
+    }
+
+    public class RequestPicturesAnswerModel
+    {
+        [Required]
+        public List<string> PictureList { get; set; }
+
+    }
 }

@@ -15,11 +15,17 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class PictureController : Controller
     {
+        [AllowAnonymous]
+        [HttpGet]
+        public RequestPicturesAnswerModel GetPictureIds(RequestPicturesModel eventpin)
+        {
+            //Finder listen af billeder i et event.
+            return 
+        }
 
         [AllowAnonymous]
-        [Route("GetImage")]
         [HttpGet]
-        public IActionResult GetImage()
+        public IActionResult GetPicture()
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
