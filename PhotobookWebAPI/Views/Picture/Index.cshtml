@@ -1,0 +1,44 @@
+﻿@model IEnumerable<PhotoBookDatabase.Model.Picture>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.PictureId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EventPin)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PictureTaker)
+        </th>
+
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.PictureId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EventPin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PictureTaker)
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
