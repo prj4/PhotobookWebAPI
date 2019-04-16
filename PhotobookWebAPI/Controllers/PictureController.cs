@@ -43,6 +43,7 @@ namespace PhotobookWebAPI.Controllers
 
         [Route("Index")]
         [AllowAnonymous]
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
 
@@ -82,7 +83,7 @@ namespace PhotobookWebAPI.Controllers
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
-                (model.PictureId.ToString() + ".PNG"));
+                (model.PictureId + ".PNG"));
 
             return PhysicalFile(file, "image/PNG");
         }
@@ -118,10 +119,6 @@ namespace PhotobookWebAPI.Controllers
                 pictureTakerId = host.PictureTakerId;
             }
 
-            //Generating picture id
-            int picId = RandomUnusedNumber(0, 999999);
-
-            
             //Creating picture
             Picture newPicture = new Picture
             {
@@ -130,7 +127,7 @@ namespace PhotobookWebAPI.Controllers
             };
 
             //Inserting picture in database
-            _picRepo.InsertPicture(newPicture);
+            int picId = await _picRepo.InsertPicture(newPicture);
 
             //Setting the current directory correctly 
             CurrentDirectoryHelpers.SetCurrentDirectory();
@@ -144,7 +141,7 @@ namespace PhotobookWebAPI.Controllers
             }
 
             //Creating file and flushing to disk
-            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, picId.ToString()+".PNG");
+            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, picId+".PNG");
 
             var bytes = Convert.FromBase64String(model.PictureString);
             using (var imageFile = new FileStream(file, FileMode.Create))
@@ -157,19 +154,7 @@ namespace PhotobookWebAPI.Controllers
             return Ok();
         }
 
-        private int RandomUnusedNumber(int min, int max)
-        {
-            Random random = new Random();
-
-            int picId = random.Next(min, max);
-
-            while (_picRepo.GetPictureById(picId).Result != null)
-            {
-                picId = random.Next(min, max);
-            }
-
-            return random.Next(min, max);
-        }
+        
 
         [AllowAnonymous]
         [HttpDelete]

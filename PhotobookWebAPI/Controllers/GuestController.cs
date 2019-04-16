@@ -17,6 +17,9 @@ using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
     public class GuestController : Controller
     {
         private IGuestRepository _guestRepo;
@@ -29,38 +32,48 @@ namespace PhotobookWebAPI.Controllers
 
         }
 
+        [HttpGet]
+        [Route("Index")]
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             return View(await _guestRepo.GetGuests());
         }
 
-        public async Task<ActionResult> Delete(string name)
+
+        // GET: api/Guest
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IEnumerable<Guest>> GetEvents()
         {
-            //_guestRepo.DeleteGuest(name);
+            return await _guestRepo.GetGuests();
+        }
+
+        [AllowAnonymous]
+        [HttpDelete]
+        public async Task<ActionResult> Delete(string name, string pin)
+        {
+            await _guestRepo.DeleteGuestByNameAndEventPin(name, pin);
 
             return Ok();
         }
 
-        public async Task<ActionResult> LogIn(string name)
-        {
-            
-
-            return Ok();
-        }
 
         // GET: /<controller>/
      
         [AllowAnonymous]
         [Route("Register")]
+        [HttpPost]
         public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
         {
             var e = await _eventRepo.GetEventByPin(model.Pin);
-
+            
             Guest guest = new Guest
             {
                 Name = model.Name,
+                EventPin = model.Pin
             };
-            _guestRepo.InsertGuest(guest);
+            await _guestRepo.InsertGuest(guest);
 
 
             return new AccountModels.ReturnGuestModel

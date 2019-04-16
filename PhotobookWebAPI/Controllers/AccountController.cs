@@ -109,27 +109,24 @@ namespace PhotobookWebAPI.Controllers
             if(userRole == null)
                 return NoContent();
 
-            //if (_utility.IsHost(user).Result)
-            //{
+          
                var result =  await _userManager.DeleteAsync(user);
-              
-               
-                return RedirectToAction("Delete", userRole, new { name = user.Name });
-            
+               if (result.Succeeded)
+               {
+                   if (userRole == "Host")
+                   {
+                       return RedirectToAction("Delete", "Host", new { email = user.Email });
+                   }
+                   else if (userRole == "Guest")
+                   {
 
-               
-            //}
+                       string[] guestStrings = user.UserName.Split(";");
+                       return RedirectToAction("Delete", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
+                   }
+                }
 
+               return NoContent();
 
-            /*
-            if (_utility.IsGuest(user).Result)
-            {
-                await _userManager.DeleteAsync(user);
-                return RedirectToAction("Delete", "Guest", new { name = user.Name });
-            }
-            */
-           
-            //return NoContent();
         }
 
 
@@ -216,8 +213,7 @@ namespace PhotobookWebAPI.Controllers
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                var user = await _userManager.FindByEmailAsync(loginInfo.UserName);
-                return RedirectToAction("Login", "Host", new {name = user.Name, email = loginInfo.UserName});
+                return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
             }
 
             return NotFound();
@@ -240,6 +236,7 @@ namespace PhotobookWebAPI.Controllers
         //[HttpPost]
         [Route("ChangePassword")]
         [Authorize("IsHost")]
+        [HttpPut]
         public async Task<ActionResult> ChangePassword(AccountModels.ChangePassModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -256,6 +253,7 @@ namespace PhotobookWebAPI.Controllers
         //[HttpPost]
         [AllowAnonymous]
         [Route("InitChangeEmail")]
+        [HttpPut]
         public async Task<ActionResult> InitChangeEmail(AccountModels.ChangeEmailModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.OldEmail);
@@ -287,6 +285,7 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [Route("ChangeEmail")]
+        [HttpPut]
         public async Task<ActionResult> ChangeEmail([FromQuery]string token, [FromQuery]string oldEmail, [FromQuery]string newEmail)
         {
             var user = await _userManager.FindByEmailAsync(oldEmail);
@@ -299,34 +298,6 @@ namespace PhotobookWebAPI.Controllers
             return NotFound();
         }
 
-
-        private async Task<bool> IsHost(AppUser user)
-        {
-            var claims = await _userManager.GetClaimsAsync(user);
-
-            if (claims.Count > 0)
-            {
-                IList<AppUser> hostList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(0));
-                return hostList.Contains(user);
-
-            }
-
-            return false;
-        }
-
-        private async Task<bool> IsGuest(AppUser user)
-        {
-            var claims = await _userManager.GetClaimsAsync(user);
-
-            if (claims.Count > 1)
-            {
-                IList<AppUser> guestList = await _userManager.GetUsersForClaimAsync(claims.ElementAt(1));
-                return guestList.Contains(user);
-
-            }
-
-            return false;
-        }
 
     }
 }

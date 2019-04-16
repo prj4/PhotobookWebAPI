@@ -43,6 +43,7 @@ namespace PhotobookWebAPI.Controllers
 
         [Route("Index")]
         [AllowAnonymous]
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
 
@@ -68,7 +69,7 @@ namespace PhotobookWebAPI.Controllers
             return e;
         }
 
-        // PUT: api/Account/1234
+        // PUT: api/Event/1234
         [HttpPut("{pin}")]
         [AllowAnonymous]
         public async Task<IActionResult> PutEvent(string pin, EditEventModel newData)
@@ -91,7 +92,7 @@ namespace PhotobookWebAPI.Controllers
                 e.StartDate = newData.StartDate;
 
 
-            _eventRepo.UpdateEvent(e);
+            await _eventRepo.UpdateEvent(e);
             return NoContent();
         }
 
@@ -100,7 +101,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DeleteEvent(string pin)
         {
-            _eventRepo.DeleteEventByPin(pin);
+            await _eventRepo.DeleteEventByPin(pin);
 
             return NoContent();
         }
@@ -112,10 +113,10 @@ namespace PhotobookWebAPI.Controllers
         public async Task<ActionResult> Create(CreateEventModel model)
         {
             //Gets the username of the current AppUser
-            var currentUserName = HttpContext.User.Identity.Name;
+            var currentUserName = User.Identity.Name;
 
             //Gets the corresponding Host in the DB
-            var currentHost = GetCurrentHost(currentUserName).Result;
+            var currentHost = await GetCurrentHost(currentUserName);
 
 
             //Gets a pin that is not used
@@ -135,11 +136,11 @@ namespace PhotobookWebAPI.Controllers
             };
 
             //Inserts the Event in the DB
-            _eventRepo.InsertEvent(newEvent);
+            await _eventRepo.InsertEvent(newEvent);
 
             //Validating that it is in the DB
 
-            Event testEvent = _eventRepo.GetEventByPin(pin).Result;
+            Event testEvent =await  _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
                 return Ok();
@@ -151,7 +152,7 @@ namespace PhotobookWebAPI.Controllers
 
 
 
-
+        [NonAction]
         private async Task<AppUser> GetCurrentAppUser(string currentUserName)
         {
 
@@ -159,18 +160,18 @@ namespace PhotobookWebAPI.Controllers
 
             return currentUser;
         }
-
+        [NonAction]
         private async Task<Host> GetCurrentHost(string currentUserName)
         {
 
-            var currentHost = _hostRepo.GetHostByEmail(GetCurrentAppUser(currentUserName).Result.Email).Result;
+            var currentHost =await _hostRepo.GetHostByEmail(GetCurrentAppUser(currentUserName).Result.Email);
 
             return currentHost;
         }
 
 
 
-
+        [NonAction]
         // Generate a random number between two numbers    
         private int RandomNumber(int min, int max)
         {
@@ -178,6 +179,8 @@ namespace PhotobookWebAPI.Controllers
             return random.Next(min, max);
         }
 
+
+        [NonAction]
         // Generate a random string with a given size    
         public string RandomString(int size, bool lowerCase)
         {
@@ -194,6 +197,8 @@ namespace PhotobookWebAPI.Controllers
             return builder.ToString();
         }
 
+
+        [NonAction]
         // Generate a random password    
         public string RandomPassword()
         {
