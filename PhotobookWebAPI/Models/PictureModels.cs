@@ -14,16 +14,24 @@ namespace PhotobookWebAPI.Models
       
     }
 
+    public class RetrievePictureModel
+    {
+        [Required]
+        public string EventPin { get; set; }
+        [Required]
+        public int PictureId { get; set; }
+    }
+
     public class RequestPicturesModel
     {
         [Required]
-        public string EventId { get; set; }
+        public string EventPin { get; set; }
     }
 
     public class RequestPicturesAnswerModel
     {
         [Required]
-        public List<string> PictureList { get; set; }
+        public List<int> PictureList { get; set; }
 
     }
 }

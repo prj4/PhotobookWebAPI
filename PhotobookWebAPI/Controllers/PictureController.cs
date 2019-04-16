@@ -20,14 +20,6 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class PictureController : Controller
     {
-        [AllowAnonymous]
-        [HttpGet]
-        public RequestPicturesAnswerModel GetPictureIds(RequestPicturesModel eventpin)
-        {
-            //Finder listen af billeder i et event.
-            return 
-        }
-
         private UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IPictureRepository _picRepo;
@@ -42,12 +34,31 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult GetPicture()
+        public async Task<RequestPicturesAnswerModel> GetPictureIds(RequestPicturesModel eventpin)
+        {
+            //Finder først eventets billeder
+            var event_ = await _eventRepo.GetEvent(eventpin.EventPin);
+            var pictures_ = event_.Pictures;
+
+            //Gemmer billedernes Id'er over i en retur liste
+            RequestPicturesAnswerModel ret = new RequestPicturesAnswerModel();
+            foreach (var picture_ in pictures_)
+            {
+                ret.PictureList.Add(picture_.PictureId);
+            }
+
+            //returnerer liste
+            return ret;
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult GetPicture(RetrievePictureModel model)
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
-            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", "Udklip.PNG");
-
+            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, (model.PictureId.ToString() + ".PNG"));
+            
             return PhysicalFile(file, "image/PNG");
         }
 
