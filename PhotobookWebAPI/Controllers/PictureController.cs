@@ -159,7 +159,7 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async IActionResult DeletePicture(PictureModel model)
+        public async Task<IActionResult> DeletePicture(PictureModel model)
         {
             //Sætter stien til filen, ud fra det givne object
             CurrentDirectoryHelpers.SetCurrentDirectory();
