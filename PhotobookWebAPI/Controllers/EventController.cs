@@ -108,8 +108,8 @@ namespace PhotobookWebAPI.Controllers
 
         [HttpPost]
         [Authorize("IsHost")]
-        [Route("CreateEvent")]
-        public async Task<ActionResult> CreateEvent(CreateEventModel model)
+        [Route("Create")]
+        public async Task<ActionResult> Create(CreateEventModel model)
         {
             //Gets the username of the current AppUser
             var currentUserName = HttpContext.User.Identity.Name;
