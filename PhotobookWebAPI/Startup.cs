@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PhotobookWebAPI.Data;
-using PhotoBook.Repository.EventGuestRepository;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -55,7 +54,7 @@ namespace PhotobookWebAPI
 
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ";
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/; ";
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
@@ -74,10 +73,6 @@ namespace PhotobookWebAPI
             services.AddScoped<IEventRepository, EventRepository>(serviceProvider =>
                 {
                     return new EventRepository(Configuration.GetConnectionString("RemoteConnection"));
-                });
-            services.AddScoped<IEventGuestRepository, EventGuestRepository>(serviceProvider =>
-                {
-                    return new EventGuestRepository(Configuration.GetConnectionString("RemoteConnection"));
                 });
            
                 
