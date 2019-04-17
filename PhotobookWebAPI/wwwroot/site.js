@@ -73,7 +73,7 @@ function addItem() {
     $.ajax({
         type: "POST",
         accepts: "application/json",
-        url: "api/Account/RegisterHost",
+        url: "api/Account/Host",
         contentType: "application/json",
         data: JSON.stringify(item),
         error: function (jqXHR, textStatus, errorThrown) {

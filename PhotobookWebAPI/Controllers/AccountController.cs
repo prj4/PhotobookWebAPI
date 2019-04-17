@@ -118,13 +118,13 @@ namespace PhotobookWebAPI.Controllers
                {
                    if (userRole == "Host")
                    {
-                       return RedirectToAction("Delete", "Host", new { email = user.Email });
+                       return RedirectToAction("DeleteHost", "Host", new { email = user.Email });
                    }
                    else if (userRole == "Guest")
                    {
 
                        string[] guestStrings = user.UserName.Split(";");
-                       return RedirectToAction("Delete", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
+                       return RedirectToAction("DeleteGuest", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
                    }
                 }
 
@@ -176,7 +176,7 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
                
     
-                return RedirectToAction("Register", "Host", model);
+                return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
             }
             return NotFound();
         }
@@ -200,7 +200,7 @@ namespace PhotobookWebAPI.Controllers
                     await _userManager.AddClaimAsync(user, roleClaim);
                     await _signInManager.SignInAsync(user, isPersistent: true);
 
-                    return RedirectToAction("Register", "Guest", model);
+                    return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
                 }
             }
 
