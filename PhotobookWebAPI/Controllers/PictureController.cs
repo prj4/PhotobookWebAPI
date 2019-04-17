@@ -61,18 +61,21 @@ namespace PhotobookWebAPI.Controllers
             {
                 return null;
             }
-
             List<Picture> pictures_ = event_.Pictures;
 
             //Gemmer billedernes Id'er over i en retur liste
+            List<int> Ids = new List<int>();
             RequestPicturesAnswerModel ret = new RequestPicturesAnswerModel();
             foreach (var picture_ in pictures_)
             {
-                ret.PictureList.Add(picture_.PictureId);
+                Ids.Add(picture_.PictureId);
             }
 
             //returnerer liste
-            return ret;
+            return new RequestPicturesAnswerModel
+            {
+                PictureList = Ids
+            };
         }
 
         [AllowAnonymous]
