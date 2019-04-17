@@ -84,7 +84,7 @@ namespace PhotobookWebAPI.Controllers
 
             await _userManager.UpdateAsync(user);
 
-            return NoContent();
+            return Ok();
         }
 
 
@@ -128,7 +128,7 @@ namespace PhotobookWebAPI.Controllers
                    }
                 }
 
-               return NoContent();
+            return NoContent();
 
         }
 
@@ -220,8 +220,6 @@ namespace PhotobookWebAPI.Controllers
             }
 
             return NotFound();
-
-
         }
 
 

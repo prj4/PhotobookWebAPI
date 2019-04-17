@@ -46,13 +46,12 @@ namespace PhotobookWebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-
             return View(await _picRepo.GetPictures());
         }
 
         [AllowAnonymous]
         [HttpGet]
-        [Route("Id's")]
+        [Route("Ids")]
         public async Task<RequestPicturesAnswerModel> GetPictureIds(RequestPicturesModel eventpin)
         {
             //Finder først eventets billeder
@@ -154,7 +153,7 @@ namespace PhotobookWebAPI.Controllers
             return Ok();
         }
 
-        
+
 
         [AllowAnonymous]
         [HttpDelete]
@@ -176,25 +175,26 @@ namespace PhotobookWebAPI.Controllers
             }
 
             if (userRole == null) //Hvis ingen af delene
-                return NoContent();
+                return NotFound();
 
             if (userRole == "Guest") //Hvis det er en Guest
             {
                 var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
                 foreach (var picture in guest.Pictures)
                 {
-                    if (picture.PictureId == model.PictureId)//Hvis billedet findes i Guestens samling af billeder
+                    if (picture.PictureId == model.PictureId) //Hvis billedet findes i Guestens samling af billeder
                     {
                         if (System.IO.File.Exists(filepath))
                         {
                             System.IO.File.Delete(filepath);
                             return Ok();
                         }
+
                         return NotFound();
                     }
                 }
 
-                return NotFound();
+                return Unauthorized();
             }
 
             if (userRole == "Host") //Hvis det er en Host
@@ -202,26 +202,24 @@ namespace PhotobookWebAPI.Controllers
                 var host = await _hostRepo.GetHostByEmail(user.Email);
                 foreach (var event_ in host.Events)
                 {
-                    if (event_.Pin == model.EventPin)//Hvis Hosten er host af dette event
+                    if (event_.Pin == model.EventPin) //Hvis Hosten er host af dette event
                     {
                         if (System.IO.File.Exists(filepath))
                         {
                             System.IO.File.Delete(filepath);
                             return Ok();
                         }
+
                         return NotFound();
                     }
                 }
-                
-                return NotFound();
+
+                return Unauthorized();
             }
 
-            else //Default
-            {
-                return NotFound();
-            }
+            return NotFound();
         }
     }
 
-    }
+}
 
