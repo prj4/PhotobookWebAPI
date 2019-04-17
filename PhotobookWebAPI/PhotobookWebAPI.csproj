@@ -6,6 +6,15 @@
     <UserSecretsId>ba2bf516-6e23-4915-8e67-964fe03d5d96</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+   <NoWarn>$(NoWarn);1591</NoWarn>
+</PropertyGroup>
+
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\$(Configuration)\Comments.xml</DocumentationFile>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Remove="Pictures\yypy7597cm\**" />
     <Content Remove="Pictures\yypy7597cm\**" />

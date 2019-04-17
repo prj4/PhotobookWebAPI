@@ -44,14 +44,14 @@ namespace PhotobookWebAPI.Controllers
         // GET: api/Guest
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IEnumerable<Guest>> GetEvents()
+        public async Task<IEnumerable<Guest>> GetGuests()
         {
             return await _guestRepo.GetGuests();
         }
 
         [AllowAnonymous]
         [HttpDelete]
-        public async Task<ActionResult> Delete(string name, string pin)
+        public async Task<ActionResult> DeleteGuest(string name, string pin)
         {
             await _guestRepo.DeleteGuestByNameAndEventPin(name, pin);
 
@@ -64,7 +64,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         [Route("Register")]
         [HttpPost]
-        public async Task<AccountModels.ReturnGuestModel> Register(AccountModels.RegisterGuestModel model)
+        public async Task<AccountModels.ReturnGuestModel> RegisterGuest(AccountModels.RegisterGuestModel model)
         {
             var e = await _eventRepo.GetEventByPin(model.Pin);
             

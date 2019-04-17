@@ -40,7 +40,10 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-        // GET: api/Account
+       /// <summary>
+       /// Gets all the app users in a list
+       /// </summary>
+       /// <returns></returns>
         [HttpGet]
         [AllowAnonymous]
         public async Task<List<AppUser>> GetAccounts()
@@ -133,8 +136,8 @@ namespace PhotobookWebAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("RegisterAdmin")]
-        public async Task<ActionResult> RegisterAdmin(AccountModels.RegisterAdminModel model)
+        [Route("Admin")]
+        public async Task<ActionResult> CreateAdmin(AccountModels.RegisterAdminModel model)
         {
 
             var user = new AppUser
@@ -158,8 +161,8 @@ namespace PhotobookWebAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("RegisterHost")]
-        public async Task<ActionResult> RegisterHost(AccountModels.RegisterHostModel model)
+        [Route("Host")]
+        public async Task<ActionResult> CreateHost(AccountModels.RegisterHostModel model)
         {
 
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
@@ -180,8 +183,8 @@ namespace PhotobookWebAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("RegisterGuest")]
-        public async Task<ActionResult> RegisterGuest(AccountModels.RegisterGuestModel model)
+        [Route("Guest")]
+        public async Task<ActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -234,10 +237,10 @@ namespace PhotobookWebAPI.Controllers
         }
 
         //[HttpPost]
-        [Route("ChangePassword")]
+        [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
-        public async Task<ActionResult> ChangePassword(AccountModels.ChangePassModel model)
+        public async Task<ActionResult> Password(AccountModels.ChangePassModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
@@ -250,6 +253,7 @@ namespace PhotobookWebAPI.Controllers
             return NotFound();
         }
 
+        /*
         //[HttpPost]
         [AllowAnonymous]
         [Route("InitChangeEmail")]
@@ -270,7 +274,7 @@ namespace PhotobookWebAPI.Controllers
             }
             
 
-            var resetLink = Url.Action("ChangeEmail", "Account",
+            var resetLink = Url.Action("Email", "Account",
                 new {token = resettoken, oldEmail = user.Email, newEmail = model.NewEmail},
                 protocol: HttpContext.Request.Scheme);
 
@@ -286,7 +290,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         [Route("ChangeEmail")]
         [HttpPut]
-        public async Task<ActionResult> ChangeEmail([FromQuery]string token, [FromQuery]string oldEmail, [FromQuery]string newEmail)
+        public async Task<ActionResult> Email([FromQuery]string token, [FromQuery]string oldEmail, [FromQuery]string newEmail)
         {
             var user = await _userManager.FindByEmailAsync(oldEmail);
 
@@ -297,6 +301,7 @@ namespace PhotobookWebAPI.Controllers
             }
             return NotFound();
         }
+        */
 
 
     }

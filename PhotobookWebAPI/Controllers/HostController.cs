@@ -40,7 +40,7 @@ namespace PhotobookWebAPI.Controllers
 
         [AllowAnonymous]
         [HttpDelete]
-        public async Task<ActionResult> Delete(string email)
+        public async Task<ActionResult> DeleteHost(string email)
         {
              await _hostRepo.DeleteHostByEmail(email);
 
@@ -64,8 +64,7 @@ namespace PhotobookWebAPI.Controllers
         }
         [AllowAnonymous]
         [HttpPost]
-        [Route("Register")]
-        public async Task<AccountModels.ReturnHostModel> Register(AccountModels.RegisterHostModel model)
+        public async Task<AccountModels.ReturnHostModel> RegisterHost(AccountModels.RegisterHostModel model)
         {
             Host host = new Host { Name = model.Name, Email = model.Email };
 
