@@ -64,14 +64,14 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         [Route("Register")]
         [HttpPost]
-        public async Task<AccountModels.ReturnGuestModel> RegisterGuest(AccountModels.RegisterGuestModel model)
+        public async Task<AccountModels.ReturnGuestModel> RegisterGuest(string name, string pin)
         {
-            var e = await _eventRepo.GetEventByPin(model.Pin);
+            var e = await _eventRepo.GetEventByPin(pin);
             
             Guest guest = new Guest
             {
-                Name = model.Name,
-                EventPin = model.Pin
+                Name = name,
+                EventPin = pin
             };
             await _guestRepo.InsertGuest(guest);
 

@@ -49,8 +49,9 @@ namespace PhotobookWebAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]
-        public async Task<AccountModels.ReturnHostModel> LogIn(string email)
+        [HttpGet]
+        [Route("Login")]
+        public async Task<AccountModels.ReturnHostModel> Login(string email)
         {
             var host = await _hostRepo.GetHostByEmail(email);
             var events = await _eventRepo.GetEventsByHostId(host.PictureTakerId);
@@ -64,9 +65,9 @@ namespace PhotobookWebAPI.Controllers
         }
         [AllowAnonymous]
         [HttpPost]
-        public async Task<AccountModels.ReturnHostModel> RegisterHost(AccountModels.RegisterHostModel model)
+        public async Task<AccountModels.ReturnHostModel> RegisterHost(string name, string email, string password)
         {
-            Host host = new Host { Name = model.Name, Email = model.Email };
+            Host host = new Host { Name = name, Email = email };
 
 
             await _hostRepo.InsertHost(host);

@@ -35,5 +35,12 @@ namespace PhotobookWebAPI.Models
         [Required]
         public List<int> PictureList { get; set; }
 
+        public RequestPicturesAnswerModel()
+        {
+            PictureList = new List<int>();
+        }
+
+        
+
     }
 }
