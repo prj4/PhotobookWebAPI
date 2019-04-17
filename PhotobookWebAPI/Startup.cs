@@ -20,6 +20,7 @@ using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBook.Repository.PictureRepository;
+using PhotoBookDatabase.Data;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace PhotobookWebAPI
@@ -88,19 +89,27 @@ namespace PhotobookWebAPI
             
             services.AddScoped<IHostRepository, HostRepository>(serviceProvider =>
                 {
-                    return new HostRepository(Configuration.GetConnectionString("RemoteConnection"));
+                    return new HostRepository(new PhotoBookDbContext(new DbContextOptionsBuilder<PhotoBookDbContext>()
+                        .UseSqlServer(Configuration.GetConnectionString("RemoteConnection"))
+                        .Options));
                 });
             services.AddScoped<IGuestRepository, GuestRepository>(serviceProvider =>
                 {
-                    return new GuestRepository(Configuration.GetConnectionString("RemoteConnection"));
+                    return new GuestRepository(new PhotoBookDbContext(new DbContextOptionsBuilder<PhotoBookDbContext>()
+                        .UseSqlServer(Configuration.GetConnectionString("RemoteConnection"))
+                        .Options));
                 });
             services.AddScoped<IEventRepository, EventRepository>(serviceProvider =>
                 {
-                    return new EventRepository(Configuration.GetConnectionString("RemoteConnection"));
+                    return new EventRepository(new PhotoBookDbContext(new DbContextOptionsBuilder<PhotoBookDbContext>()
+                        .UseSqlServer(Configuration.GetConnectionString("RemoteConnection"))
+                        .Options));
                 });
             services.AddScoped<IPictureRepository, PictureRepository>(serviceProvider =>
             {
-                return new PictureRepository(Configuration.GetConnectionString("RemoteConnection"));
+                return new PictureRepository(new PhotoBookDbContext(new DbContextOptionsBuilder<PhotoBookDbContext>()
+                    .UseSqlServer(Configuration.GetConnectionString("RemoteConnection"))
+                    .Options));
             });
 
 
