@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
+using PhotoBook.Repository.GuestRepository;
+using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
 
 
@@ -29,14 +31,18 @@ namespace PhotobookWebAPI.Controllers
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
         private IEventRepository _eventRepo;
+        private IHostRepository _hostRepo;
+        private IGuestRepository _guestRepo;
  
  
 
-        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo)
+        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo)
         {            
             _userManager = userManager;
             _signInManager = signInManager;
             _eventRepo = eventRepo;
+            _guestRepo = guestRepo;
+            _hostRepo = hostRepo;
         }
 
 
@@ -118,13 +124,20 @@ namespace PhotobookWebAPI.Controllers
                {
                    if (userRole == "Host")
                    {
-                       return RedirectToAction("DeleteHost", "Host", new { email = user.Email });
+                       //THIS IS TEMPORARY
+                       await _hostRepo.DeleteHostByEmail(user.Email);
+                       //UNTIL HERE
+                    //return RedirectToAction("DeleteHost", "Host", new { email = user.Email });
                    }
                    else if (userRole == "Guest")
                    {
 
                        string[] guestStrings = user.UserName.Split(";");
-                       return RedirectToAction("DeleteGuest", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
+                    //THIS IS TEMPORARY
+                    await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
+                    //UNTIL HERE
+
+                    //return RedirectToAction("DeleteGuest", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
                    }
                 }
 
@@ -174,11 +187,24 @@ namespace PhotobookWebAPI.Controllers
                 var roleClaim = new Claim("Role", "Host");
                 await _userManager.AddClaimAsync(user, roleClaim);
                 await _signInManager.SignInAsync(user, isPersistent: false);
-               
-    
-                return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
+
+
+                //THIS AND DOWN IN TEMPORARY
+
+                Host host = new Host { Name = model.Name, Email = model.Email };
+
+
+                await _hostRepo.InsertHost(host);
+
+                //Returnering af host data (Nyoprettet dermed ingen events).
+                return Ok();
+
+                //UNTIL HERE !!
+
+                //return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
             }
-            return NotFound();
+            return Ok();
+            //return NotFound();
         }
 
         [HttpPost]
@@ -200,11 +226,22 @@ namespace PhotobookWebAPI.Controllers
                     await _userManager.AddClaimAsync(user, roleClaim);
                     await _signInManager.SignInAsync(user, isPersistent: true);
 
-                    return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
+                    //THIS IS TEMPORARY
+                    var ev = await _eventRepo.GetEventByPin(model.Pin);
+
+                    Guest guest = new Guest
+                    {
+                        Name = model.Name,
+                        EventPin = model.Pin
+                    };
+                    await _guestRepo.InsertGuest(guest);
+                    //UNTIL HERE
+                   // return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
                 }
             }
 
-            return NotFound();
+            return Ok();
+            //return NotFound();
         }
 
         [AllowAnonymous]
@@ -216,10 +253,12 @@ namespace PhotobookWebAPI.Controllers
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
+                
+                //return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
             }
 
-            return NotFound();
+            return Ok();
+            //return NotFound();
         }
 
 

@@ -66,8 +66,7 @@ function addItem() {
     const item = {
         Email: $("#AccountEmail").val(),
         Name: $("#AccountName").val(),
-        Password: $("#AccountPassword").val(),
-        Role: "Host"
+        Password: $("#AccountPassword").val()
     };
 
     $.ajax({
