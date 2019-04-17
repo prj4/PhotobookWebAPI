@@ -148,13 +148,28 @@ namespace PhotobookWebAPI.Controllers
                 imageFile.Write(bytes, 0, bytes.Length);
                 imageFile.Flush();
             }
-
-
+            
             return Ok();
         }
 
 
-
+        /// <summary>
+        /// Deletes a picture from the server and the database.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Todo
+        ///     {
+        ///        "EventPin": awf122km2,
+        ///        "PictureId": 1
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="item"></param>
+        /// <returns>A newly created TodoItem</returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the item is null</response>   
         [AllowAnonymous]
         [HttpDelete]
         public async Task<IActionResult> DeletePicture(PictureModel model)
@@ -187,7 +202,7 @@ namespace PhotobookWebAPI.Controllers
                         if (System.IO.File.Exists(filepath))
                         {
                             System.IO.File.Delete(filepath);
-                            return Ok();
+                            return NoContent();
                         }
 
                         return NotFound();
@@ -207,7 +222,7 @@ namespace PhotobookWebAPI.Controllers
                         if (System.IO.File.Exists(filepath))
                         {
                             System.IO.File.Delete(filepath);
-                            return Ok();
+                            return NoContent();
                         }
 
                         return NotFound();

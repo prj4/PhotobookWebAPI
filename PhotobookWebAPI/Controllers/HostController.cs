@@ -44,7 +44,7 @@ namespace PhotobookWebAPI.Controllers
         {
              await _hostRepo.DeleteHostByEmail(email);
 
-            return Ok();
+            return NoContent();
 
         }
 

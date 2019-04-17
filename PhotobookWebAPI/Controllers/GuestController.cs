@@ -55,7 +55,7 @@ namespace PhotobookWebAPI.Controllers
         {
             await _guestRepo.DeleteGuestByNameAndEventPin(name, pin);
 
-            return Ok();
+            return NoContent();
         }
 
 
