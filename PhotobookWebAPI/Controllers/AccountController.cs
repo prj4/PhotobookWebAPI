@@ -84,7 +84,7 @@ namespace PhotobookWebAPI.Controllers
 
             await _userManager.UpdateAsync(user);
 
-            return NoContent();
+            return Ok();
         }
 
 
@@ -113,22 +113,22 @@ namespace PhotobookWebAPI.Controllers
                 return NoContent();
 
           
-               var result =  await _userManager.DeleteAsync(user);
-               if (result.Succeeded)
-               {
-                   if (userRole == "Host")
-                   {
-                       return RedirectToAction("Delete", "Host", new { email = user.Email });
-                   }
-                   else if (userRole == "Guest")
-                   {
-
-                       string[] guestStrings = user.UserName.Split(";");
-                       return RedirectToAction("Delete", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
-                   }
+            var result =  await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                if (userRole == "Host")
+                {
+                    return RedirectToAction("Delete", "Host", new { email = user.Email });
                 }
+                else if (userRole == "Guest")
+                {
 
-               return NoContent();
+                    string[] guestStrings = user.UserName.Split(";");
+                    return RedirectToAction("Delete", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
+                }
+            }
+
+            return NoContent();
 
         }
 
@@ -220,8 +220,6 @@ namespace PhotobookWebAPI.Controllers
             }
 
             return NotFound();
-
-
         }
 
 

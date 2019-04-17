@@ -93,7 +93,7 @@ namespace PhotobookWebAPI.Controllers
 
 
             await _eventRepo.UpdateEvent(e);
-            return NoContent();
+            return Ok();
         }
 
         // DELETE: api/Event/1234
@@ -103,7 +103,7 @@ namespace PhotobookWebAPI.Controllers
         {
             await _eventRepo.DeleteEventByPin(pin);
 
-            return NoContent();
+            return Ok();
         }
 
 
