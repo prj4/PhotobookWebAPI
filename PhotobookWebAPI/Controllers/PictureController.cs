@@ -173,6 +173,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="201">Returns the newly created item</response>
         /// <response code="400">If the item is null</response>   
         [AllowAnonymous]
+
         [HttpDelete]
         public async Task<IActionResult> DeletePicture(PictureModel model)
         {

@@ -115,6 +115,7 @@ namespace PhotobookWebAPI.Models
             public string NewPassword { get; set; }
         }
 
+
         public class ChangeEmailModel
         {
             [Required]

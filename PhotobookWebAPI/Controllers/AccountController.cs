@@ -46,21 +46,40 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-       /// <summary>
-       /// Gets all the app users in a list
-       /// </summary>
-       /// <returns></returns>
+        /// <summary>
+        /// Gets a list of all AppUsers registered in the database
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Account
+        ///
+        /// </remarks>
+        /// <returns>Ok, list of AppUser</returns>
+        /// <response code="200">Returns list of all AppUsers, empty list if no users</response> 
         [HttpGet]
         [AllowAnonymous]
         public async Task<List<AppUser>> GetAccounts()
         {
-            return await _userManager.Users.ToListAsync();
+            var accountList = await _userManager.Users.ToListAsync();
+            
+                return accountList;
         }
 
 
-        // GET: api/Account/"username"
+        /// <summary>
+        /// Gets a the AppUser with the given username
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Account/Name@mail.dk
+        ///
+        /// </remarks>
+        /// <returns>Ok, AppUser</returns>
+        /// <response code="200">Returns AppUser with specified username</response>
+        /// <response code="204">User not found</response> 
         [HttpGet("{UserName}")]
-        //[Authorize("IsAdmin")]
         [AllowAnonymous]
         public async Task<AppUser> GetAccount(string UserName)
         {
@@ -69,8 +88,22 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-
-        // PUT: api/Account/"username"
+        /// <summary>
+        /// Can change the email/Username of a user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT api/Account/name@mail.dk
+        ///     {
+        ///        "UserName": "example@mail.dk",
+        ///        "Email": "example@mail.dk"
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> User changed successfully </response>
+        /// <response code="404"> User not found </response> 
         [HttpPut("{UserName}")]
         //[Authorize("IsAdmin")]
         [AllowAnonymous]
@@ -90,12 +123,22 @@ namespace PhotobookWebAPI.Controllers
 
             await _userManager.UpdateAsync(user);
 
-            return Ok();
+            return NoContent();
         }
 
 
-
-        // DELETE: api/Account/"username"
+        /// <summary>
+        /// Deletes AppUser with specified username
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE api/Account/name@mail.dk
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> User Deleted </response>
+        /// <response code="404"> User not found </response> 
         [HttpDelete("{UserName}")]
         //[Authorize("IsAdmin")]
         [AllowAnonymous]
@@ -116,7 +159,7 @@ namespace PhotobookWebAPI.Controllers
             }
 
             if(userRole == null)
-                return NoContent();
+                return NotFound();
 
           
                var result =  await _userManager.DeleteAsync(user);
@@ -146,13 +189,29 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-
+        /// <summary>
+        /// Creates Admin user(NOT CURRENTLY WORKING)
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Admin
+        ///     {
+        ///        "UserName": "admin",
+        ///        "Password": "admin"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Admin created </response>
+        /// <response code="404"> Error in creating admin</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Admin")]
         public async Task<ActionResult> CreateAdmin(AccountModels.RegisterAdminModel model)
         {
-
+            
             var user = new AppUser
                 {UserName = model.UserName};
 
@@ -165,19 +224,37 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
 
-                return Ok();
+                return NoContent();
             }
 
             return NotFound();
         }
 
 
+        /// <summary>
+        /// Creates Host user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Host
+        ///     {
+        ///        "Name": "Name",
+        ///        "Email": "Name@mail.dk",
+        ///        "Password": "123456"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Host created </response>
+        /// <response code="404"> Error in creating Host</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
         public async Task<ActionResult> CreateHost(AccountModels.RegisterHostModel model)
         {
-
+            
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -197,16 +274,32 @@ namespace PhotobookWebAPI.Controllers
                 await _hostRepo.InsertHost(host);
 
                 //Returnering af host data (Nyoprettet dermed ingen events).
-                return Ok();
+                return NoContent();
 
                 //UNTIL HERE !!
 
                 //return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
             }
-            return Ok();
-            //return NotFound();
+            
+            return NotFound();
         }
-
+        /// <summary>
+        /// Creates Guest user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Guest
+        ///     {
+        ///        "Name": "Name",
+        ///        "Pin": "abcd1234ef"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Guest created </response>
+        /// <response code="404"> Error in creating Guest</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
@@ -235,15 +328,34 @@ namespace PhotobookWebAPI.Controllers
                         EventPin = model.Pin
                     };
                     await _guestRepo.InsertGuest(guest);
+                    return NoContent();
                     //UNTIL HERE
-                   // return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
+                    // return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
                 }
             }
 
-            return Ok();
+            return NotFound();
             //return NotFound();
         }
 
+
+        /// <summary>
+        /// Login with Host login
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Login
+        ///     {
+        ///        "UserName": "Name",
+        ///        "Password": "123456"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Success </response>
+        /// <response code="404"> Error</response> 
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
@@ -253,15 +365,28 @@ namespace PhotobookWebAPI.Controllers
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                
+                return NoContent();
                 //return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
             }
 
-            return Ok();
-            //return NotFound();
+           
+            return NotFound();
         }
 
 
+        /// <summary>
+        /// Logout 
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Logout
+        ///    
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Success </response>
         [AllowAnonymous]
         [Route("Logout")]
         [HttpPost]
@@ -269,11 +394,28 @@ namespace PhotobookWebAPI.Controllers
         {
             await _signInManager.SignOutAsync();
 
-            return Ok();
+            return NoContent();
 
         }
 
-        //[HttpPost]
+        /// <summary>
+        /// Change password [IsHost]
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT api/Account/Password
+        ///     {
+        ///        "Email": "Name@mail.dk",
+        ///        "CurrPassword": "123456",
+        ///        "NewPassword": "234567"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Success </response>
+        /// <response code="404"> Error</response> 
         [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
@@ -285,7 +427,7 @@ namespace PhotobookWebAPI.Controllers
 
             if (result.Succeeded)
             {
-               return Ok();
+               return NoContent();
             }
             return NotFound();
         }
