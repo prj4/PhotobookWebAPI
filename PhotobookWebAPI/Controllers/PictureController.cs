@@ -41,6 +41,13 @@ namespace PhotobookWebAPI.Controllers
            
         }
 
+        /// <summary>
+        /// Gets all the picture data from the database.
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <returns>A view of the pictures in the database.</returns>
+        /// <response>A view of the pictures in the database.</response>
         [Route("Index")]
         [AllowAnonymous]
         [HttpGet]
@@ -49,6 +56,21 @@ namespace PhotobookWebAPI.Controllers
             return View(await _picRepo.GetPictures());
         }
 
+        /// <summary>
+        /// Gets all the picture Ids for a given Event
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Todo
+        ///     {
+        ///        "EventPin": 123wer12f1
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>List of Ids of pictures from the requested event.</returns>
+        /// <response Task='null'>If no pictures have been taken at the event.</response>
+        /// <response Task='List of Picture Ids'>If there are pictures from the event.</response>
         [AllowAnonymous]
         [HttpGet]
         [Route("Ids")]
@@ -78,6 +100,21 @@ namespace PhotobookWebAPI.Controllers
             };
         }
 
+        /// <summary>
+        /// Gets a Picture from the server.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Todo
+        ///     {
+        ///        "Picture string": base64,
+        ///        "EventPin": 123wer12f1
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>A physical file, a picture.</returns>
+        /// <response>Physical file, the requested picture.</response>
         [AllowAnonymous]
         [HttpGet]
         public IActionResult GetPicture(PictureModel model)
@@ -90,7 +127,21 @@ namespace PhotobookWebAPI.Controllers
             return PhysicalFile(file, "image/PNG");
         }
 
-
+        /// <summary>
+        /// Insert a Picture onto the server and into the database.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Todo
+        ///     {
+        ///        "Picture string": base64,
+        ///        "EventPin": 123wer12f1
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>Ok, Picture has been inserted into database and put on server.</returns>
+        /// <response code="200">Picture has been inserted into database and put on server.</response>
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
@@ -121,7 +172,7 @@ namespace PhotobookWebAPI.Controllers
                 pictureTakerId = host.PictureTakerId;
             }
 
-            //Creating picture
+            //Creating picture for database
             Picture newPicture = new Picture
             {
                 EventPin = model.EventPin,
@@ -169,11 +220,12 @@ namespace PhotobookWebAPI.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <returns>No Content</returns>
-        /// <response code="201">Returns the newly created item</response>
-        /// <response code="400">If the item is null</response>   
+        /// <returns>No Content, Picture deleted</returns>
+        /// <response code="204">Deleted the requested picture</response>
+        /// <response code="401">If you don't have the right to delete the picture</response>   
+        /// <response code="404">If the users claim is not recognized or,
+        ///                      If the the picture wasn't found on the server.</response>   
         [AllowAnonymous]
-
         [HttpDelete]
         public async Task<IActionResult> DeletePicture(PictureModel model)
         {
