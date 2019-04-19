@@ -129,7 +129,7 @@ namespace PhotobookWebAPI.Controllers
                 EndDate = model.EndDate,
                 Location = model.Location,
                 StartDate = model.StartDate,
-                HostId = currentHost.PictureTakerId,
+                HostId = currentHost.HostId,
                 Pin = pin
 
             };

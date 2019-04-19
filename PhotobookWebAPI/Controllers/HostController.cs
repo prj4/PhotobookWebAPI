@@ -54,7 +54,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<AccountModels.ReturnHostModel> Login(string email)
         {
             var host = await _hostRepo.GetHostByEmail(email);
-            var events = await _eventRepo.GetEventsByHostId(host.PictureTakerId);
+            var events = await _eventRepo.GetEventsByHostId(host.HostId);
             return new AccountModels.ReturnHostModel
             {
                 Name = host.Name,

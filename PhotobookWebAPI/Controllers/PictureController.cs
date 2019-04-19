@@ -146,9 +146,6 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
-            //Local variables
-            int pictureTakerId = 0;
-
             //Finding logged in user
             var user =  await _userManager.FindByNameAsync(User.Identity.Name);
 
@@ -161,24 +158,25 @@ namespace PhotobookWebAPI.Controllers
                     userRole = userClaim.Value;
             }
 
+            Picture newPicture = new Picture();
+
             //Getting guest or host
             if (userRole=="Guest")
             {
                 Guest guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
-                pictureTakerId = guest.PictureTakerId;
-            }else if (userRole == "Host")
+                //Creating picture for database if a guest took the picture
+                newPicture.EventPin = model.EventPin;
+                newPicture.GuestId = guest.GuestId;
+            }
+            else if (userRole == "Host")
             {
                 Host host = await _hostRepo.GetHostByEmail(user.Email);
-                pictureTakerId = host.PictureTakerId;
+                //Creating picture for database if host took the picture
+                newPicture.EventPin = model.EventPin;
+                newPicture.HostId = host.HostId;
             }
-
-            //Creating picture for database
-            Picture newPicture = new Picture
-            {
-                EventPin = model.EventPin,
-                TakerId = pictureTakerId
-            };
-
+            
+            
             //Inserting picture in database
             int picId = await _picRepo.InsertPicture(newPicture);
 
@@ -229,13 +227,15 @@ namespace PhotobookWebAPI.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeletePicture(PictureModel model)
         {
-            //Sætter stien til filen, ud fra det givne object
+            //Sætter stien til filen, ud fra det givne billede id og eventpin.
             CurrentDirectoryHelpers.SetCurrentDirectory();
             string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
                 (model.PictureId.ToString() + ".PNG"));
 
-            //Er det en host eller en guest?
+            //Bestemmer den bruger som er logget ind
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
+
+            //bestemmer brugerens rolle
             string userRole = null;
             var userClaims = await _userManager.GetClaimsAsync(user);
             foreach (var userClaim in userClaims)
@@ -244,9 +244,51 @@ namespace PhotobookWebAPI.Controllers
                     userRole = userClaim.Value;
             }
 
-            if (userRole == null) //Hvis ingen af delene
-                return NotFound();
+            if (userRole == "Guest")
+            {
+                var event_ = await _eventRepo.GetEventByPin(model.EventPin);
+                var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
+                foreach (var picture in event_.Pictures)
+                {
+                    if (picture.PictureId == model.PictureId) //Hvis billedet findes i Guestens samling af billeder
+                    {
+                        if (System.IO.File.Exists(filepath))
+                        {
+                            System.IO.File.Delete(filepath);
+                            await _picRepo.DeletePictureById(model.PictureId);
+                            return NoContent();
+                        }
 
+                        return NotFound();
+                    }
+                }
+
+                return Unauthorized();
+            }
+            if (userRole == "Host")
+            {
+                var host = await _hostRepo.GetHostByEmail(user.Email);
+                foreach (var event_ in host.Events)
+                {
+                    if (event_.Pin == model.EventPin) //Hvis Hosten er host af dette event
+                    {
+                        if (System.IO.File.Exists(filepath))
+                        {
+                            System.IO.File.Delete(filepath);
+                            await _picRepo.DeletePictureById(model.PictureId);
+                            return NoContent();
+                        }
+
+                        return NotFound();
+                    }
+                }
+
+                return Unauthorized();
+            }
+            
+            return NotFound();
+
+            /*
             if (userRole == "Guest") //Hvis det er en Guest
             {
                 var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
@@ -286,8 +328,9 @@ namespace PhotobookWebAPI.Controllers
 
                 return Unauthorized();
             }
+            */
 
-            return NotFound();
+            //return NotFound();
         }
     }
 

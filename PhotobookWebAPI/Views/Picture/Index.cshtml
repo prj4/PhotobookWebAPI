@@ -10,19 +10,22 @@
 </p>
 <table class="table">
     <thead>
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.PictureId)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.EventPin)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.PictureTaker)
-        </th>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PictureId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EventPin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GuestId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HostId)
+            </th>
 
-        <th></th>
-    </tr>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var item in Model)
@@ -35,7 +38,10 @@
                 @Html.DisplayFor(modelItem => item.EventPin)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PictureTaker)
+                @Html.DisplayFor(modelItem => item.GuestId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HostId)
             </td>
         </tr>
     }
