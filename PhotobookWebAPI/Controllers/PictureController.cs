@@ -250,7 +250,7 @@ namespace PhotobookWebAPI.Controllers
                 var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
                 foreach (var picture in event_.Pictures)
                 {
-                    if (picture.PictureId == model.PictureId) //Hvis billedet findes i Guestens samling af billeder
+                    if ((picture.PictureId == model.PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
                     {
                         if (System.IO.File.Exists(filepath))
                         {
@@ -332,6 +332,77 @@ namespace PhotobookWebAPI.Controllers
 
             //return NotFound();
         }
+
+        #region delete prøve
+        [Authorize("IsHost")]
+        [HttpDelete]
+        public async Task<IActionResult> HostDeletePicture(PictureModel model)
+        {
+            //Sætter stien til filen, ud fra det givne billede id og eventpin.
+            CurrentDirectoryHelpers.SetCurrentDirectory();
+            string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
+                (model.PictureId.ToString() + ".PNG"));
+
+            //Bestemmer den bruger som er logget ind
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var host = await _hostRepo.GetHostByEmail(user.Email);
+
+            foreach (var event_ in host.Events)
+                {
+                    if (event_.Pin == model.EventPin) //Hvis Hosten er host af dette event
+                    {
+                        if (System.IO.File.Exists(filepath))
+                        {
+                            System.IO.File.Delete(filepath);
+                            await _picRepo.DeletePictureById(model.PictureId);
+                            return NoContent();
+                        }
+
+                        return NotFound();
+                    }
+
+                return Unauthorized();
+            }
+
+            return NotFound();
+            
+        }
+
+        [Authorize("IsGuest")]
+        [HttpDelete]
+        public async Task<IActionResult> GuestDeletePicture(PictureModel model)
+        {
+            //Sætter stien til filen, ud fra det givne billede id og eventpin.
+            CurrentDirectoryHelpers.SetCurrentDirectory();
+            string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
+                (model.PictureId.ToString() + ".PNG"));
+
+            //Bestemmer den bruger som er logget ind
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
+
+            var event_ = await _eventRepo.GetEventByPin(model.EventPin);
+            foreach (var picture in event_.Pictures)
+            {
+                if ((picture.PictureId == model.PictureId) && (picture.GuestId == guest.GuestId)) //Hvis guesten har taget billedet
+                {
+                    if (System.IO.File.Exists(filepath))
+                    {
+                        System.IO.File.Delete(filepath);
+                        await _picRepo.DeletePictureById(model.PictureId);
+                        return NoContent();
+                    }
+
+                    return NotFound();
+                }
+
+                return Unauthorized();
+            }
+
+            return NotFound();
+
+        }
+        #endregion
     }
 
 }
