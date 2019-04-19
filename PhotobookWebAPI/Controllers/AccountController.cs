@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
@@ -33,8 +34,9 @@ namespace PhotobookWebAPI.Controllers
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
- 
- 
+        private Logger logger = LogManager.GetCurrentClassLogger();
+
+
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo)
         {            
@@ -62,7 +64,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<List<AppUser>> GetAccounts()
         {
             var accountList = await _userManager.Users.ToListAsync();
-            
+            logger.Info("GetAccounts Called");
                 return accountList;
         }
 
