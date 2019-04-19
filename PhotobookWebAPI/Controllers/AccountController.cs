@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -46,6 +47,8 @@ namespace PhotobookWebAPI.Controllers
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
         }
+
+
 
 
         /// <summary>
