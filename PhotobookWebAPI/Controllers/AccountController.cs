@@ -67,7 +67,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<List<AppUser>> GetAccounts()
         {
             var accountList = await _userManager.Users.ToListAsync();
-            logger.Info("GetAccounts Called");
+            //logger.Info("GetAccounts Called");
                 return accountList;
         }
 

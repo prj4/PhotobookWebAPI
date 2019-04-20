@@ -106,23 +106,20 @@ namespace PhotobookWebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /Todo
-        ///     {
-        ///        "Picture string": base64,
-        ///        "EventPin": 123wer12f1
-        ///     }
+        ///     GET /api/Picture/rine2164bk/4
+        ///     
         ///
         /// </remarks>
         /// <returns>A physical file, a picture.</returns>
         /// <response>Physical file, the requested picture.</response>
         [AllowAnonymous]
-        [HttpGet]
-        public IActionResult GetPicture(PictureModel model)
+        [HttpGet("{EventPin}/{PictureId}")]
+        public IActionResult GetPicture(string EventPin, int PictureId)
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
-            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
-                (model.PictureId + ".PNG"));
+            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
+                (PictureId + ".PNG"));
 
             return PhysicalFile(file, "image/PNG");
         }
@@ -144,6 +141,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="200">Picture has been inserted into database and put on server.</response>
         [AllowAnonymous]
         [HttpPost]
+        [Authorize("IsGuest")]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
             //Finding logged in user

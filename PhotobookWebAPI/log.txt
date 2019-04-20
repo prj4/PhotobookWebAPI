@@ -18,3 +18,5 @@
 2019-04-20 09:51:19.9116|INFO|PhotobookWebAPI.Controllers.AccountController|GetAccounts Called
 2019-04-20 09:51:23.2052|INFO|PhotobookWebAPI.Controllers.AccountController|GetAccounts Called
 2019-04-20 09:52:51.5614|INFO|PhotobookWebAPI.Controllers.AccountController|GetAccounts Called
+2019-04-20 09:57:02.5031|INFO|PhotobookWebAPI.Controllers.AccountController|GetAccounts Called
+2019-04-20 09:57:49.0047|INFO|PhotobookWebAPI.Controllers.AccountController|GetAccounts Called
