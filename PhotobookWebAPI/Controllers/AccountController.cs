@@ -89,6 +89,8 @@ namespace PhotobookWebAPI.Controllers
         public async Task<AppUser> GetAccount(string UserName)
         {
             var user = await _userManager.FindByNameAsync(UserName);
+            //logger.Info($"GetAccount called with UserName: {UserName}");
+
             return user;
         }
 
@@ -127,6 +129,8 @@ namespace PhotobookWebAPI.Controllers
                 user.UserName = newData.UserName;
 
             await _userManager.UpdateAsync(user);
+
+            //logger.Info($"PutAccount called on UserName: {UserName}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
 
             return NoContent();
         }
@@ -168,25 +172,28 @@ namespace PhotobookWebAPI.Controllers
 
           
                var result =  await _userManager.DeleteAsync(user);
-               if (result.Succeeded)
+               //logger.Info($"AppUser with UserName {UserName} is deleted");
+            if (result.Succeeded)
                {
                    if (userRole == "Host")
                    {
                        //THIS IS TEMPORARY
                        await _hostRepo.DeleteHostByEmail(user.Email);
-                       //UNTIL HERE
+                      // logger.Info($"Host with Email {user.Email} is deleted");
+                    //UNTIL HERE
                     //return RedirectToAction("DeleteHost", "Host", new { email = user.Email });
-                   }
+                }
                    else if (userRole == "Guest")
                    {
 
                        string[] guestStrings = user.UserName.Split(";");
                     //THIS IS TEMPORARY
                     await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
+                    //logger.Info($"Guest with Name {guestStrings[0]} and Eventpin {guestStrings[1]} is deleted");
                     //UNTIL HERE
 
                     //return RedirectToAction("DeleteGuest", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
-                   }
+                }
                 }
 
             return NoContent();
@@ -263,20 +270,23 @@ namespace PhotobookWebAPI.Controllers
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
 
             var result = await _userManager.CreateAsync(user, model.Password);
+            //logger.Info($"AppUser created with Email: {user.Email}");
 
             if (result.Succeeded)
             {
                 var roleClaim = new Claim("Role", "Host");
                 await _userManager.AddClaimAsync(user, roleClaim);
+                //logger.Info($"Host Role Claim added to AppUser with Email: {user.Email}");
                 await _signInManager.SignInAsync(user, isPersistent: false);
-
+                //logger.Info($"AppUser signed in with Email: {user.Email}");
 
                 //THIS AND DOWN IN TEMPORARY
 
                 Host host = new Host { Name = model.Name, Email = model.Email };
 
-
+                
                 await _hostRepo.InsertHost(host);
+                //logger.Info($"Host created with Email: {host.Email} ");
 
                 return new AccountModels.ReturnHostModel
                 {
@@ -325,11 +335,15 @@ namespace PhotobookWebAPI.Controllers
             if (e!=null)
             {
                 var result = await _userManager.CreateAsync(user, model.Pin);
+                
                 if (result.Succeeded)
                 {
+                    //logger.Info($"AppUser created with UserName: {user.UserName}");
                     var roleClaim = new Claim("Role", "Guest");
                     await _userManager.AddClaimAsync(user, roleClaim);
+                    //logger.Info($"Guest Role Claim added to AppUser with UserName: {user.UserName}");
                     await _signInManager.SignInAsync(user, isPersistent: true);
+                    //logger.Info($"AppUser signed in with UserName: {user.UserName}");
 
                     //THIS IS TEMPORARY
                     var ev = await _eventRepo.GetEventByPin(model.Pin);
@@ -340,6 +354,7 @@ namespace PhotobookWebAPI.Controllers
                         EventPin = model.Pin
                     };
                     await _guestRepo.InsertGuest(guest);
+                    //logger.Info($"Guest created with Name: {guest.Name} and EventPin: {guest.EventPin}");
 
                     return new AccountModels.ReturnGuestModel
                     {

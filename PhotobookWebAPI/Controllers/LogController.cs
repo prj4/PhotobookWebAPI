@@ -21,7 +21,7 @@ namespace PhotobookWebAPI.Controllers
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
-            var file = Path.Combine(Directory.GetCurrentDirectory(), "log.txt");
+            var file = Path.Combine(Directory.GetCurrentDirectory(),"LogFiles", "log.txt");
 
             return PhysicalFile(file, "text/txt");
         }
