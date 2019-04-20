@@ -114,7 +114,7 @@ namespace PhotobookWebAPI.Controllers
         ///
         /// </remarks>
         /// <returns>A physical file, a picture.</returns>
-        /// <response>Physical file, the requested picture.</response>
+        /// <response code='200'>Physical file, the requested picture.</response>
         [AllowAnonymous]
         [HttpGet]
         public IActionResult GetPicture(PictureModel model)
@@ -332,7 +332,7 @@ namespace PhotobookWebAPI.Controllers
 
             //return NotFound();
         }
-
+        /*
         #region delete prøve
         [Authorize("IsHost")]
         [HttpDelete]
@@ -403,6 +403,7 @@ namespace PhotobookWebAPI.Controllers
 
         }
         #endregion
+        */
     }
 
 }
