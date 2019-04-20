@@ -257,7 +257,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
-        public async Task<ActionResult> CreateHost(AccountModels.RegisterHostModel model)
+        public async Task<AccountModels.ReturnHostModel> CreateHost(AccountModels.RegisterHostModel model)
         {
             
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
@@ -278,15 +278,22 @@ namespace PhotobookWebAPI.Controllers
 
                 await _hostRepo.InsertHost(host);
 
+                return new AccountModels.ReturnHostModel
+                {
+                    Name = host.Name,
+                    Email = host.Email
+                };
+
                 //Returnering af host data (Nyoprettet dermed ingen events).
-                return NoContent();
+                //return NoContent();
 
                 //UNTIL HERE !!
 
                 //return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
             }
-            
-            return NotFound();
+
+            return null;
+            //return NotFound();
         }
         /// <summary>
         /// Creates Guest user
@@ -308,7 +315,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
-        public async Task<ActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
+        public async Task<AccountModels.ReturnGuestModel> CreateGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -333,13 +340,20 @@ namespace PhotobookWebAPI.Controllers
                         EventPin = model.Pin
                     };
                     await _guestRepo.InsertGuest(guest);
-                    return NoContent();
+
+                    return new AccountModels.ReturnGuestModel
+                    {
+                        Event = e,
+                        Name = guest.Name
+                    };
+
+                    
                     //UNTIL HERE
                     // return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
                 }
             }
 
-            return NotFound();
+            return null;
             //return NotFound();
         }
 
@@ -364,18 +378,30 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
-        public async Task<IActionResult> Login(AccountModels.LoginModel loginInfo)
+        public async Task<AccountModels.ReturnHostModel> Login(AccountModels.LoginModel loginInfo)
         {
             var result = await _signInManager.PasswordSignInAsync(loginInfo.UserName,
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return NoContent();
+
+                //THIS IS TEMPORARY
+                string email = loginInfo.UserName;
+                var host = await _hostRepo.GetHostByEmail(email);
+                var events = await _eventRepo.GetEventsByHostId(host.HostId);
+                return new AccountModels.ReturnHostModel
+                {
+                    Name = host.Name,
+                    Email = email,
+                    Events = events
+                };
+                 //UNTIL HERE!
+                //return NoContent();
                 //return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
             }
 
-           
-            return NotFound();
+            return null;
+            //return NotFound();
         }
 
 

@@ -336,6 +336,7 @@ namespace PhotobookWebAPI.Controllers
         #region delete prøve
         [Authorize("IsHost")]
         [HttpDelete]
+        [Route("Host")]
         public async Task<IActionResult> HostDeletePicture(PictureModel model)
         {
             //Sætter stien til filen, ud fra det givne billede id og eventpin.
@@ -370,6 +371,7 @@ namespace PhotobookWebAPI.Controllers
 
         [Authorize("IsGuest")]
         [HttpDelete]
+        [Route("Guest")]
         public async Task<IActionResult> GuestDeletePicture(PictureModel model)
         {
             //Sætter stien til filen, ud fra det givne billede id og eventpin.
