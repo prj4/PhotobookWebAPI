@@ -30,6 +30,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.6" />
+    <PackageReference Include="NLog" Version="4.6.2" />
+    <PackageReference Include="NLog.Config" Version="4.6.2" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.8.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 
@@ -43,7 +46,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="LogFiles\" />
     <Folder Include="Pictures\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\Bruger\.nuget\packages\nlog.config\4.6.2\contentFiles\any\any\NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

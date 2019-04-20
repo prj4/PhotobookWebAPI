@@ -106,23 +106,20 @@ namespace PhotobookWebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /Todo
-        ///     {
-        ///        "Picture string": base64,
-        ///        "EventPin": 123wer12f1
-        ///     }
+        ///     GET /api/Picture/rine2164bk/4
+        ///     
         ///
         /// </remarks>
         /// <returns>A physical file, a picture.</returns>
         /// <response code='200'>Physical file, the requested picture.</response>
         [AllowAnonymous]
-        [HttpGet]
-        public IActionResult GetPicture(PictureModel model)
+        [HttpGet("{EventPin}/{PictureId}")]
+        public IActionResult GetPicture(string EventPin, int PictureId)
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
-            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
-                (model.PictureId + ".PNG"));
+            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
+                (PictureId + ".PNG"));
 
             return PhysicalFile(file, "image/PNG");
         }
@@ -144,6 +141,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="200">Picture has been inserted into database and put on server.</response>
         [AllowAnonymous]
         [HttpPost]
+        [Authorize("IsGuest")]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
             //Finding logged in user
@@ -336,6 +334,7 @@ namespace PhotobookWebAPI.Controllers
         #region delete prøve
         [Authorize("IsHost")]
         [HttpDelete]
+        [Route("Host")]
         public async Task<IActionResult> HostDeletePicture(PictureModel model)
         {
             //Sætter stien til filen, ud fra det givne billede id og eventpin.
@@ -370,6 +369,7 @@ namespace PhotobookWebAPI.Controllers
 
         [Authorize("IsGuest")]
         [HttpDelete]
+        [Route("Guest")]
         public async Task<IActionResult> GuestDeletePicture(PictureModel model)
         {
             //Sætter stien til filen, ud fra det givne billede id og eventpin.
