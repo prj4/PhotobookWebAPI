@@ -121,7 +121,14 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId + ".PNG"));
 
-            return PhysicalFile(file, "image/PNG");
+
+            if (System.IO.File.Exists(file))
+            {
+                return PhysicalFile(file, "image/PNG");
+            }
+
+            return NotFound();
+
         }
 
         /// <summary>
