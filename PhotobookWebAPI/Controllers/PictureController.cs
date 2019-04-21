@@ -112,6 +112,7 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>A physical file, a picture.</returns>
         /// <response code='200'>Physical file, the requested picture.</response>
+        /// /// <response code='404'>Picture file not found</response>
         [AllowAnonymous]
         [HttpGet("{EventPin}/{PictureId}")]
         public IActionResult GetPicture(string EventPin, int PictureId)
