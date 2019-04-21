@@ -50,6 +50,7 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>A view of the pictures in the database.</returns>
         /// <response>A view of the pictures in the database.</response>
+        [ApiExplorerSettings(IgnoreApi = true)]
         [Route("Index")]
         [AllowAnonymous]
         [HttpGet]

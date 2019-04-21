@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PhotobookWebAPI.Controllers
 {
-
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -26,7 +26,7 @@ namespace PhotobookWebAPI.Controllers
                 Assembly.GetExecutingAssembly().Location);
             string file = Path.Combine(executableLocation, "log.txt");
 
-            if (System.IO.File.Exists("file"))
+            if (System.IO.File.Exists(file))
             {
                 return PhysicalFile(file, "text/txt");
             }

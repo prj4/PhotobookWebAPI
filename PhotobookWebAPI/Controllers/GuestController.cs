@@ -17,6 +17,8 @@ using PhotoBookDatabase.Model;
 
 namespace PhotobookWebAPI.Controllers
 {
+
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
