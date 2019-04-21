@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
@@ -31,6 +32,7 @@ namespace PhotobookWebAPI.Controllers
         private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
+        private Logger logger = LogManager.GetCurrentClassLogger();
 
 
         public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
@@ -56,6 +58,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<IEnumerable<Event>> GetEvents()
         {
+            logger.Info("GetEvents called");
             return await _eventRepo.GetEvents();
         }
 
@@ -66,6 +69,8 @@ namespace PhotobookWebAPI.Controllers
         public async Task<Event> GetEvent(string pin)
         {
             var e = await _eventRepo.GetEventByPin(pin);
+            logger.Info($"GetEvent called with pin: {pin}");
+
             return e;
         }
 
@@ -92,6 +97,8 @@ namespace PhotobookWebAPI.Controllers
                 e.StartDate = newData.StartDate;
 
 
+                logger.Info($"Event with pin: {pin} changed with the new values Description: {newData.Description}, Location: {newData.Location}, Name: {newData.Name}, StartDate: {newData.StartDate}, EndDate: {newData.StartDate}" );
+
             await _eventRepo.UpdateEvent(e);
             return Ok();
         }
@@ -102,6 +109,8 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> DeleteEvent(string pin)
         {
             await _eventRepo.DeleteEventByPin(pin);
+
+            logger.Info($"Deleted Event with pin: {pin}");
 
             return Ok();
         }
@@ -133,6 +142,8 @@ namespace PhotobookWebAPI.Controllers
                 Pin = pin
 
             };
+
+            logger.Info($"Created event with Name: {newEvent.Name}, Pin: {newEvent.Pin}, Description: {newEvent.Description}, Location: {newEvent.Location}, StartDate: {newEvent.StartDate}, EndDate: {newEvent.EndDate}, HostId: {newEvent.HostId}");
 
             //Inserts the Event in the DB
             await _eventRepo.InsertEvent(newEvent);

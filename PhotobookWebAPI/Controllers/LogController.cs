@@ -26,8 +26,13 @@ namespace PhotobookWebAPI.Controllers
                 Assembly.GetExecutingAssembly().Location);
             string file = Path.Combine(executableLocation, "log.txt");
 
+            if (System.IO.File.Exists("file"))
+            {
+                return PhysicalFile(file, "text/txt");
+            }
 
-            return PhysicalFile(file, "text/txt");
+            return NotFound();
+
         }
 
     }

@@ -399,7 +399,7 @@ namespace PhotobookWebAPI.Controllers
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-
+                logger.Info($"AppUser with login {loginInfo.UserName} signed in");
                 //THIS IS TEMPORARY
                 string email = loginInfo.UserName;
                 var host = await _hostRepo.GetHostByEmail(email);

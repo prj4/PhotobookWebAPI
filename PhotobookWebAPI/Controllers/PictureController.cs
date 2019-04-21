@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
@@ -29,6 +30,7 @@ namespace PhotobookWebAPI.Controllers
         private IGuestRepository _guestRepo;
         private IHostRepository _hostRepo;
         private IPictureRepository _picRepo;
+        private Logger logger = LogManager.GetCurrentClassLogger();
 
         public PictureController(UserManager<AppUser> userManager, IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
             IPictureRepository picRepo)
@@ -92,7 +94,7 @@ namespace PhotobookWebAPI.Controllers
             {
                 Ids.Add(picture_.PictureId);
             }
-
+            logger.Info($"GetPictureIds Called");
             //returnerer liste
             return new RequestPicturesAnswerModel
             {
@@ -125,9 +127,10 @@ namespace PhotobookWebAPI.Controllers
 
             if (System.IO.File.Exists(file))
             {
+                logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG");
             }
-
+            logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
             return NotFound();
 
         }
@@ -181,10 +184,13 @@ namespace PhotobookWebAPI.Controllers
                 newPicture.EventPin = model.EventPin;
                 newPicture.HostId = host.HostId;
             }
-            
+
+
             
             //Inserting picture in database
             int picId = await _picRepo.InsertPicture(newPicture);
+
+            logger.Info($"User with UserName: {user.UserName} Inserts picture in db with for Event: {newPicture.EventPin} with PictureId: {newPicture.PictureId}");
 
             //Setting the current directory correctly 
             CurrentDirectoryHelpers.SetCurrentDirectory();
@@ -195,6 +201,7 @@ namespace PhotobookWebAPI.Controllers
             if (!Directory.Exists(subdir))
             {
                 Directory.CreateDirectory(subdir);
+                logger.Info($"Subdir created for Event: {model.EventPin}");
             }
 
             //Creating file and flushing to disk
@@ -205,6 +212,7 @@ namespace PhotobookWebAPI.Controllers
             {
                 imageFile.Write(bytes, 0, bytes.Length);
                 imageFile.Flush();
+                logger.Info($"Picture with Id: {picId} saved in  event subdir: {model.EventPin}");
             }
             
             return Ok();
