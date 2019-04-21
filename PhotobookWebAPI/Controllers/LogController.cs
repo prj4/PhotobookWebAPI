@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +21,11 @@ namespace PhotobookWebAPI.Controllers
         [HttpGet]
         public IActionResult GetLog()
         {
-            CurrentDirectoryHelpers.SetCurrentDirectory();
 
-            var file = Path.Combine(Directory.GetCurrentDirectory(),"LogFiles", "log.txt");
+            string executableLocation = Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location);
+            string file = Path.Combine(executableLocation, "log.txt");
+
 
             return PhysicalFile(file, "text/txt");
         }
