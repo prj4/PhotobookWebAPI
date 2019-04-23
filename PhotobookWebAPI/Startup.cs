@@ -131,6 +131,8 @@ namespace PhotobookWebAPI
                 app.UseHsts();
             }
 
+            app.UseCors(builder=>builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader());
+
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
