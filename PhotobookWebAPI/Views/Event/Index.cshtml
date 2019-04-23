@@ -17,6 +17,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Pin)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HostId)
+            </th>
 
             <th></th>
         </tr>
@@ -24,14 +27,17 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Pin)
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HostId)
+            </td>
+        </tr>
         }
     </tbody>
 </table>
