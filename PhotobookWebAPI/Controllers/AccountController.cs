@@ -358,15 +358,15 @@ namespace PhotobookWebAPI.Controllers
 
                     return new AccountModels.ReturnGuestModel
                     {
-                        Event = e
-                            /*new Event{
+                        Event = 
+                            new Event{
                             Description = e.Description,
                             EndDate = e.EndDate,
                             StartDate = e.StartDate,
                             Location = e.Location,
                             Name = e.Name,
                             Pin = e.Pin
-                        }*/,
+                        },
                         Name = guest.Name
                     };
 

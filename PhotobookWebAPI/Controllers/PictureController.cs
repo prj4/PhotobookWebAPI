@@ -75,12 +75,12 @@ namespace PhotobookWebAPI.Controllers
         /// <response Task='null'>If no pictures have been taken at the event.</response>
         /// <response Task='List of Picture Ids'>If there are pictures from the event.</response>
         [AllowAnonymous]
-        [HttpGet]
+        [HttpGet("{EventPin}")]
         [Route("Ids")]
-        public async Task<RequestPicturesAnswerModel> GetPictureIds(RequestPicturesModel eventpin)
+        public async Task<RequestPicturesAnswerModel> GetPictureIds(string EventPin)
         {
             //Finder først eventets billeder
-            var event_ = await _eventRepo.GetEventByPin(eventpin.EventPin);
+            var event_ = await _eventRepo.GetEventByPin(EventPin);
 
             if (event_.Pictures == null)
             {
