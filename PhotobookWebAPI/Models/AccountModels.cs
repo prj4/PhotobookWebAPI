@@ -88,11 +88,24 @@ namespace PhotobookWebAPI.Models
         public class ReturnGuestModel
         {
             [Required]
+            [Display(Name = "Pin")]
+            public string Pin;
+            [Required]
+            [Display(Name = "Location")]
+            public string Location;
+            [Required]
+            [Display(Name = "Description")]
+            public string Description;
+            [Required]
             [Display(Name = "Name")]
-            public string Name { get; set; }
+            public string Name;
+            [Required]
+            [Display(Name = "StartDate")]
+            public DateTime StartDate;
+            [Required]
+            [Display(Name = "EndDate")]
+            public DateTime EndDate;
 
-            [Display(Name = "Event")]
-            public Event Event { get; set; }
         }
 
         public class ChangePassModel

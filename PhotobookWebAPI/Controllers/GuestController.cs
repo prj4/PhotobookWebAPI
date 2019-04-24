@@ -62,7 +62,7 @@ namespace PhotobookWebAPI.Controllers
 
 
         // GET: /<controller>/
-     
+     /*
         [AllowAnonymous]
         [Route("Register")]
         [HttpPost]
@@ -84,5 +84,6 @@ namespace PhotobookWebAPI.Controllers
                 Name = guest.Name
             };
         }
+        */
     }
 }
