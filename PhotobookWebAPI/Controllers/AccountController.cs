@@ -177,22 +177,19 @@ namespace PhotobookWebAPI.Controllers
                {
                    if (userRole == "Host")
                    {
-                       //THIS IS TEMPORARY
+                       
                        await _hostRepo.DeleteHostByEmail(user.Email);
                       logger.Info($"Host with Email {user.Email} is deleted");
-                    //UNTIL HERE
-                    //return RedirectToAction("DeleteHost", "Host", new { email = user.Email });
+
                 }
                    else if (userRole == "Guest")
                    {
 
-                       string[] guestStrings = user.UserName.Split(";");
-                    //THIS IS TEMPORARY
+                    string[] guestStrings = user.UserName.Split(";");
+
                     await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
                     logger.Info($"Guest with Name {guestStrings[0]} and Eventpin {guestStrings[1]} is deleted");
-                    //UNTIL HERE
 
-                    //return RedirectToAction("DeleteGuest", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
                 }
                 }
 
@@ -280,7 +277,7 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 logger.Info($"AppUser signed in with Email: {user.Email}");
 
-                //THIS AND DOWN IN TEMPORARY
+                
 
                 Host host = new Host { Name = model.Name, Email = model.Email };
 
@@ -294,16 +291,13 @@ namespace PhotobookWebAPI.Controllers
                     Email = host.Email
                 };
 
-                //Returnering af host data (Nyoprettet dermed ingen events).
-                //return NoContent();
+                
 
-                //UNTIL HERE !!
-
-                //return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
+                
             }
 
             return null;
-            //return NotFound();
+           
         }
         /// <summary>
         /// Creates Guest user
@@ -345,7 +339,7 @@ namespace PhotobookWebAPI.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: true);
                     logger.Info($"AppUser signed in with UserName: {user.UserName}");
 
-                    //THIS IS TEMPORARY
+                    
                     var ev = await _eventRepo.GetEventByPin(model.Pin);
 
                     Guest guest = new Guest
@@ -358,26 +352,20 @@ namespace PhotobookWebAPI.Controllers
 
                     return new AccountModels.ReturnGuestModel
                     {
-                        Event = 
-                            new Event{
                             Description = e.Description,
                             EndDate = e.EndDate,
                             StartDate = e.StartDate,
                             Location = e.Location,
                             Name = e.Name,
                             Pin = e.Pin
-                        },
-                        Name = guest.Name
                     };
 
                     
-                    //UNTIL HERE
-                    // return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
+
                 }
             }
 
             return null;
-            //return NotFound();
         }
 
 
@@ -408,7 +396,6 @@ namespace PhotobookWebAPI.Controllers
             if (result.Succeeded)
             {
                 logger.Info($"AppUser with login {loginInfo.UserName} signed in");
-                //THIS IS TEMPORARY
                 string email = loginInfo.UserName;
                 var host = await _hostRepo.GetHostByEmail(email);
                 var events = await _eventRepo.GetEventsByHostId(host.HostId);
@@ -418,13 +405,10 @@ namespace PhotobookWebAPI.Controllers
                     Email = email,
                     Events = events
                 };
-                 //UNTIL HERE!
-                //return NoContent();
-                //return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
+
             }
 
             return null;
-            //return NotFound();
         }
 
 
