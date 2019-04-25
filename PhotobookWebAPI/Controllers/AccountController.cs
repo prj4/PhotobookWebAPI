@@ -112,27 +112,33 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="204"> User changed successfully </response>
         /// <response code="404"> User not found </response> 
         [HttpPut("{UserName}")]
-        //[Authorize("IsAdmin")]
-        [AllowAnonymous]
+        [Authorize("IsHost")]
         public async Task<IActionResult> PutAccount(string UserName, AppUser newData)
         {
-            AppUser user = await _userManager.FindByNameAsync(UserName);
-
-            if (user == null)
+            if (User.Identity.Name == UserName)
             {
-                return NotFound();
+                AppUser user = await _userManager.FindByNameAsync(UserName);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                if (newData.Email != null)
+                    user.Email = newData.Email;
+                if (newData.UserName != null)
+                    user.UserName = newData.UserName;
+
+                await _userManager.UpdateAsync(user);
+
+                logger.Info($"PutAccount called on UserName: {UserName}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
+
+                return NoContent();
+
             }
 
-            if(newData.Email!=null)
-            user.Email = newData.Email;
-            if (newData.UserName != null)
-                user.UserName = newData.UserName;
+            return Unauthorized();
 
-            await _userManager.UpdateAsync(user);
-
-            logger.Info($"PutAccount called on UserName: {UserName}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
-
-            return NoContent();
         }
 
 
@@ -149,7 +155,6 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="204"> User Deleted </response>
         /// <response code="404"> User not found </response> 
         [HttpDelete("{UserName}")]
-        //[Authorize("IsAdmin")]
         [AllowAnonymous]
         public async Task<IActionResult> DeleteAccount(string UserName)
         {
@@ -225,7 +230,7 @@ namespace PhotobookWebAPI.Controllers
                 {UserName = model.UserName};
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
+            
             if (result.Succeeded)
             {
                 var roleClaim = new Claim("Role", "Admin");

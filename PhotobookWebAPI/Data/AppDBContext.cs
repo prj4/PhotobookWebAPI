@@ -20,6 +20,7 @@ namespace PhotobookWebAPI.Data
             base.OnModelCreating(builder);
 
 
+
             builder.Entity<IdentityRole>().ToTable("Role");
             builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
@@ -27,6 +28,7 @@ namespace PhotobookWebAPI.Data
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaim");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
             builder.Entity<IdentityUser>().ToTable("User");
+
         }
     }
 }
