@@ -150,7 +150,6 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="200">Picture has been inserted into database and put on server.</response>
         [AllowAnonymous]
         [HttpPost]
-        [Authorize("IsGuest")]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
             //Finding logged in user
