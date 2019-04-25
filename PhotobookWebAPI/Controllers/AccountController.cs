@@ -27,7 +27,7 @@ namespace PhotobookWebAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class AccountController : ControllerBase
+    public class AccountController : Controller
     {
 
         private UserManager<AppUser> _userManager;

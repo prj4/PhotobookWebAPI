@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -162,11 +163,38 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DeleteEvent(string pin)
         {
-            await _eventRepo.DeleteEventByPin(pin);
+            //Bestemmer den bruger som er logget ind
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
-            logger.Info($"Deleted Event with pin: {pin}");
+            //bestemmer brugerens rolle
+            string userRole = null;
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            foreach (var userClaim in userClaims)
+            {
+                if (userClaim.Type == "Role")
+                    userRole = userClaim.Value;
+            }
 
-            return Ok();
+            if (userRole == "Host")
+            {
+                if (_hostRepo.GetHostByEmail(user.Email).Result.HostId == _eventRepo.GetEventByPin(pin).Result.HostId)
+                {
+                    CurrentDirectoryHelpers.SetCurrentDirectory();
+                    string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
+
+                    System.IO.Directory.Delete(filepath,true);
+
+                    await _eventRepo.DeleteEventByPin(pin);
+
+                    logger.Info($"Deleted Event with pin: {pin}");
+
+                    return Ok();
+                }
+
+            }
+
+            return NotFound();
+
         }
 
         /// <summary>

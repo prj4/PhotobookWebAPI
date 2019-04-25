@@ -186,7 +186,7 @@ namespace PhotobookWebAPI.Controllers
                 newPicture.HostId = host.HostId;
             }
 
-
+            
             
             //Inserting picture in database
             int picId = await _picRepo.InsertPicture(newPicture);
