@@ -65,10 +65,7 @@ namespace PhotobookWebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /Todo
-        ///     {
-        ///        "EventPin": 123wer12f1
-        ///     }
+        ///     GET api/Picture/Ids/{EventPin}
         ///
         /// </remarks>
         /// <returns>List of Ids of pictures from the requested event.</returns>
@@ -109,9 +106,9 @@ namespace PhotobookWebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /api/Picture/rine2164bk/4
+        ///     GET /api/Picture/{EventPin}/{PictureId}
         ///     
-        ///
+        ///{
         /// </remarks>
         /// <returns>A physical file, a picture.</returns>
         /// <response code='200'>Physical file, the requested picture.</response>
@@ -142,7 +139,7 @@ namespace PhotobookWebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /Todo
+        ///     POST
         ///     {
         ///        "Picture string": base64,
         ///        "EventPin": 123wer12f1
@@ -226,7 +223,7 @@ namespace PhotobookWebAPI.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /Todo
+        ///     DELETE
         ///     {
         ///        "EventPin": awf122km2,
         ///        "PictureId": 1
@@ -302,51 +299,8 @@ namespace PhotobookWebAPI.Controllers
             }
             
             return NotFound();
-
-            /*
-            if (userRole == "Guest") //Hvis det er en Guest
-            {
-                var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
-                foreach (var picture in guest.Pictures)
-                {
-                    if (picture.PictureId == model.PictureId) //Hvis billedet findes i Guestens samling af billeder
-                    {
-                        if (System.IO.File.Exists(filepath))
-                        {
-                            System.IO.File.Delete(filepath);
-                            return NoContent();
-                        }
-
-                        return NotFound();
-                    }
-                }
-
-                return Unauthorized();
-            }
-
-            if (userRole == "Host") //Hvis det er en Host
-            {
-                var host = await _hostRepo.GetHostByEmail(user.Email);
-                foreach (var event_ in host.Events)
-                {
-                    if (event_.Pin == model.EventPin) //Hvis Hosten er host af dette event
-                    {
-                        if (System.IO.File.Exists(filepath))
-                        {
-                            System.IO.File.Delete(filepath);
-                            return NoContent();
-                        }
-
-                        return NotFound();
-                    }
-                }
-
-                return Unauthorized();
-            }
-            */
-
-            //return NotFound();
         }
+
         /*
         #region delete prøve
         [Authorize("IsHost")]
