@@ -71,7 +71,6 @@ namespace PhotobookWebAPI.Controllers
         /// <returns>List of Ids of pictures from the requested event.</returns>
         /// <response Task='null'>If no pictures have been taken at the event.</response>
         /// <response Task='List of Picture Ids'>If there are pictures from the event.</response>
-        [AllowAnonymous]
         [HttpGet]
         [Route("Ids/{EventPin}")]
         public async Task<RequestPicturesAnswerModel> GetPictureIds(string EventPin)
@@ -113,7 +112,6 @@ namespace PhotobookWebAPI.Controllers
         /// <returns>A physical file, a picture.</returns>
         /// <response code='200'>Physical file, the requested picture.</response>
         /// /// <response code='404'>Picture file not found</response>
-        [AllowAnonymous]
         [HttpGet("{EventPin}/{PictureId}")]
         public IActionResult GetPicture(string EventPin, int PictureId)
         {
@@ -148,7 +146,6 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>Ok, Picture has been inserted into database and put on server.</returns>
         /// <response code="200">Picture has been inserted into database and put on server.</response>
-        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
@@ -233,8 +230,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="204">Deleted the requested picture</response>
         /// <response code="401">If you don't have the right to delete the picture</response>   
         /// <response code="404">If the users claim is not recognized or,
-        ///                      If the the picture wasn't found on the server.</response>   
-        [AllowAnonymous]
+        ///                      If the the picture wasn't found on the server.</response>
         [HttpDelete]
         public async Task<IActionResult> DeletePicture(PictureModel model)
         {
@@ -299,81 +295,7 @@ namespace PhotobookWebAPI.Controllers
             
             return NotFound();
         }
-
-        /*
-        #region delete prøve
-        [Authorize("IsHost")]
-        [HttpDelete]
-        [Route("Host")]
-        public async Task<IActionResult> HostDeletePicture(PictureModel model)
-        {
-            //Sætter stien til filen, ud fra det givne billede id og eventpin.
-            CurrentDirectoryHelpers.SetCurrentDirectory();
-            string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
-                (model.PictureId.ToString() + ".PNG"));
-
-            //Bestemmer den bruger som er logget ind
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var host = await _hostRepo.GetHostByEmail(user.Email);
-
-            foreach (var event_ in host.Events)
-                {
-                    if (event_.Pin == model.EventPin) //Hvis Hosten er host af dette event
-                    {
-                        if (System.IO.File.Exists(filepath))
-                        {
-                            System.IO.File.Delete(filepath);
-                            await _picRepo.DeletePictureById(model.PictureId);
-                            return NoContent();
-                        }
-
-                        return NotFound();
-                    }
-
-                return Unauthorized();
-            }
-
-            return NotFound();
-            
-        }
-
-        [Authorize("IsGuest")]
-        [HttpDelete]
-        [Route("Guest")]
-        public async Task<IActionResult> GuestDeletePicture(PictureModel model)
-        {
-            //Sætter stien til filen, ud fra det givne billede id og eventpin.
-            CurrentDirectoryHelpers.SetCurrentDirectory();
-            string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
-                (model.PictureId.ToString() + ".PNG"));
-
-            //Bestemmer den bruger som er logget ind
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
-
-            var event_ = await _eventRepo.GetEventByPin(model.EventPin);
-            foreach (var picture in event_.Pictures)
-            {
-                if ((picture.PictureId == model.PictureId) && (picture.GuestId == guest.GuestId)) //Hvis guesten har taget billedet
-                {
-                    if (System.IO.File.Exists(filepath))
-                    {
-                        System.IO.File.Delete(filepath);
-                        await _picRepo.DeletePictureById(model.PictureId);
-                        return NoContent();
-                    }
-
-                    return NotFound();
-                }
-
-                return Unauthorized();
-            }
-
-            return NotFound();
-
-        }
-        #endregion
-        */
+        
     }
 
 }
