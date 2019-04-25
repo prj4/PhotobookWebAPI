@@ -68,7 +68,6 @@ namespace PhotobookWebAPI.Controllers
         /// <returns>Ok, list of Events</returns>
         /// <response code="200">Returns list of all Events, empty list if no Events</response> 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IEnumerable<Event>> GetEvents()
         {
             logger.Info("GetEvents called");
@@ -89,7 +88,6 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="200">Returns Specified Event</response>
         /// <response code="204">No event with given pin</response> 
         [HttpGet("{pin}")]
-        [AllowAnonymous]
         public async Task<Event> GetEvent(string pin)
         {
             var e = await _eventRepo.GetEventByPin(pin);
@@ -101,27 +99,27 @@ namespace PhotobookWebAPI.Controllers
             return null;
         }
 
-    /// <summary>
-    /// Edits an event with the specified pin
-    /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///     PUT api/Event/abcd1234ef
-    ///     {
-    ///     "location": "My Crib",
-    ///     "description": "Party at my crib",
-    ///     "name": "Crib party",
-    ///     "startDate": "2019-04-21T08:28:16.885Z",
-    ///     "endDate": "2019-04-21T08:28:16.885Z"
-    ///     }
-    ///
-    /// </remarks>
-    /// <returns>Ok</returns>
-    /// <response code="200">Event updated with values in JSON object</response>
-    /// <response code="204">No event with given pin</response> 
-    [HttpPut("{pin}")]
-        [AllowAnonymous]
+        /// <summary>
+        /// Edits an event with the specified pin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT api/Event/abcd1234ef
+        ///     {
+        ///     "location": "My Crib",
+        ///     "description": "Party at my crib",
+        ///     "name": "Crib party",
+        ///     "startDate": "2019-04-21T08:28:16.885Z",
+        ///     "endDate": "2019-04-21T08:28:16.885Z"
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>Ok</returns>
+        /// <response code="200">Event updated with values in JSON object</response>
+        /// <response code="204">No event with given pin</response>
+        [Authorize("IsHost")]
+        [HttpPut("{pin}")]
         public async Task<IActionResult> PutEvent(string pin, EditEventModel newData)
         {
             Event e = await _eventRepo.GetEventByPin(pin);
@@ -159,8 +157,8 @@ namespace PhotobookWebAPI.Controllers
     /// </remarks>
     /// <returns>NoContent</returns>
     /// <response code="204">Event with specified pin has been deleted</response>
+        [Authorize("IsHost")]
         [HttpDelete("{pin}")]
-        [AllowAnonymous]
         public async Task<IActionResult> DeleteEvent(string pin)
         {
             //Bestemmer den bruger som er logget ind
