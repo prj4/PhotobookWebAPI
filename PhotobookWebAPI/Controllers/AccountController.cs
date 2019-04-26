@@ -338,9 +338,6 @@ namespace PhotobookWebAPI.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: true);
                     logger.Info($"AppUser signed in with UserName: {user.UserName}");
 
-                    
-                    var ev = await _eventRepo.GetEventByPin(model.Pin);
-
                     Guest guest = new Guest
                     {
                         Name = model.Name,
@@ -405,9 +402,7 @@ namespace PhotobookWebAPI.Controllers
                     HostId = host.HostId,
                     Events = events
                 };
-
             }
-
             return null;
         }
 
