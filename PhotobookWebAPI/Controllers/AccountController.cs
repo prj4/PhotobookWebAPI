@@ -111,13 +111,11 @@ namespace PhotobookWebAPI.Controllers
         /// <returns>NoContent</returns>
         /// <response code="204"> User changed successfully </response>
         /// <response code="404"> User not found </response> 
-        [HttpPut("{UserName}")]
+        [HttpPut]
         [Authorize("IsHost")]
-        public async Task<IActionResult> PutAccount(string UserName, AppUser newData)
+        public async Task<IActionResult> PutAccount( AppUser newData)
         {
-            if (User.Identity.Name == UserName)
-            {
-                AppUser user = await _userManager.FindByNameAsync(UserName);
+                AppUser user = await _userManager.FindByNameAsync(User.Identity.Name);
 
                 if (user == null)
                 {
@@ -131,7 +129,7 @@ namespace PhotobookWebAPI.Controllers
 
                 await _userManager.UpdateAsync(user);
 
-                logger.Info($"PutAccount called on UserName: {UserName}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
+                logger.Info($"PutAccount called on UserName: {user.Email}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
 
                 return NoContent();
 
