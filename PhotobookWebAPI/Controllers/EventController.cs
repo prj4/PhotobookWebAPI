@@ -100,6 +100,31 @@ namespace PhotobookWebAPI.Controllers
         }
 
         /// <summary>
+        /// Gets a Events with specified Host Id
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Event/Host12
+        ///
+        /// </remarks>
+        /// <returns>Ok, Events</returns>
+        /// <response code="200">Returns list of Specified Events</response>
+        /// <response code="204">No event with given Host</response> 
+        [HttpGet]
+        [Route("Host{hostId}")]
+        public async Task<IEnumerable<Event>> GetEvent(int hostId)
+        {
+            var e = await _eventRepo.GetEventsByHostId(hostId);
+            logger.Info($"GetEvent called with hostId: {hostId}");
+            if (e != null)
+            {
+                return e;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Edits an event with the specified pin
         /// </summary>
         /// <remarks>
