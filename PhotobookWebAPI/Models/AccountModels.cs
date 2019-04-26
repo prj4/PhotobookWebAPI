@@ -82,6 +82,10 @@ namespace PhotobookWebAPI.Models
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Required]
+            [Display(Name = "HostId")]
+            public int HostId { get; set; }
+
             [Display(Name = "Events")]
             public IEnumerable<Event> Events { get; set; }
         }

@@ -293,7 +293,8 @@ namespace PhotobookWebAPI.Controllers
                 return new AccountModels.ReturnHostModel
                 {
                     Name = host.Name,
-                    Email = host.Email
+                    Email = host.Email,
+                    HostId = host.HostId
                 };
 
                 
@@ -408,6 +409,7 @@ namespace PhotobookWebAPI.Controllers
                 {
                     Name = host.Name,
                     Email = email,
+                    HostId = host.HostId,
                     Events = events
                 };
 
