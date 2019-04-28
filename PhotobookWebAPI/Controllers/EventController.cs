@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
@@ -31,6 +33,7 @@ namespace PhotobookWebAPI.Controllers
         private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
+        private Logger logger = LogManager.GetCurrentClassLogger();
 
 
         public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
@@ -41,6 +44,8 @@ namespace PhotobookWebAPI.Controllers
             _hostRepo = hostRepo;
         }
 
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         [Route("Index")]
         [AllowAnonymous]
         [HttpGet]
@@ -51,27 +56,95 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-        // GET: api/Event
+        /// <summary>
+        /// Gets a list of all Events registered in the database
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Event
+        ///
+        /// </remarks>
+        /// <returns>Ok, list of Events</returns>
+        /// <response code="200">Returns list of all Events, empty list if no Events</response> 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IEnumerable<Event>> GetEvents()
         {
+            logger.Info("GetEvents called");
             return await _eventRepo.GetEvents();
         }
 
 
-        // GET: api/Event/1234
+        /// <summary>
+        /// Gets a Event with specified Eventpin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Event/abcd1234ef
+        ///
+        /// </remarks>
+        /// <returns>Ok, Event</returns>
+        /// <response code="200">Returns Specified Event</response>
+        /// <response code="204">No event with given pin</response> 
         [HttpGet("{pin}")]
-        [AllowAnonymous]
         public async Task<Event> GetEvent(string pin)
         {
             var e = await _eventRepo.GetEventByPin(pin);
-            return e;
+            logger.Info($"GetEvent called with pin: {pin}");
+            if (e != null)
+            {
+                return e;
+            }
+            return null;
         }
 
-        // PUT: api/Event/1234
+        /// <summary>
+        /// Gets a Events with specified Host Id
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Event/Host12
+        ///
+        /// </remarks>
+        /// <returns>Ok, Events</returns>
+        /// <response code="200">Returns list of Specified Events</response>
+        /// <response code="204">No event with given Host</response> 
+        [HttpGet]
+        [Route("Host{hostId}")]
+        public async Task<IEnumerable<Event>> GetEvent(int hostId)
+        {
+            var e = await _eventRepo.GetEventsByHostId(hostId);
+            logger.Info($"GetEvent called with hostId: {hostId}");
+            if (e != null)
+            {
+                return e;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Edits an event with the specified pin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT api/Event/abcd1234ef
+        ///     {
+        ///     "location": "My Crib",
+        ///     "description": "Party at my crib",
+        ///     "name": "Crib party",
+        ///     "startDate": "2019-04-21T08:28:16.885Z",
+        ///     "endDate": "2019-04-21T08:28:16.885Z"
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>Ok</returns>
+        /// <response code="200">Event updated with values in JSON object</response>
+        /// <response code="204">No event with given pin</response>
+        [Authorize("IsHost")]
         [HttpPut("{pin}")]
-        [AllowAnonymous]
         public async Task<IActionResult> PutEvent(string pin, EditEventModel newData)
         {
             Event e = await _eventRepo.GetEventByPin(pin);
@@ -92,21 +165,79 @@ namespace PhotobookWebAPI.Controllers
                 e.StartDate = newData.StartDate;
 
 
+                logger.Info($"Event with pin: {pin} changed with the new values Description: {newData.Description}, Location: {newData.Location}, Name: {newData.Name}, StartDate: {newData.StartDate}, EndDate: {newData.StartDate}" );
+
             await _eventRepo.UpdateEvent(e);
             return Ok();
         }
 
-        // DELETE: api/Event/1234
+    /// <summary>
+    /// Deletes an event with the specified pin
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     DELETE api/Event/abcd1234ef
+    ///
+    /// </remarks>
+    /// <returns>NoContent</returns>
+    /// <response code="204">Event with specified pin has been deleted</response>
+        [Authorize("IsHost")]
         [HttpDelete("{pin}")]
-        [AllowAnonymous]
         public async Task<IActionResult> DeleteEvent(string pin)
         {
-            await _eventRepo.DeleteEventByPin(pin);
+            //Bestemmer den bruger som er logget ind
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
-            return Ok();
+            //bestemmer brugerens rolle
+            string userRole = null;
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            foreach (var userClaim in userClaims)
+            {
+                if (userClaim.Type == "Role")
+                    userRole = userClaim.Value;
+            }
+
+            if (userRole == "Host")
+            {
+                if (_hostRepo.GetHostByEmail(user.Email).Result.HostId == _eventRepo.GetEventByPin(pin).Result.HostId)
+                {
+                    CurrentDirectoryHelpers.SetCurrentDirectory();
+                    string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
+
+                    System.IO.Directory.Delete(filepath,true);
+
+                    await _eventRepo.DeleteEventByPin(pin);
+
+                    logger.Info($"Deleted Event with pin: {pin}");
+
+                    return Ok();
+                }
+
+            }
+
+            return NotFound();
+
         }
 
-
+        /// <summary>
+        /// Creates an event [IsHost]
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Event
+        ///     {
+        ///     "location": "My Crib",
+        ///     "description": "Party at my crib",
+        ///     "name": "Crib party",
+        ///     "startDate": "2019-04-21T08:28:16.885Z",
+        ///     "endDate": "2019-04-21T08:28:16.885Z"
+        ///     }
+        /// </remarks>
+        /// <returns>Ok</returns>
+        /// <response code="200">Event has been created</response>
+        /// <response code="204">Failure to create event</response>
         [HttpPost]
         [Authorize("IsHost")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
@@ -129,10 +260,12 @@ namespace PhotobookWebAPI.Controllers
                 EndDate = model.EndDate,
                 Location = model.Location,
                 StartDate = model.StartDate,
-                HostId = currentHost.PictureTakerId,
+                HostId = currentHost.HostId,
                 Pin = pin
 
             };
+
+            logger.Info($"Created event with Name: {newEvent.Name}, Pin: {newEvent.Pin}, Description: {newEvent.Description}, Location: {newEvent.Location}, StartDate: {newEvent.StartDate}, EndDate: {newEvent.EndDate}, HostId: {newEvent.HostId}");
 
             //Inserts the Event in the DB
             await _eventRepo.InsertEvent(newEvent);

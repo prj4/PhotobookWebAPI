@@ -72,6 +72,7 @@ namespace PhotobookWebAPI
                 options.AddPolicy("IsGuest",
                     policyBuilder => policyBuilder.RequireClaim("Role", "Guest"));
 
+
                 options.AddPolicy("IsAdmin",
                     policyBuilder => policyBuilder.RequireClaim("Role", "Admin"));
             });
@@ -129,6 +130,8 @@ namespace PhotobookWebAPI
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseCors(builder=>builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader());
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();

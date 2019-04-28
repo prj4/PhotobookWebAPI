@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NLog;
 using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
@@ -25,7 +27,7 @@ namespace PhotobookWebAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class AccountController : ControllerBase
+    public class AccountController : Controller
     {
 
         private UserManager<AppUser> _userManager;
@@ -33,8 +35,9 @@ namespace PhotobookWebAPI.Controllers
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
- 
- 
+        private Logger logger = LogManager.GetCurrentClassLogger();
+
+
 
         public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo)
         {            
@@ -46,58 +49,105 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-       /// <summary>
-       /// Gets all the app users in a list
-       /// </summary>
-       /// <returns></returns>
+
+
+        /// <summary>
+        /// Gets a list of all AppUsers registered in the database
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Account
+        ///
+        /// </remarks>
+        /// <returns>Ok, list of AppUser</returns>
+        /// <response code="200">Returns list of all AppUsers, empty list if no users</response> 
         [HttpGet]
         [AllowAnonymous]
         public async Task<List<AppUser>> GetAccounts()
         {
-            return await _userManager.Users.ToListAsync();
+            var accountList = await _userManager.Users.ToListAsync();
+            logger.Info("GetAccounts Called");
+                return accountList;
         }
 
 
-        // GET: api/Account/"username"
+        /// <summary>
+        /// Gets a the AppUser with the given username
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET api/Account/Name@mail.dk
+        ///
+        /// </remarks>
+        /// <returns>Ok, AppUser</returns>
+        /// <response code="200">Returns AppUser with specified username</response>
+        /// <response code="204">User not found</response> 
         [HttpGet("{UserName}")]
-        //[Authorize("IsAdmin")]
         [AllowAnonymous]
         public async Task<AppUser> GetAccount(string UserName)
         {
             var user = await _userManager.FindByNameAsync(UserName);
+            logger.Info($"GetAccount called with UserName: {UserName}");
+
             return user;
         }
 
 
-
-        // PUT: api/Account/"username"
-        [HttpPut("{UserName}")]
-        //[Authorize("IsAdmin")]
-        [AllowAnonymous]
-        public async Task<IActionResult> PutAccount(string UserName, AppUser newData)
+        /// <summary>
+        /// Can change the email/Username of a user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT api/Account/name@mail.dk
+        ///     {
+        ///        "UserName": "example@mail.dk",
+        ///        "Email": "example@mail.dk"
+        ///     }
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> User changed successfully </response>
+        /// <response code="401">No user found </response> 
+        [HttpPut]
+        [Authorize("IsHost")]
+        public async Task<IActionResult> PutAccount(AppUser newData)
         {
-            AppUser user = await _userManager.FindByNameAsync(UserName);
+                AppUser user = await _userManager.FindByNameAsync(User.Identity.Name);
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
 
-            if(newData.Email!=null)
-            user.Email = newData.Email;
-            if (newData.UserName != null)
-                user.UserName = newData.UserName;
+                if (newData.Email != null)
+                    user.Email = newData.Email;
+                if (newData.UserName != null)
+                    user.UserName = newData.UserName;
 
-            await _userManager.UpdateAsync(user);
+                await _userManager.UpdateAsync(user);
 
-            return Ok();
+                logger.Info($"PutAccount called on UserName: {user.Email}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
+
+                return NoContent();
         }
 
 
-
-        // DELETE: api/Account/"username"
+        /// <summary>
+        /// Deletes AppUser with specified username
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE api/Account/name@mail.dk
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> User Deleted </response>
+        /// <response code="404"> User not found </response> 
         [HttpDelete("{UserName}")]
-        //[Authorize("IsAdmin")]
         [AllowAnonymous]
         public async Task<IActionResult> DeleteAccount(string UserName)
         {
@@ -116,29 +166,29 @@ namespace PhotobookWebAPI.Controllers
             }
 
             if(userRole == null)
-                return NoContent();
+                return NotFound();
 
           
                var result =  await _userManager.DeleteAsync(user);
-               if (result.Succeeded)
+               logger.Info($"AppUser with UserName {UserName} is deleted");
+            if (result.Succeeded)
                {
                    if (userRole == "Host")
                    {
-                       //THIS IS TEMPORARY
+                       
                        await _hostRepo.DeleteHostByEmail(user.Email);
-                       //UNTIL HERE
-                    //return RedirectToAction("DeleteHost", "Host", new { email = user.Email });
-                   }
+                      logger.Info($"Host with Email {user.Email} is deleted");
+
+                }
                    else if (userRole == "Guest")
                    {
 
-                       string[] guestStrings = user.UserName.Split(";");
-                    //THIS IS TEMPORARY
-                    await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
-                    //UNTIL HERE
+                    string[] guestStrings = user.UserName.Split(";");
 
-                    //return RedirectToAction("DeleteGuest", "Guest", new { name = guestStrings[0],  pin=guestStrings[1] });
-                   }
+                    await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
+                    logger.Info($"Guest with Name {guestStrings[0]} and Eventpin {guestStrings[1]} is deleted");
+
+                }
                 }
 
             return NoContent();
@@ -146,18 +196,34 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-
+        /// <summary>
+        /// Creates Admin user(NOT CURRENTLY WORKING)
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Admin
+        ///     {
+        ///        "UserName": "admin",
+        ///        "Password": "admin"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Admin created </response>
+        /// <response code="404"> Error in creating admin</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Admin")]
         public async Task<ActionResult> CreateAdmin(AccountModels.RegisterAdminModel model)
         {
-
+            
             var user = new AppUser
                 {UserName = model.UserName};
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
+            
             if (result.Succeeded)
             {
                 var roleClaim = new Claim("Role", "Admin");
@@ -165,52 +231,94 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
 
-                return Ok();
+                return NoContent();
             }
 
             return NotFound();
         }
 
 
+        /// <summary>
+        /// Creates Host user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Host
+        ///     {
+        ///        "Name": "Name",
+        ///        "Email": "Name@mail.dk",
+        ///        "Password": "123456"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Host created </response>
+        /// <response code="404"> Error in creating Host</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
-        public async Task<ActionResult> CreateHost(AccountModels.RegisterHostModel model)
+        public async Task<AccountModels.ReturnHostModel> CreateHost(AccountModels.RegisterHostModel model)
         {
-
+            
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
 
             var result = await _userManager.CreateAsync(user, model.Password);
+            logger.Info($"AppUser created with Email: {user.Email}");
 
             if (result.Succeeded)
             {
                 var roleClaim = new Claim("Role", "Host");
                 await _userManager.AddClaimAsync(user, roleClaim);
+                logger.Info($"Host Role Claim added to AppUser with Email: {user.Email}");
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                logger.Info($"AppUser signed in with Email: {user.Email}");
 
-
-                //THIS AND DOWN IN TEMPORARY
+                
 
                 Host host = new Host { Name = model.Name, Email = model.Email };
 
-
+                
                 await _hostRepo.InsertHost(host);
+                logger.Info($"Host created with Email: {host.Email} ");
 
-                //Returnering af host data (Nyoprettet dermed ingen events).
-                return Ok();
+                return new AccountModels.ReturnHostModel
+                {
+                    Name = host.Name,
+                    Email = host.Email,
+                    HostId = host.HostId
+                };
 
-                //UNTIL HERE !!
+                
 
-                //return RedirectToAction("RegisterHost", "Host", new {name = model.Name, email = model.Email});
+                
             }
-            return Ok();
-            //return NotFound();
-        }
 
+            return null;
+           
+        }
+        /// <summary>
+        /// Creates Guest user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Guest
+        ///     {
+        ///        "Name": "Name",
+        ///        "Pin": "abcd1234ef"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Guest created </response>
+        /// <response code="404"> Error in creating Guest</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
-        public async Task<ActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
+        public async Task<AccountModels.ReturnGuestModel> CreateGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -220,14 +328,15 @@ namespace PhotobookWebAPI.Controllers
             if (e!=null)
             {
                 var result = await _userManager.CreateAsync(user, model.Pin);
+                
                 if (result.Succeeded)
                 {
+                    logger.Info($"AppUser created with UserName: {user.UserName}");
                     var roleClaim = new Claim("Role", "Guest");
                     await _userManager.AddClaimAsync(user, roleClaim);
+                    logger.Info($"Guest Role Claim added to AppUser with UserName: {user.UserName}");
                     await _signInManager.SignInAsync(user, isPersistent: true);
-
-                    //THIS IS TEMPORARY
-                    var ev = await _eventRepo.GetEventByPin(model.Pin);
+                    logger.Info($"AppUser signed in with UserName: {user.UserName}");
 
                     Guest guest = new Guest
                     {
@@ -235,33 +344,82 @@ namespace PhotobookWebAPI.Controllers
                         EventPin = model.Pin
                     };
                     await _guestRepo.InsertGuest(guest);
-                    //UNTIL HERE
-                   // return RedirectToAction("RegisterGuest", "Guest", new{name= model.Name, pin = model.Pin});
+                    logger.Info($"Guest created with Name: {guest.Name} and EventPin: {guest.EventPin}");
+
+                    return new AccountModels.ReturnGuestModel
+                    {
+                            Description = e.Description,
+                            EndDate = e.EndDate,
+                            StartDate = e.StartDate,
+                            Location = e.Location,
+                            Name = e.Name,
+                            Pin = e.Pin
+                    };
+
+                    
+
                 }
             }
 
-            return Ok();
-            //return NotFound();
+            return null;
         }
 
+
+        /// <summary>
+        /// Login with Host login
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Login
+        ///     {
+        ///        "UserName": "Name",
+        ///        "Password": "123456"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Success </response>
+        /// <response code="404"> Error</response> 
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
-        public async Task<IActionResult> Login(AccountModels.LoginModel loginInfo)
+        public async Task<AccountModels.ReturnHostModel> Login(AccountModels.LoginModel loginInfo)
         {
             var result = await _signInManager.PasswordSignInAsync(loginInfo.UserName,
                 loginInfo.Password, false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                
-                //return RedirectToAction("Login", "Host", new {email = loginInfo.UserName});
+                logger.Info($"AppUser with login {loginInfo.UserName} signed in");
+                string email = loginInfo.UserName;
+                var host = await _hostRepo.GetHostByEmail(email);
+                var events = await _eventRepo.GetEventsByHostId(host.HostId);
+                return new AccountModels.ReturnHostModel
+                {
+                    Name = host.Name,
+                    Email = email,
+                    HostId = host.HostId,
+                    Events = events
+                };
             }
-
-            return Ok();
-            //return NotFound();
+            return null;
         }
 
 
+        /// <summary>
+        /// Logout 
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Logout
+        ///    
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Success </response>
         [AllowAnonymous]
         [Route("Logout")]
         [HttpPost]
@@ -269,11 +427,28 @@ namespace PhotobookWebAPI.Controllers
         {
             await _signInManager.SignOutAsync();
 
-            return Ok();
+            return NoContent();
 
         }
 
-        //[HttpPost]
+        /// <summary>
+        /// Change password [IsHost]
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT api/Account/Password
+        ///     {
+        ///        "Email": "Name@mail.dk",
+        ///        "CurrPassword": "123456",
+        ///        "NewPassword": "234567"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Success </response>
+        /// <response code="404"> Error</response> 
         [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
@@ -285,7 +460,7 @@ namespace PhotobookWebAPI.Controllers
 
             if (result.Succeeded)
             {
-               return Ok();
+               return NoContent();
             }
             return NotFound();
         }

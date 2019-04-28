@@ -51,8 +51,7 @@ namespace PhotobookWebAPI.Models
             public string UserName { get; set; }
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 1)]
             [Display(Name = "Password")]
             public string Password { get; set; }
         }
@@ -68,7 +67,9 @@ namespace PhotobookWebAPI.Models
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
+            
             public string Password { get; set; }
+
         }
 
         public class ReturnHostModel
@@ -81,6 +82,10 @@ namespace PhotobookWebAPI.Models
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Required]
+            [Display(Name = "HostId")]
+            public int HostId { get; set; }
+
             [Display(Name = "Events")]
             public IEnumerable<Event> Events { get; set; }
         }
@@ -88,11 +93,24 @@ namespace PhotobookWebAPI.Models
         public class ReturnGuestModel
         {
             [Required]
+            [Display(Name = "Pin")]
+            public string Pin;
+            [Required]
+            [Display(Name = "Location")]
+            public string Location;
+            [Required]
+            [Display(Name = "Description")]
+            public string Description;
+            [Required]
             [Display(Name = "Name")]
-            public string Name { get; set; }
+            public string Name;
+            [Required]
+            [Display(Name = "StartDate")]
+            public DateTime StartDate;
+            [Required]
+            [Display(Name = "EndDate")]
+            public DateTime EndDate;
 
-            [Display(Name = "Event")]
-            public Event Event { get; set; }
         }
 
         public class ChangePassModel
@@ -114,6 +132,7 @@ namespace PhotobookWebAPI.Models
             //[Compare("Current Password", ErrorMessage = "The new password must be different from the old one.")]
             public string NewPassword { get; set; }
         }
+
 
         public class ChangeEmailModel
         {
