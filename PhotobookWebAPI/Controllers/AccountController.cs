@@ -172,14 +172,14 @@ namespace PhotobookWebAPI.Controllers
                var result =  await _userManager.DeleteAsync(user);
                logger.Info($"AppUser with UserName {UserName} is deleted");
             if (result.Succeeded)
-               {
+            {
                    if (userRole == "Host")
                    {
                        
                        await _hostRepo.DeleteHostByEmail(user.Email);
                       logger.Info($"Host with Email {user.Email} is deleted");
 
-                }
+                   }
                    else if (userRole == "Guest")
                    {
 
@@ -188,8 +188,8 @@ namespace PhotobookWebAPI.Controllers
                     await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
                     logger.Info($"Guest with Name {guestStrings[0]} and Eventpin {guestStrings[1]} is deleted");
 
-                }
-                }
+                   }
+            }
 
             return NoContent();
 
@@ -253,13 +253,13 @@ namespace PhotobookWebAPI.Controllers
         ///     
         ///
         /// </remarks>
-        /// <returns>NoContent</returns>
-        /// <response code="204"> Host created </response>
-        /// <response code="404"> Error in creating Host</response> 
+        /// <returns>Ok, Host info</returns>
+        /// <response code="200"> Host created </response>
+        /// <response code="400"> Error in creating Host</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
-        public async Task<AccountModels.ReturnHostModel> CreateHost(AccountModels.RegisterHostModel model)
+        public async Task<IActionResult> CreateHost(AccountModels.RegisterHostModel model)
         {
             
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
@@ -275,27 +275,22 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 logger.Info($"AppUser signed in with Email: {user.Email}");
 
-                
-
                 Host host = new Host { Name = model.Name, Email = model.Email };
 
                 
                 await _hostRepo.InsertHost(host);
                 logger.Info($"Host created with Email: {host.Email} ");
 
-                return new AccountModels.ReturnHostModel
+                return Ok(new AccountModels.ReturnHostModel
                 {
                     Name = host.Name,
                     Email = host.Email,
                     HostId = host.HostId
-                };
-
-                
-
+                });
                 
             }
 
-            return null;
+            return BadRequest();
            
         }
         /// <summary>
@@ -312,13 +307,13 @@ namespace PhotobookWebAPI.Controllers
         ///     
         ///
         /// </remarks>
-        /// <returns>NoContent</returns>
-        /// <response code="204"> Guest created </response>
-        /// <response code="404"> Error in creating Guest</response> 
+        /// <returns>Created, Event info</returns>
+        /// <response code="201"> Guest created </response>
+        /// <response code="400"> Error in creating Guest</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
-        public async Task<ActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
+        public async Task<IActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -358,7 +353,7 @@ namespace PhotobookWebAPI.Controllers
                 }
             }
 
-            return NotFound();
+            return BadRequest();
         }
 
 
@@ -449,7 +444,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
-        public async Task<ActionResult> Password(AccountModels.ChangePassModel model)
+        public async Task<IActionResult> Password(AccountModels.ChangePassModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 

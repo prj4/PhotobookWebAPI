@@ -69,18 +69,18 @@ namespace PhotobookWebAPI.Controllers
         ///
         /// </remarks>
         /// <returns>List of Ids of pictures from the requested event.</returns>
-        /// <response Task='null'>If no pictures have been taken at the event.</response>
-        /// <response Task='List of Picture Ids'>If there are pictures from the event.</response>
+        /// <response Task='204'>No pictures at the Event</response>
+        /// <response Task='200'>En liste af billede Id'er</response>
         [HttpGet]
         [Route("Ids/{EventPin}")]
-        public async Task<RequestPicturesAnswerModel> GetPictureIds(string EventPin)
+        public async Task<IActionResult> GetPictureIds(string EventPin)
         {
             //Finder først eventets billeder
             var event_ = await _eventRepo.GetEventByPin(EventPin);
 
             if (event_.Pictures == null)
             {
-                return null;
+                return NoContent();
             }
             List<Picture> pictures_ = event_.Pictures;
 
@@ -92,11 +92,12 @@ namespace PhotobookWebAPI.Controllers
                 Ids.Add(picture_.PictureId);
             }
             logger.Info($"GetPictureIds Called");
+
             //returnerer liste
-            return new RequestPicturesAnswerModel
+            return Ok(new RequestPicturesAnswerModel
             {
                 PictureList = Ids
-            };
+            });
         }
 
         /// <summary>
