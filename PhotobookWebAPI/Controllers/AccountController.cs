@@ -325,7 +325,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
-        public async Task<AccountModels.ReturnGuestModel> CreateGuest(AccountModels.RegisterGuestModel model)
+        public async Task<ActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -355,23 +355,20 @@ namespace PhotobookWebAPI.Controllers
                     };
                     await _guestRepo.InsertGuest(guest);
                     logger.Info($"Guest created with Name: {guest.Name} and EventPin: {guest.EventPin}");
-
-                    return new AccountModels.ReturnGuestModel
-                    {
-                            Description = e.Description,
-                            EndDate = e.EndDate,
-                            StartDate = e.StartDate,
-                            Location = e.Location,
-                            Name = e.Name,
-                            Pin = e.Pin
-                    };
-
                     
-
+                    return Created("In Database", new AccountModels.ReturnGuestModel
+                    {
+                        Description = e.Description,
+                        EndDate = e.EndDate,
+                        StartDate = e.StartDate,
+                        Location = e.Location,
+                        Name = e.Name,
+                        Pin = e.Pin
+                    });
                 }
             }
 
-            return null;
+            return NotFound();
         }
 
 
