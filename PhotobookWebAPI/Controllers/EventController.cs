@@ -88,15 +88,15 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="200">Returns Specified Event</response>
         /// <response code="204">No event with given pin</response> 
         [HttpGet("{pin}")]
-        public async Task<Event> GetEvent(string pin)
+        public async Task<ActionResult> GetEvent(string pin)
         {
             var e = await _eventRepo.GetEventByPin(pin);
             logger.Info($"GetEvent called with pin: {pin}");
             if (e != null)
             {
-                return e;
+                return Ok(e);
             }
-            return null;
+            return NoContent();
         }
 
         /// <summary>
@@ -113,15 +113,15 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="204">No event with given Host</response> 
         [HttpGet]
         [Route("Host{hostId}")]
-        public async Task<IEnumerable<Event>> GetEvent(int hostId)
+        public async Task<IActionResult> GetEvent(int hostId)
         {
             var e = await _eventRepo.GetEventsByHostId(hostId);
             logger.Info($"GetEvent called with hostId: {hostId}");
             if (e != null)
             {
-                return e;
+                return Ok(e);
             }
-            return null;
+            return NoContent();
         }
 
         /// <summary>
@@ -141,8 +141,8 @@ namespace PhotobookWebAPI.Controllers
         ///
         /// </remarks>
         /// <returns>Ok</returns>
-        /// <response code="200">Event updated with values in JSON object</response>
-        /// <response code="204">No event with given pin</response>
+        /// <response code="204">Event updated with values in JSON object</response>
+        /// <response code="404">No event with given pin</response>
         [Authorize("IsHost")]
         [HttpPut("{pin}")]
         public async Task<IActionResult> PutEvent(string pin, EditEventModel newData)
@@ -168,20 +168,21 @@ namespace PhotobookWebAPI.Controllers
                 logger.Info($"Event with pin: {pin} changed with the new values Description: {newData.Description}, Location: {newData.Location}, Name: {newData.Name}, StartDate: {newData.StartDate}, EndDate: {newData.StartDate}" );
 
             await _eventRepo.UpdateEvent(e);
-            return Ok();
+            return NoContent();
         }
 
-    /// <summary>
-    /// Deletes an event with the specified pin
-    /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///     DELETE api/Event/abcd1234ef
-    ///
-    /// </remarks>
-    /// <returns>NoContent</returns>
-    /// <response code="204">Event with specified pin has been deleted</response>
+        /// <summary>
+        /// Deletes an event with the specified pin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE api/Event/abcd1234ef
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204">Event with specified pin has been deleted</response>
+        /// <response code="400">Event</response>
         [Authorize("IsHost")]
         [HttpDelete("{pin}")]
         public async Task<IActionResult> DeleteEvent(string pin)
@@ -211,12 +212,12 @@ namespace PhotobookWebAPI.Controllers
 
                     logger.Info($"Deleted Event with pin: {pin}");
 
-                    return Ok();
+                    return NoContent();
                 }
 
             }
 
-            return NotFound();
+            return BadRequest();
 
         }
 
@@ -275,7 +276,7 @@ namespace PhotobookWebAPI.Controllers
             Event testEvent =await  _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
-                return Ok();
+                return Ok(newEvent.Pin);
             }
 
          

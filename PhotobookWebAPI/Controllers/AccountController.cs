@@ -377,12 +377,12 @@ namespace PhotobookWebAPI.Controllers
         ///
         /// </remarks>
         /// <returns>NoContent</returns>
-        /// <response code="204"> Success </response>
-        /// <response code="404"> Error</response> 
+        /// <response code="200"> Success </response>
+        /// <response code="400"> Error in creating</response> 
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
-        public async Task<AccountModels.ReturnHostModel> Login(AccountModels.LoginModel loginInfo)
+        public async Task<ActionResult> Login(AccountModels.LoginModel loginInfo)
         {
             var result = await _signInManager.PasswordSignInAsync(loginInfo.UserName,
                 loginInfo.Password, false, lockoutOnFailure: false);
@@ -392,15 +392,15 @@ namespace PhotobookWebAPI.Controllers
                 string email = loginInfo.UserName;
                 var host = await _hostRepo.GetHostByEmail(email);
                 var events = await _eventRepo.GetEventsByHostId(host.HostId);
-                return new AccountModels.ReturnHostModel
+                return Ok(new AccountModels.ReturnHostModel
                 {
                     Name = host.Name,
                     Email = email,
                     HostId = host.HostId,
                     Events = events
-                };
+                });
             }
-            return null;
+            return BadRequest();
         }
 
 
