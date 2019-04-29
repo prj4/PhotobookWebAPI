@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NSubstitute;
 using NUnit.Framework;
-using PhotoBook.Repository.EventRepository;
-using PhotoBook.Repository.GuestRepository;
-using PhotoBook.Repository.HostRepository;
 
-namespace PhotobookWebAPI.UnitTest
+namespace ClassLibrary1
 {
     [TestFixture]
     public class AccountControllerTest
@@ -19,9 +15,9 @@ namespace PhotobookWebAPI.UnitTest
         private IGuestRepository _guestRepo;
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            _eventRepo = Substitute.For
+            
         }
     }
 }
