@@ -238,7 +238,7 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>Ok</returns>
         /// <response code="200">Event has been created</response>
-        /// <response code="204">Failure to create event</response>
+        /// <response code="400">Failure to create event</response>
         [HttpPost]
         [Authorize("IsHost")]
         public async Task<ActionResult> CreateEvent(CreateEventModel model)
@@ -276,11 +276,15 @@ namespace PhotobookWebAPI.Controllers
             Event testEvent =await  _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
-                return Ok(newEvent.Pin);
+                return Ok(new EventPinModel
+                {
+                    pin=newEvent.Pin
+                });
+
             }
 
          
-            return NotFound();
+            return BadRequest();
         }
 
 

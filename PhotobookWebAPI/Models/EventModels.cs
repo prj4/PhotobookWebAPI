@@ -23,6 +23,11 @@ namespace PhotobookWebAPI.Models
 
     }
 
+    public class EventPinModel
+    {
+        public string pin { get; set; }
+    }
+
     public class EditEventModel
     {
 
