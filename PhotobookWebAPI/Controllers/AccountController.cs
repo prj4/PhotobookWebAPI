@@ -110,18 +110,16 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>NoContent</returns>
         /// <response code="204"> User changed successfully </response>
-        /// <response code="404"> User not found </response> 
-        [HttpPut("{UserName}")]
+        /// <response code="401">No user found </response> 
+        [HttpPut]
         [Authorize("IsHost")]
-        public async Task<IActionResult> PutAccount(string UserName, AppUser newData)
+        public async Task<IActionResult> PutAccount(AppUser newData)
         {
-            if (User.Identity.Name == UserName)
-            {
-                AppUser user = await _userManager.FindByNameAsync(UserName);
+                AppUser user = await _userManager.FindByNameAsync(User.Identity.Name);
 
                 if (user == null)
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
 
                 if (newData.Email != null)
@@ -131,14 +129,9 @@ namespace PhotobookWebAPI.Controllers
 
                 await _userManager.UpdateAsync(user);
 
-                logger.Info($"PutAccount called on UserName: {UserName}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
+                logger.Info($"PutAccount called on UserName: {user.Email}: UserName changed to {newData.UserName}, Email Changed to {newData.UserName}");
 
                 return NoContent();
-
-            }
-
-            return Unauthorized();
-
         }
 
 
@@ -345,9 +338,6 @@ namespace PhotobookWebAPI.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: true);
                     logger.Info($"AppUser signed in with UserName: {user.UserName}");
 
-                    
-                    var ev = await _eventRepo.GetEventByPin(model.Pin);
-
                     Guest guest = new Guest
                     {
                         Name = model.Name,
@@ -409,9 +399,7 @@ namespace PhotobookWebAPI.Controllers
                     HostId = host.HostId,
                     Events = events
                 };
-
             }
-
             return null;
         }
 
