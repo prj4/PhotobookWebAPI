@@ -172,14 +172,14 @@ namespace PhotobookWebAPI.Controllers
                var result =  await _userManager.DeleteAsync(user);
                logger.Info($"AppUser with UserName {UserName} is deleted");
             if (result.Succeeded)
-               {
+            {
                    if (userRole == "Host")
                    {
                        
                        await _hostRepo.DeleteHostByEmail(user.Email);
                       logger.Info($"Host with Email {user.Email} is deleted");
 
-                }
+                   }
                    else if (userRole == "Guest")
                    {
 
@@ -188,8 +188,8 @@ namespace PhotobookWebAPI.Controllers
                     await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
                     logger.Info($"Guest with Name {guestStrings[0]} and Eventpin {guestStrings[1]} is deleted");
 
-                }
-                }
+                   }
+            }
 
             return NoContent();
 
@@ -253,9 +253,9 @@ namespace PhotobookWebAPI.Controllers
         ///     
         ///
         /// </remarks>
-        /// <returns>NoContent</returns>
-        /// <response code="204"> Host created </response>
-        /// <response code="404"> Error in creating Host</response> 
+        /// <returns>Ok, Host info</returns>
+        /// <response code="200"> Host created </response>
+        /// <response code="400"> Error in creating Host</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
@@ -307,9 +307,9 @@ namespace PhotobookWebAPI.Controllers
         ///     
         ///
         /// </remarks>
-        /// <returns>NoContent</returns>
-        /// <response code="204"> Guest created </response>
-        /// <response code="404"> Error in creating Guest</response> 
+        /// <returns>Created, Event info</returns>
+        /// <response code="201"> Guest created </response>
+        /// <response code="400"> Error in creating Guest</response> 
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
