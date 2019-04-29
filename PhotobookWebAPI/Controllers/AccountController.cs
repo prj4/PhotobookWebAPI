@@ -259,7 +259,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
-        public async Task<AccountModels.ReturnHostModel> CreateHost(AccountModels.RegisterHostModel model)
+        public async Task<IActionResult> CreateHost(AccountModels.RegisterHostModel model)
         {
             
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
@@ -275,27 +275,22 @@ namespace PhotobookWebAPI.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 logger.Info($"AppUser signed in with Email: {user.Email}");
 
-                
-
                 Host host = new Host { Name = model.Name, Email = model.Email };
 
                 
                 await _hostRepo.InsertHost(host);
                 logger.Info($"Host created with Email: {host.Email} ");
 
-                return new AccountModels.ReturnHostModel
+                return Ok(new AccountModels.ReturnHostModel
                 {
                     Name = host.Name,
                     Email = host.Email,
                     HostId = host.HostId
-                };
-
-                
-
+                });
                 
             }
 
-            return null;
+            return BadRequest();
            
         }
         /// <summary>
@@ -318,7 +313,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
-        public async Task<ActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
+        public async Task<IActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -358,7 +353,7 @@ namespace PhotobookWebAPI.Controllers
                 }
             }
 
-            return NotFound();
+            return BadRequest();
         }
 
 
@@ -449,7 +444,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
-        public async Task<ActionResult> Password(AccountModels.ChangePassModel model)
+        public async Task<IActionResult> Password(AccountModels.ChangePassModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
