@@ -128,7 +128,6 @@ namespace PhotobookWebAPI.Controllers
             }
             logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
             return NotFound();
-
         }
 
         /// <summary>
