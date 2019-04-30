@@ -23,7 +23,7 @@ namespace WebAPI.UnitTest
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
-            _uut = new AccountController();
+            //_uut = new AccountController();
         }
 
         [Test]
@@ -31,11 +31,11 @@ namespace WebAPI.UnitTest
         {
             
         }
-
+        /*
         [Test]
-        public void GetUser_InvalidUserNamer Get()
-        {
-
+        public void GetUser_InvalidUserNamer G
+        
         }
+        */
     }
 }
