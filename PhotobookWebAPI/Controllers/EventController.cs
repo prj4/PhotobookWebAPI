@@ -101,23 +101,26 @@ namespace PhotobookWebAPI.Controllers
         }
 
         /// <summary>
-        /// Gets a Events with specified Host Id
+        /// Gets a Events with specified Host Id [IsHost]
         /// </summary>
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET api/Event/Host12
+        ///     GET api/Event/Host
         ///
         /// </remarks>
         /// <returns>Ok, Events</returns>
         /// <response code="200">Returns list of Specified Events</response>
         /// <response code="204">No event with given Host</response> 
         [HttpGet]
-        [Route("Host{hostId}")]
-        public async Task<IActionResult> GetEvent(int hostId)
+        [Route("Host")]
+        [Authorize("IsHost")]
+        public async Task<IActionResult> GetEvent()
         {
-            var e = await _eventRepo.GetEventsByHostId(hostId);
-            logger.Info($"GetEvent called with hostId: {hostId}");
+            Host currentHost =await  GetCurrentHost(User.Identity.Name);
+
+            var e = await _eventRepo.GetEventsByHostId(currentHost.HostId);
+            logger.Info($"GetEvent called with hostId: {currentHost.HostId}");
             if (e != null)
             {
                 return Ok(toEventModels(e));
@@ -362,7 +365,7 @@ namespace PhotobookWebAPI.Controllers
                         EndDate = ev.EndDate,
                         Location = ev.Location,
                         Name = ev.Name,
-                        Pin = ev.Name,
+                        Pin = ev.Pin,
                         StartDate = ev.StartDate
                     });
                 }
@@ -379,7 +382,7 @@ namespace PhotobookWebAPI.Controllers
                 EndDate = ev.EndDate,
                 Location = ev.Location,
                 Name = ev.Name,
-                Pin = ev.Name,
+                Pin = ev.Pin,
                 StartDate = ev.StartDate
             };
 
