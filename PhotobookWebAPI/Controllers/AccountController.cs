@@ -399,7 +399,7 @@ namespace PhotobookWebAPI.Controllers
                             EndDate = ev.EndDate,
                             Location = ev.Location,
                             Name = ev.Name,
-                            Pin = ev.Name,
+                            Pin = ev.Pin,
                             StartDate = ev.StartDate
                         });
                     }
