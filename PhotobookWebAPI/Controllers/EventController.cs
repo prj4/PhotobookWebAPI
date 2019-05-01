@@ -242,7 +242,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="400">Failure to create event</response>
         [HttpPost]
         [Authorize("IsHost")]
-        public async Task<ActionResult> CreateEvent(EventModel model)
+        public async Task<IActionResult> CreateEvent(EventModel model)
         {
             //Gets the username of the current AppUser
             var currentUserName = User.Identity.Name;
