@@ -12,17 +12,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NLog;
+using PB.Dto;
 using PhotobookWebAPI.Data;
-using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
+using PhotoSauce.MagicScaler;
 
 
 namespace PhotobookWebAPI.Controllers
 {
-
+    
     
     [Route("api/[controller]")]
     [ApiController]
@@ -216,7 +217,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Admin")]
-        public async Task<ActionResult> CreateAdmin(AccountModels.RegisterAdminModel model)
+        public async Task<ActionResult> CreateAdmin(RegisterAdminModel model)
         {
             
             var user = new AppUser
@@ -259,7 +260,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Host")]
-        public async Task<IActionResult> CreateHost(AccountModels.RegisterHostModel model)
+        public async Task<IActionResult> CreateHost(RegisterHostModel model)
         {
             
             var user = new AppUser {UserName = model.Email, Email = model.Email, Name = model.Name};
@@ -281,11 +282,10 @@ namespace PhotobookWebAPI.Controllers
                 await _hostRepo.InsertHost(host);
                 logger.Info($"Host created with Email: {host.Email} ");
 
-                return Ok(new AccountModels.ReturnHostModel
+                return Ok(new ReturnHostModel
                 {
                     Name = host.Name,
                     Email = host.Email,
-                    HostId = host.HostId
                 });
                 
             }
@@ -313,7 +313,7 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("Guest")]
-        public async Task<IActionResult> CreateGuest(AccountModels.RegisterGuestModel model)
+        public async Task<IActionResult> CreateGuest(RegisterGuestModel model)
         {
             string username = model.Name + ";" + model.Pin;
             var user = new AppUser { UserName = username, Name = model.Name};
@@ -341,7 +341,8 @@ namespace PhotobookWebAPI.Controllers
                     await _guestRepo.InsertGuest(guest);
                     logger.Info($"Guest created with Name: {guest.Name} and EventPin: {guest.EventPin}");
                     
-                    return Created("In Database", new AccountModels.ReturnGuestModel
+                    //EventModel
+                    return Created("In Database", new EventModel
                     {
                         Description = e.Description,
                         EndDate = e.EndDate,
@@ -377,7 +378,7 @@ namespace PhotobookWebAPI.Controllers
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]
-        public async Task<ActionResult> Login(AccountModels.LoginModel loginInfo)
+        public async Task<ActionResult> Login(LoginModel loginInfo)
         {
             var result = await _signInManager.PasswordSignInAsync(loginInfo.UserName,
                 loginInfo.Password, false, lockoutOnFailure: false);
@@ -387,12 +388,30 @@ namespace PhotobookWebAPI.Controllers
                 string email = loginInfo.UserName;
                 var host = await _hostRepo.GetHostByEmail(email);
                 var events = await _eventRepo.GetEventsByHostId(host.HostId);
-                return Ok(new AccountModels.ReturnHostModel
+                List<EventModel> eventModels = new List<EventModel>();
+                if (events != null)
+                {
+                    foreach (var ev in events)
+                    {
+                        eventModels.Add(new EventModel()
+                        {
+                            Description = ev.Description,
+                            EndDate = ev.EndDate,
+                            Location = ev.Location,
+                            Name = ev.Name,
+                            Pin = ev.Name,
+                            StartDate = ev.StartDate
+                        });
+                    }
+                }
+
+                
+
+                return Ok(new ReturnHostModel
                 {
                     Name = host.Name,
                     Email = email,
-                    HostId = host.HostId,
-                    Events = events
+                    Events = eventModels
                 });
             }
             return BadRequest();
@@ -444,7 +463,7 @@ namespace PhotobookWebAPI.Controllers
         [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
-        public async Task<IActionResult> Password(AccountModels.ChangePassModel model)
+        public async Task<IActionResult> Password(ChangePassModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
