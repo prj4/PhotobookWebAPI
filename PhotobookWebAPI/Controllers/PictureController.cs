@@ -10,13 +10,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
+using PB.Dto;
 using PhotobookWebAPI.Data;
-using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBook.Repository.PictureRepository;
 using PhotoBookDatabase.Model;
+using PhotoSauce.MagicScaler;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -86,7 +87,7 @@ namespace PhotobookWebAPI.Controllers
 
             //Gemmer billedernes Id'er over i en retur liste
             List<int> Ids = new List<int>();
-            RequestPicturesAnswerModel ret = new RequestPicturesAnswerModel();
+            PicturesAnswerModel ret = new PicturesAnswerModel();
             foreach (var picture_ in pictures_)
             {
                 Ids.Add(picture_.PictureId);
@@ -94,7 +95,7 @@ namespace PhotobookWebAPI.Controllers
             logger.Info($"GetPictureIds Called");
 
             //returnerer liste
-            return Ok(new RequestPicturesAnswerModel
+            return Ok(new PicturesAnswerModel
             {
                 PictureList = Ids
             });
@@ -121,6 +122,24 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId + ".PNG"));
 
+            if (System.IO.File.Exists(file))
+            {
+                logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
+                return PhysicalFile(file, "image/PNG");
+            }
+            logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
+            return NotFound();
+        }
+
+
+        [HttpGet]
+        [Route("Preview/{EventPin}/{PictureId}")]
+        public IActionResult GetPicturePreview(string EventPin, int PictureId)
+        {
+            CurrentDirectoryHelpers.SetCurrentDirectory();
+
+            var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin, "Preview",
+                (PictureId + ".PNG"));
 
             if (System.IO.File.Exists(file))
             {
@@ -197,6 +216,12 @@ namespace PhotobookWebAPI.Controllers
                 Directory.CreateDirectory(subdir);
                 logger.Info($"Subdir created for Event: {model.EventPin}");
             }
+            var subdirPreview = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,"Preview");
+            if (!Directory.Exists(subdirPreview))
+            {
+                Directory.CreateDirectory(subdirPreview);
+                logger.Info($"Subdir created for Event: {model.EventPin}, Preview");
+            }
 
             //Creating file and flushing to disk
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, picId+".PNG");
@@ -208,7 +233,19 @@ namespace PhotobookWebAPI.Controllers
                 imageFile.Flush();
                 logger.Info($"Picture with Id: {picId} saved in  event subdir: {model.EventPin}");
             }
-            
+
+            //Creating Smaller image
+            string inPath = file;
+            string outPath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, "Preview", picId + ".PNG");
+            var settings = new ProcessImageSettings { Width = 200 };
+
+            using (var outStream = new FileStream(outPath, FileMode.Create))
+            {
+                MagicImageProcessor.ProcessImage(inPath, outStream, settings);
+            }
+
+
+
             return Ok();
         }
 
@@ -231,13 +268,13 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="401">If you don't have the right to delete the picture</response>   
         /// <response code="404">If the users claim is not recognized or,
         ///                      If the the picture wasn't found on the server.</response>
-        [HttpDelete]
-        public async Task<IActionResult> DeletePicture(PictureModel model)
+        [HttpDelete("{EventPin}/{PictureId}")]
+        public async Task<IActionResult> DeletePicture(string EventPin, int PictureId)
         {
             //Sætter stien til filen, ud fra det givne billede id og eventpin.
             CurrentDirectoryHelpers.SetCurrentDirectory();
-            string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,
-                (model.PictureId.ToString() + ".PNG"));
+            string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
+                (PictureId.ToString() + ".PNG"));
 
             //Bestemmer den bruger som er logget ind
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
@@ -253,16 +290,16 @@ namespace PhotobookWebAPI.Controllers
 
             if (userRole == "Guest")
             {
-                var event_ = await _eventRepo.GetEventByPin(model.EventPin);
-                var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
+                var event_ = await _eventRepo.GetEventByPin(EventPin);
+                var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, EventPin);
                 foreach (var picture in event_.Pictures)
                 {
-                    if ((picture.PictureId == model.PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
+                    if ((picture.PictureId == PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
                     {
                         if (System.IO.File.Exists(filepath))
                         {
                             System.IO.File.Delete(filepath);
-                            await _picRepo.DeletePictureById(model.PictureId);
+                            await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
 
@@ -277,12 +314,12 @@ namespace PhotobookWebAPI.Controllers
                 var host = await _hostRepo.GetHostByEmail(user.Email);
                 foreach (var event_ in host.Events)
                 {
-                    if (event_.Pin == model.EventPin) //Hvis Hosten er host af dette event
+                    if (event_.Pin == EventPin) //Hvis Hosten er host af dette event
                     {
                         if (System.IO.File.Exists(filepath))
                         {
                             System.IO.File.Delete(filepath);
-                            await _picRepo.DeletePictureById(model.PictureId);
+                            await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
 

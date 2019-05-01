@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NLog;
+using PB.Dto;
 using PhotobookWebAPI.Data;
-using PhotobookWebAPI.Models;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -68,10 +68,11 @@ namespace PhotobookWebAPI.Controllers
         /// <returns>Ok, list of Events</returns>
         /// <response code="200">Returns list of all Events, empty list if no Events</response> 
         [HttpGet]
-        public async Task<IEnumerable<Event>> GetEvents()
+        public async Task<IEnumerable<EventModel>> GetEvents()
         {
             logger.Info("GetEvents called");
-            return await _eventRepo.GetEvents();
+
+            return toEventModels(await _eventRepo.GetEvents());
         }
 
 
@@ -94,7 +95,7 @@ namespace PhotobookWebAPI.Controllers
             logger.Info($"GetEvent called with pin: {pin}");
             if (e != null)
             {
-                return Ok(e);
+                return Ok(toEventModel(e));
             }
             return NoContent();
         }
@@ -119,7 +120,7 @@ namespace PhotobookWebAPI.Controllers
             logger.Info($"GetEvent called with hostId: {hostId}");
             if (e != null)
             {
-                return Ok(e);
+                return Ok(toEventModels(e));
             }
             return NoContent();
         }
@@ -241,7 +242,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="400">Failure to create event</response>
         [HttpPost]
         [Authorize("IsHost")]
-        public async Task<ActionResult> CreateEvent(CreateEventModel model)
+        public async Task<ActionResult> CreateEvent(EventModel model)
         {
             //Gets the username of the current AppUser
             var currentUserName = User.Identity.Name;
@@ -346,6 +347,44 @@ namespace PhotobookWebAPI.Controllers
             return builder.ToString();
         }
 
+
+        [NonAction]
+        private IEnumerable<EventModel> toEventModels(IEnumerable<Event> events)
+        {
+            List<EventModel> eventModels = new List<EventModel>();
+            if (events != null)
+            {
+                foreach (var ev in events)
+                {
+                    eventModels.Add(new EventModel()
+                    {
+                        Description = ev.Description,
+                        EndDate = ev.EndDate,
+                        Location = ev.Location,
+                        Name = ev.Name,
+                        Pin = ev.Name,
+                        StartDate = ev.StartDate
+                    });
+                }
+            }
+            return eventModels;
+        }
+
+        [NonAction]
+        private EventModel toEventModel(Event ev)
+        {
+            EventModel eventModel = new EventModel()
+            {
+                Description = ev.Description,
+                EndDate = ev.EndDate,
+                Location = ev.Location,
+                Name = ev.Name,
+                Pin = ev.Name,
+                StartDate = ev.StartDate
+            };
+
+            return eventModel;
+        }
 
     }
 }
