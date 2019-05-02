@@ -35,8 +35,8 @@ namespace Tests
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
 
-            var _userManager = Mock.Of<UserManager<AppUser>>();
-            var _signInManager = Mock.Of<SignInManager<AppUser>>();
+            _userManager = Mock.Of<UserManager<AppUser>>();
+            _signInManager = Mock.Of<SignInManager<AppUser>>();
 
             _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
         }
