@@ -1,4 +1,6 @@
 using System;
+using Microsoft.AspNet.Identity;
+using PhotobookWebAPI.Data;
 using Xunit;
 
 namespace XWebAPITests
@@ -9,6 +11,6 @@ namespace XWebAPITests
         public void Test1()
         {
 
-        }
+        }   
     }
 }
