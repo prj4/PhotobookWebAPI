@@ -131,7 +131,7 @@ namespace PhotobookWebAPI
                 app.UseHsts();
             }
 
-            app.UseCors(builder=>builder.WithOrigins("https://photobookvue.z16.web.core.windows.net/*").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+            app.UseCors(builder=>builder.WithOrigins("https://photobookvue.z16.web.core.windows.net/").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
