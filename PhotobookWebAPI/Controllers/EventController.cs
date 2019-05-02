@@ -279,6 +279,14 @@ namespace PhotobookWebAPI.Controllers
             Event testEvent = await  _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
+                CurrentDirectoryHelpers.SetCurrentDirectory();
+                var subdir = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
+                if (!Directory.Exists(subdir))
+                {
+                    Directory.CreateDirectory(subdir);
+                    logger.Info($"Subdir created for Event: {pin}");
+                }
+
                 return Ok(new EventPinModel
                 {
                     pin=newEvent.Pin
