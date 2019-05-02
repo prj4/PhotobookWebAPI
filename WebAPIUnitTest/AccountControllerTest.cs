@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Tests
 {
+    [TestFixture]
     public class AccountControllerTest
     {
         //private UserManager<AppUser> _userManager;
@@ -43,8 +44,7 @@ namespace Tests
         [Test]
         public void Test1()
         {
-
-            Assert.Pass();
+            
         }
     }
 }
