@@ -245,7 +245,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="400">Failure to create event</response>
         [HttpPost]
         [Authorize("IsHost")]
-        public async Task<ActionResult> CreateEvent(EventModel model)
+        public async Task<IActionResult> CreateEvent(EventModel model)
         {
             //Gets the username of the current AppUser
             var currentUserName = User.Identity.Name;
@@ -276,8 +276,7 @@ namespace PhotobookWebAPI.Controllers
             await _eventRepo.InsertEvent(newEvent);
 
             //Validating that it is in the DB
-
-            Event testEvent =await  _eventRepo.GetEventByPin(pin);
+            Event testEvent = await  _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
                 CurrentDirectoryHelpers.SetCurrentDirectory();
