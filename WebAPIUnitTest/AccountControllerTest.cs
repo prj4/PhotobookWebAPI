@@ -19,6 +19,8 @@ namespace Tests
 
         private AccountController _uut;
 
+        
+
         [SetUp]
         public void Setup()
         {
@@ -26,7 +28,8 @@ namespace Tests
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
 
-           // _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
+
+            // _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
         }
 
         [Test]

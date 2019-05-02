@@ -66,7 +66,7 @@ namespace PhotobookWebAPI
             services.AddDbContext<AppDBContext>(opt =>
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-
+            
 
             services.AddAuthorization(options =>
             {
@@ -91,7 +91,11 @@ namespace PhotobookWebAPI
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 1;
             }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
-            
+
+
+
+            services.ConfigureApplicationCookie(options => { options.Cookie.SameSite = SameSiteMode.None; });
+
             services.AddScoped<IHostRepository, HostRepository>(serviceProvider =>
                 {
                     return new HostRepository(new PhotoBookDbContext(new DbContextOptionsBuilder<PhotoBookDbContext>()
@@ -135,7 +139,7 @@ namespace PhotobookWebAPI
                 app.UseHsts();
             }
 
-            app.UseCors(builder=>builder.WithOrigins("https://photobookvue.z16.web.core.windows.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+            app.UseCors(builder=>builder.WithOrigins("https://photobookvue.z16.web.core.windows.net", "http://localhost:1337").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
