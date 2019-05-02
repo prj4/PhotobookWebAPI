@@ -1,3 +1,5 @@
+using System.Net;
+using Castle.Core.Internal;
 using NSubstitute;
 using NUnit.Framework;
 using PhotoBook.Repository.EventRepository;
@@ -8,6 +10,8 @@ using Microsoft.AspNetCore.Hosting;
 using PhotobookWebAPI.Controllers;
 using Moq;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using NUnit.Framework.Internal;
 
 namespace Tests
 {
@@ -42,9 +46,10 @@ namespace Tests
         }
 
         [Test]
-        public void Test1()
+        public async void accounts_get_returnsOK()
         {
-            
+            var actionResult = await _uut.GetAccounts();
+            Assert.That(actionResult.IsNullOrEmpty());
         }
     }
 }
