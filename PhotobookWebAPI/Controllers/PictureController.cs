@@ -63,7 +63,7 @@ namespace PhotobookWebAPI.Controllers
         /// <summary>
         /// Gets all the picture Ids for a given Event
         /// </summary>
-        /// <remarks>
+        /// <remarks> 
         /// Sample request:
         ///
         ///     GET api/Picture/Ids/{EventPin}
