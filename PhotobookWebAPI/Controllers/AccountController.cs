@@ -30,7 +30,6 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-
         private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
         private IEventRepository _eventRepo;
