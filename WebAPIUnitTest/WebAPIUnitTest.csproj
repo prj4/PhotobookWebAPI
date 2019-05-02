@@ -24,6 +24,9 @@
     <Reference Include="Microsoft.AspNetCore.Hosting">
       <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.hosting\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Hosting.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNetCore.Identity">
+      <HintPath>..\..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.identity\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Identity.dll</HintPath>
+    </Reference>
     <Reference Include="PhotoBook.Repository">
       <HintPath>..\PhotobookWebAPI\DAL\PhotoBook.Repository.dll</HintPath>
     </Reference>
