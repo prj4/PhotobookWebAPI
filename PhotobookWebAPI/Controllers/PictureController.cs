@@ -119,13 +119,33 @@ namespace PhotobookWebAPI.Controllers
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
+
+            Picture pic =  _picRepo.GetPictureById(PictureId).Result;
+
+            int guestId = pic.GuestId;
+            int hostId = pic.HostId;
+            string pictureTakerName = "";
+            Host h = new Host();
+            Guest g = new Guest();
+            if (guestId != 0)
+            {
+                g = _guestRepo.GetGuestById(guestId).Result;
+                pictureTakerName = g.Name;
+            }else if (hostId!=0)
+            {
+                h = _hostRepo.GetHostById(hostId).Result;
+                pictureTakerName = h.Name;
+            }
+
+            
+
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId + ".PNG"));
 
             if (System.IO.File.Exists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
-                return PhysicalFile(file, "image/PNG");
+                return PhysicalFile(file, "image/PNG", pictureTakerName);
             }
             logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
             return NotFound();
@@ -138,13 +158,31 @@ namespace PhotobookWebAPI.Controllers
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
+            Picture pic = _picRepo.GetPictureById(PictureId).Result;
+
+            int guestId = pic.GuestId;
+            int hostId = pic.HostId;
+            string pictureTakerName = "";
+            Host h;
+            Guest g;
+            if (guestId != 0)
+            {
+                g = _guestRepo.GetGuestById(guestId).Result;
+                pictureTakerName = g.Name;
+            }
+            else if (hostId != 0)
+            {
+                h = _hostRepo.GetHostById(hostId).Result;
+                pictureTakerName = h.Name;
+            }
+
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin, "Preview",
                 (PictureId + ".PNG"));
 
             if (System.IO.File.Exists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
-                return PhysicalFile(file, "image/PNG");
+                return PhysicalFile(file, "image/PNG", pictureTakerName);
             }
             logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
             return NotFound();
@@ -246,7 +284,10 @@ namespace PhotobookWebAPI.Controllers
 
 
 
-            return Ok();
+            return Ok(new ReturnPictureIdModel()
+            {
+                PictureId = picId
+            });
         }
 
 
@@ -265,7 +306,7 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>No Content, Picture deleted</returns>
         /// <response code="204">Deleted the requested picture</response>
-        /// <response code="401">If you don't have the right to delete the picture</response>   
+        /// <response code="401">If you don't have the right to delete the picture</response>       
         /// <response code="404">If the users claim is not recognized or,
         ///                      If the the picture wasn't found on the server.</response>
         [HttpDelete("{EventPin}/{PictureId}")]
