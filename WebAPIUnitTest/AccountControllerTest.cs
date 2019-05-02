@@ -5,6 +5,7 @@ using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotobookWebAPI.Data;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Hosting;
 using PhotobookWebAPI.Controllers;
 
 namespace Tests
@@ -12,6 +13,7 @@ namespace Tests
     public class AccountControllerTest
     {
         //private UserManager<AppUser> _userManager;
+        
 
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
@@ -32,7 +34,6 @@ namespace Tests
         [Test]
         public void Test1()
         {
-            
 
             Assert.Pass();
         }
