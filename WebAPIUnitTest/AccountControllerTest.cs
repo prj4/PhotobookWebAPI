@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using Castle.Core.Internal;
 using NSubstitute;
 using NUnit.Framework;
@@ -35,21 +37,25 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
+            //AppDBContext dataBase = new AppDBContext();
             _eventRepo = Substitute.For<IEventRepository>();
+            //_eventRepo.Setup()
+
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
 
-            _userManager = Mock.Of<UserManager<AppUser>>();
-            _signInManager = Mock.Of<SignInManager<AppUser>>();
-
+            //_userManager = new UserManager<AppUser>();
+            _signInManager = Substitute.For<SignInManager<AppUser>>();
+            
             _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
         }
 
         [Test]
-        public async void accounts_get_returnsOK()
+        public async Task accounts_get_returnsOK()
         {
+            
             var actionResult = await _uut.GetAccounts();
-            Assert.That(actionResult.IsNullOrEmpty());
+            
         }
     }
 }
