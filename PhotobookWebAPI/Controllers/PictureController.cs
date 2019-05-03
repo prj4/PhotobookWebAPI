@@ -353,7 +353,8 @@ namespace PhotobookWebAPI.Controllers
             if (userRole == "Host")
             {
                 var host = await _hostRepo.GetHostByEmail(user.Email);
-                foreach (var event_ in host.Events)
+                var events = await _eventRepo.GetEventsByHostId(host.HostId);
+                foreach (var event_ in events)
                 {
                     if (event_.Pin == EventPin) //Hvis Hosten er host af dette event
                     {

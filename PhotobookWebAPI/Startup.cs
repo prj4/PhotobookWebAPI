@@ -62,9 +62,21 @@ namespace PhotobookWebAPI
                 c.IncludeXmlComments(xmlPath);
                 
             });
+            string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (env == "TEST")
+            {
+                services.AddDbContext<AppDBContext>(opt => opt.UseInMemoryDatabase());
+            }
+            else
+            {
+                services.AddDbContext<AppDBContext>(opt =>
+                    opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            }
 
-            services.AddDbContext<AppDBContext>(opt =>
-                opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+
+
+            
 
             
 
