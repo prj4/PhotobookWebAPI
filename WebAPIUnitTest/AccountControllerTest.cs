@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NUnit.Framework.Internal;
 using System.Data.Entity;
+using System.Linq;
 
 namespace Tests
 {
@@ -36,11 +37,21 @@ namespace Tests
 
         private List<AppUser> _users = new List<AppUser>
         {
-            new AppUser() { },
-            new AppUser() { }
+            new AppUser()
+            {
+                Email = "d@d",
+                PasswordHash = "123456",
+                Name = "Alfred"
+            },
+            new AppUser()
+            {
+                Email = "b@b",
+                PasswordHash = "123456",
+                Name = "Balfred"
+            }
         };
 
-
+        
 
         [SetUp]
         public void Setup()
@@ -63,6 +74,7 @@ namespace Tests
         [Test]
         public async Task accounts_get_returnsOK()
         {
+            //_userManager.
             var accounts = await _uut.GetAccounts();
             Assert.That(accounts.IsNullOrEmpty());
 
