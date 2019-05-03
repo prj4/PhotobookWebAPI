@@ -1,4 +1,5 @@
-using System;
+using System.Net;
+using Castle.Core.Internal;
 using NSubstitute;
 using NUnit.Framework;
 using PhotoBook.Repository.EventRepository;
@@ -6,14 +7,15 @@ using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotobookWebAPI.Data;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Moq;
 using PhotobookWebAPI.Controllers;
+using Moq;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using NUnit.Framework.Internal;
 
 namespace Tests
 {
+    [TestFixture]
     public class AccountControllerTest
     {
         //private UserManager<AppUser> _userManager;
@@ -22,6 +24,9 @@ namespace Tests
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
+
+        private UserManager<AppUser> _userManager;
+        private SignInManager<AppUser> _signInManager;
 
         private AccountController _uut;
 
@@ -34,14 +39,17 @@ namespace Tests
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
 
-            // _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
+            _userManager = Mock.Of<UserManager<AppUser>>();
+            _signInManager = Mock.Of<SignInManager<AppUser>>();
+
+            _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
         }
 
         [Test]
-        public void Test1()
+        public async void accounts_get_returnsOK()
         {
-
-            Assert.Pass();
+            var actionResult = await _uut.GetAccounts();
+            Assert.That(actionResult.IsNullOrEmpty());
         }
     }
 }

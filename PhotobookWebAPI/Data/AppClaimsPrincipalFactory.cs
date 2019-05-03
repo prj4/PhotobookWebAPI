@@ -22,10 +22,10 @@ namespace PhotobookWebAPI.Data
         {
             var principal = await base.CreateAsync(user);
 
-            if (!string.IsNullOrWhiteSpace(user.FullName))
+            if (!string.IsNullOrWhiteSpace(user.Name))
             {
                 ((ClaimsIdentity)principal.Identity).AddClaims(new[] {
-                    new Claim(ClaimTypes.GivenName, user.FullName)
+                    new Claim(ClaimTypes.GivenName, user.Name)
                 });
             }
 
