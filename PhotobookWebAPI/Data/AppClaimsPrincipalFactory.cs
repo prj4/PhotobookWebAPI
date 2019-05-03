@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace PhotobookWebAPI.Data
 {
+    
     public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<AppUser, IdentityRole>
     {
         public AppClaimsPrincipalFactory(
@@ -33,4 +34,5 @@ namespace PhotobookWebAPI.Data
             return principal;
         }
     }
+    
 }

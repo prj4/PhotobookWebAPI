@@ -1,11 +1,15 @@
+using System;
 using NSubstitute;
 using NUnit.Framework;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotobookWebAPI.Data;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 using PhotobookWebAPI.Controllers;
 
 namespace Tests
@@ -29,7 +33,6 @@ namespace Tests
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
-
 
             // _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
         }
