@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>PhotoAPI</title>
+    <title>Login</title>
     <style>
         input[type='submit'], button, [aria-label] {
             cursor: pointer;
@@ -30,53 +30,26 @@
     </style>
 </head>
 <body>
-<h1>PhotoAPI</h1>
-<div>
-    <a href="/api/Host/Index">See Host database</a><br>
-    <a href="/api/Guest/Index">See Guest database</a><br>
-    <a href="/api/Event/Index">See Event database</a><br>
-    <a href="/api/Picture/Index">See Picture database</a><br>
-    <br/>
-    <a href="/swagger">View API</a><br>
-    <a href="/api/Log">See log of all calls to API</a><br>
-</div>
+    <h1>PhotoAPI Login</h1>
 
-<h3>Add</h3>
-<form action="javascript:void(0);" method="POST" onsubmit="addItem()">
-    <input type="text" id="AccountName" placeholder="Name"><br>
-    <input type="text" id="AccountEmail" placeholder="Email"><br>
-    <input type="text" id="AccountPassword" placeholder="Password"><br>
-    <input type="submit" value="Add">
+
+    <h3>AdminLogin</h3>
+    <form action="javascript:void(0);" method="POST" onsubmit="LoginAdmin()">
+        <input type="text" id="AdminAccountName" placeholder="UserName"><br>
+        <input type="text" id="AdminAccountPassword" placeholder="Password"><br>
+        <input type="submit" value="Login">
+    </form>
+<form action="javascript:void(0);" method="POST" onsubmit="LogoutAdmin()">
+    <input type="submit" value="Logout">
 </form>
 
-<div id="spoiler">
-    <h3>Edit</h3>
-    <form class="my-form">
-        <input type="hidden" id="edit-id">
-        Username:<input type="text" id="edit-username"><br>
-        Email:<input type="text" id="edit-email"><br>
-        <input type="submit" value="Save">
-        <a onclick="closeInput()" aria-label="Close">&#10006;</a>
-    </form>
-</div>
+Bruger: admin Kode: admin <br/>
+Tager lige 2 sek når du trykker log ind
 
-<p id="counter"></p>
-
-<div id="table">
-    <table>
-        <tr>
-            <th>UserName</th>
-            <th></th>
-            <th></th>
-        </tr>
-        <tbody id="accounts"></tbody>
-    </table>
-</div>
-    
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
-<script src="site.js"></script>
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <script src="site.js"></script>
 </body>
 </html>

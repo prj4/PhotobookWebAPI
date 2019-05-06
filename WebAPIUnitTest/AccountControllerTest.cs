@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NUnit.Framework.Internal;
 using System.Data.Entity;
+using System.Linq;
+using NSubstitute.Core;
 
 namespace Tests
 {
@@ -70,18 +73,31 @@ namespace Tests
         }
 
 
-        public static Mock<UserManager<TUser>> MockUserManager<TUser>(List<TUser> ls) where TUser : class
+        public static Mock<UserManager<AppUser>> MockUserManager<AppUser>(List<AppUser> ls) where AppUser : class
         {
-            var store = new Mock<IUserStore<TUser>>();
-            var mgr = new Mock<UserManager<TUser>>(store.Object, null, null, null, null, null, null, null, null);
-            mgr.Object.UserValidators.Add(new UserValidator<TUser>());
-            mgr.Object.PasswordValidators.Add(new PasswordValidator<TUser>());
+            var store = new Mock<IUserStore<AppUser>>();
+            var mgr = new Mock<UserManager<AppUser>>(store.Object, null, null, null, null, null, null, null, null);
+            mgr.Object.UserValidators.Add(new UserValidator<AppUser>());
+            mgr.Object.PasswordValidators.Add(new PasswordValidator<AppUser>());
 
-            mgr.Setup(x => x.DeleteAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
-            mgr.Setup(x => x.CreateAsync(It.IsAny<TUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<TUser, string>((x, y) => ls.Add(x));
-            mgr.Setup(x => x.UpdateAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
+            mgr.Setup(x => x.DeleteAsync(It.IsAny<AppUser>())).ReturnsAsync(IdentityResult.Success);
+            mgr.Setup(x => x.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<AppUser, string>((x, y) => ls.Add(x));
+            mgr.Setup(x => x.UpdateAsync(It.IsAny<AppUser>())).ReturnsAsync(IdentityResult.Success);
+
 
             return mgr;
         }
+
+        private static List<AppUser> getAppUsers() {
+            var list = new List<AppUser>
+            {
+                new AppUser() { },
+                new AppUser() { }
+            };
+
+
+            return list;
+        }
+
     }
 }

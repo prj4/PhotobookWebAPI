@@ -38,7 +38,6 @@ namespace PhotobookWebAPI.Controllers
 
         public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
         {
-
             _userManager = userManager;
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
@@ -47,11 +46,10 @@ namespace PhotobookWebAPI.Controllers
 
         [ApiExplorerSettings(IgnoreApi = true)]
         [Route("Index")]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-
             return View(await _eventRepo.GetEvents());
         }
 
