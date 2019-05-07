@@ -134,9 +134,9 @@ namespace PhotobookWebAPI
                     .Options));
             });
             services.AddScoped<ICurrentUser, CurrentUser>(u =>
-            {
-                return new CurrentUser(new HttpContextAccessor().HttpContext);
-            });
+                {
+                    return new CurrentUser(new HttpContextAccessor().HttpContext);
+                });
 
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();

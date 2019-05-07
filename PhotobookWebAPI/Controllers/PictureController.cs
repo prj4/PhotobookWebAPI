@@ -26,7 +26,6 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class PictureController : Controller
     {
-        private UserManager<AppUser> _userManager;
         private IEventRepository _eventRepo;
         private IGuestRepository _guestRepo;
         private IHostRepository _hostRepo;
@@ -34,14 +33,13 @@ namespace PhotobookWebAPI.Controllers
         private Logger logger = LogManager.GetCurrentClassLogger();
         private ICurrentUser _currentUser;
 
-        public PictureController(UserManager<AppUser> userManager, IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
+        public PictureController( IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
             IPictureRepository picRepo, ICurrentUser currentUser)
         {
             _eventRepo = eventRepo;
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
             _picRepo = picRepo;
-            _userManager = userManager;
             _currentUser = currentUser;
 
         }
@@ -208,31 +206,21 @@ namespace PhotobookWebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
-            //Finding logged in user
-            var user =  await _userManager.FindByNameAsync(_currentUser.Name());
 
-            //Determining user role
-            string userRole = null;
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            foreach (var userClaim in userClaims)
-            {
-                if (userClaim.Type == "Role")
-                    userRole = userClaim.Value;
-            }
-
+            string userName = _currentUser.Name();
             Picture newPicture = new Picture();
 
             //Getting guest or host
-            if (userRole=="Guest")
+            if (!userName.Contains('@'))
             {
-                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, model.EventPin);
+                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(userName, model.EventPin);
                 //Creating picture for database if a guest took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.GuestId = guest.GuestId;
             }
-            else if (userRole == "Host")
+            else if (userName.Contains('@'))
             {
-                Host host = await _hostRepo.GetHostByEmail(user.Email);
+                Host host = await _hostRepo.GetHostByEmail(userName);
                 //Creating picture for database if host took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.HostId = host.HostId;
@@ -243,7 +231,7 @@ namespace PhotobookWebAPI.Controllers
             //Inserting picture in database
             int picId = await _picRepo.InsertPicture(newPicture);
 
-            logger.Info($"User with UserName: {user.UserName} Inserts picture in db with for Event: {newPicture.EventPin} with PictureId: {newPicture.PictureId}");
+            logger.Info($"User with UserName: {userName} Inserts picture in db with for Event: {newPicture.EventPin} with PictureId: {newPicture.PictureId}");
 
             //Setting the current directory correctly 
             CurrentDirectoryHelpers.SetCurrentDirectory();
@@ -319,22 +307,13 @@ namespace PhotobookWebAPI.Controllers
             string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId.ToString() + ".PNG"));
 
-            //Bestemmer den bruger som er logget ind
-            var user = await _userManager.FindByNameAsync(_currentUser.Name());
 
-            //bestemmer brugerens rolle
-            string userRole = null;
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            foreach (var userClaim in userClaims)
-            {
-                if (userClaim.Type == "Role")
-                    userRole = userClaim.Value;
-            }
+            string userName = _currentUser.Name();
 
-            if (userRole == "Guest")
+            if (!userName.Contains('@'))
             {
                 var event_ = await _eventRepo.GetEventByPin(EventPin);
-                var guest = await _guestRepo.GetGuestByNameAndEventPin(user.Name, EventPin);
+                var guest = await _guestRepo.GetGuestByNameAndEventPin(userName, EventPin);
                 foreach (var picture in event_.Pictures)
                 {
                     if ((picture.PictureId == PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
@@ -352,9 +331,9 @@ namespace PhotobookWebAPI.Controllers
 
                 return Unauthorized();
             }
-            if (userRole == "Host")
+            if (userName.Contains('@'))
             {
-                var host = await _hostRepo.GetHostByEmail(user.Email);
+                var host = await _hostRepo.GetHostByEmail(userName);
                 var events = await _eventRepo.GetEventsByHostId(host.HostId);
                 foreach (var event_ in events)
                 {
