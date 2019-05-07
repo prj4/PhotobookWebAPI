@@ -19,12 +19,12 @@ using System.Linq;
 
 namespace Tests
 {
-
+    
     [TestFixture]
     public class AccountControllerTest
     {
         //private UserManager<AppUser> _userManager;
-        
+
 
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
