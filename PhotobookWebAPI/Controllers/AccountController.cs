@@ -99,7 +99,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="200">Returns AppUser with specified username</response>
         /// <response code="204">User not found</response> 
         [HttpGet("{UserName}")]
-        [Authorize("IsAdmin")]
+        [AllowAnonymous]
         public async Task<AppUser> GetAccount(string UserName)
         {
             var user = await _userManager.FindByNameAsync(UserName);
@@ -211,7 +211,7 @@ namespace PhotobookWebAPI.Controllers
 
 
         /// <summary>
-        /// Creates Admin user(NOT CURRENTLY WORKING)
+        /// Creates Admin user
         /// </summary>
         /// <remarks>
         /// Sample request:

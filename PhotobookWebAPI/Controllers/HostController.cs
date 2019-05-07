@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PB.Dto;
 using PhotobookWebAPI.Data;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
@@ -34,12 +35,14 @@ namespace PhotobookWebAPI.Controllers
 
         [ApiExplorerSettings(IgnoreApi = true)]
         [Route("Index")]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
 
             return View(await _hostRepo.GetHosts());
         }
+
+
     }
 }

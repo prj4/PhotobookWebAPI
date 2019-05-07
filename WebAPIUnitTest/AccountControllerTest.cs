@@ -32,7 +32,7 @@ namespace Tests
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
 
-        private UserManager<AppUser> _userManager;
+        private Mock<UserManager<AppUser>> _userManager;
         private SignInManager<AppUser> _signInManager;
 
         private AccountController _uut;
@@ -54,13 +54,13 @@ namespace Tests
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
 
-            _userManager = MockUserManager<AppUser>(_users).Object;
+            _userManager = MockUserManager<AppUser>(_users);
             //_userManager = Mock.Of<UserManager<AppUser>>();
             //_signInManager = Mock.Of<SignInManager<AppUser>>();
 
            
-
-            _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo);
+            
+            _uut = new AccountController(_userManager.Object, _signInManager, _eventRepo, _hostRepo, _guestRepo);
         }
 
         [Test]
@@ -68,8 +68,6 @@ namespace Tests
         {
             var accounts = await _uut.GetAccounts();
             Assert.That(accounts.IsNullOrEmpty());
-
-
         }
 
 
@@ -86,17 +84,6 @@ namespace Tests
 
 
             return mgr;
-        }
-
-        private static List<AppUser> getAppUsers() {
-            var list = new List<AppUser>
-            {
-                new AppUser() { },
-                new AppUser() { }
-            };
-
-
-            return list;
         }
 
     }
