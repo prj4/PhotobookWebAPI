@@ -31,7 +31,7 @@ namespace PhotobookWebAPI.Controllers
     {
 
 
-        private Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
+
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
@@ -39,9 +39,9 @@ namespace PhotobookWebAPI.Controllers
         private ICurrentUser _currentUser;
         
 
-        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager, ICurrentUser currentUser)
+        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, ICurrentUser currentUser)
         {
-            _userManager = userManager;
+
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
 
@@ -196,20 +196,9 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> DeleteEvent(string pin)
         {
             //Bestemmer den bruger som er logget ind
-            var user = await _userManager.FindByNameAsync(_currentUser.Name());
+            string userName = _currentUser.Name();
 
-            //bestemmer brugerens rolle
-            string userRole = null;
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            foreach (var userClaim in userClaims)
-            {
-                if (userClaim.Type == "Role")
-                    userRole = userClaim.Value;
-            }
-
-            if (userRole == "Host")
-            {
-                if (_hostRepo.GetHostByEmail(user.Email).Result.HostId == _eventRepo.GetEventByPin(pin).Result.HostId)
+                if (_hostRepo.GetHostByEmail(userName).Result.HostId == _eventRepo.GetEventByPin(pin).Result.HostId)
                 {
                     CurrentDirectoryHelpers.SetCurrentDirectory();
                     string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
@@ -222,9 +211,6 @@ namespace PhotobookWebAPI.Controllers
 
                     return NoContent();
                 }
-
-            }
-
             return BadRequest();
 
         }
@@ -304,19 +290,12 @@ namespace PhotobookWebAPI.Controllers
 
 
 
-        [NonAction]
-        private async Task<AppUser> GetCurrentAppUser(string currentUserName)
-        {
-
-            var currentUser = await _userManager.FindByNameAsync(currentUserName);
-
-            return currentUser;
-        }
+       
         [NonAction]
         private async Task<Host> GetCurrentHost(string currentUserName)
         {
 
-            var currentHost =await _hostRepo.GetHostByEmail(GetCurrentAppUser(currentUserName).Result.Email);
+            var currentHost =await _hostRepo.GetHostByEmail(currentUserName);
 
             return currentHost;
         }
