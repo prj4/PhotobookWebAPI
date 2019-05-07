@@ -32,7 +32,6 @@ namespace Tests
     {     
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
-        private IGuestRepository _guestRepo;
         private ICurrentUser _fakeCurrentUser;
         private EventController _uut;
 
@@ -47,7 +46,6 @@ namespace Tests
             //Arange
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
-            _guestRepo = Substitute.For<IGuestRepository>();
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
 
             _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser);
@@ -63,6 +61,8 @@ namespace Tests
             };
         }
 
+        #region Dependency Call Testing
+        
         [Test]
         public async Task CreateEvent_CurrentUser_NameCalled()
         {
@@ -123,6 +123,10 @@ namespace Tests
             _eventRepo.Received(1).GetEventByPin(Arg.Any<string>());
         }
 
+        #endregion
+
+        #region Return Value Testing
+
         [Test]
         public async Task CreateEvent_HostRepo_ReturnsOk()
         {
@@ -153,7 +157,10 @@ namespace Tests
             var statCode = response as BadRequestObjectResult;
 
             //Assert
+            Assert.That(statCode, Is.Not.Null);
             Assert.That(statCode.StatusCode, Is.EqualTo(400));
         }
+
+        #endregion
     }
 }
