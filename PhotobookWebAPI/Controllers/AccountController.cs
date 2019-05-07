@@ -37,16 +37,18 @@ namespace PhotobookWebAPI.Controllers
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
+        private ICurrentUser _currentUser;
 
 
 
-        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo)
+        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo, ICurrentUser currentUser)
         {            
             _userManager = userManager;
             _signInManager = signInManager;
             _eventRepo = eventRepo;
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
+            _currentUser = currentUser;
         }
 
 
@@ -129,7 +131,7 @@ namespace PhotobookWebAPI.Controllers
         [Authorize("IsHost")]
         public async Task<IActionResult> PutAccount(AppUser newData)
         {
-                AppUser user = await _userManager.FindByNameAsync(User.Identity.Name);
+                AppUser user = await _userManager.FindByNameAsync(_currentUser.Name());
 
                 if (user == null)
                 {

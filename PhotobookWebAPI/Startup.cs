@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -132,7 +133,10 @@ namespace PhotobookWebAPI
                     .UseSqlServer(Configuration.GetConnectionString("RemoteConnection"))
                     .Options));
             });
-
+            services.AddScoped<ICurrentUser, CurrentUser>(u =>
+            {
+                return new CurrentUser(new HttpContextAccessor().HttpContext);
+            });
 
 
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();

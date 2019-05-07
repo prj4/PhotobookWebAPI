@@ -18,6 +18,7 @@ using NUnit.Framework.Internal;
 using System.Data.Entity;
 using System.Linq;
 using NSubstitute.Core;
+using PhotobookWebAPI;
 
 namespace Tests
 {
@@ -31,8 +32,9 @@ namespace Tests
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
+        private ICurrentUser _fakeCurrentUser;
 
-        private Mock<UserManager<AppUser>> _userManager;
+        private UserManager<AppUser> _userManager;
         private SignInManager<AppUser> _signInManager;
 
         private AccountController _uut;
@@ -53,14 +55,15 @@ namespace Tests
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
+            _fakeCurrentUser = Substitute.For<ICurrentUser>();
 
-            _userManager = MockUserManager<AppUser>(_users);
+            _userManager = MockUserManager<AppUser>(_users).Object;
             //_userManager = Mock.Of<UserManager<AppUser>>();
             //_signInManager = Mock.Of<SignInManager<AppUser>>();
 
            
             
-            _uut = new AccountController(_userManager.Object, _signInManager, _eventRepo, _hostRepo, _guestRepo);
+            _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo,_fakeCurrentUser);
         }
 
         [Test]

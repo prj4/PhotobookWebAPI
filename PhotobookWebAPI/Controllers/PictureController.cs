@@ -32,16 +32,18 @@ namespace PhotobookWebAPI.Controllers
         private IHostRepository _hostRepo;
         private IPictureRepository _picRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
+        private ICurrentUser _currentUser;
 
         public PictureController(UserManager<AppUser> userManager, IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
-            IPictureRepository picRepo)
+            IPictureRepository picRepo, ICurrentUser currentUser)
         {
             _eventRepo = eventRepo;
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
             _picRepo = picRepo;
             _userManager = userManager;
-           
+            _currentUser = currentUser;
+
         }
 
         /// <summary>
@@ -207,7 +209,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> InsertPicture(InsertPictureModel model)
         {
             //Finding logged in user
-            var user =  await _userManager.FindByNameAsync(User.Identity.Name);
+            var user =  await _userManager.FindByNameAsync(_currentUser.Name());
 
             //Determining user role
             string userRole = null;
@@ -318,7 +320,7 @@ namespace PhotobookWebAPI.Controllers
                 (PictureId.ToString() + ".PNG"));
 
             //Bestemmer den bruger som er logget ind
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(_currentUser.Name());
 
             //bestemmer brugerens rolle
             string userRole = null;
