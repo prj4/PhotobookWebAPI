@@ -266,7 +266,7 @@ namespace PhotobookWebAPI.Controllers
             await _eventRepo.InsertEvent(newEvent);
 
             //Validating that it is in the DB
-            Event testEvent = await  _eventRepo.GetEventByPin(pin);
+            Event testEvent = await _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
                 CurrentDirectoryHelpers.SetCurrentDirectory();
@@ -285,7 +285,7 @@ namespace PhotobookWebAPI.Controllers
             }
 
          
-            return BadRequest();
+            return BadRequest("Event Not Created");
         }
 
 

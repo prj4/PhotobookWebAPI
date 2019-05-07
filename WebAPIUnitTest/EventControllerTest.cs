@@ -18,6 +18,8 @@ using NUnit.Framework.Internal;
 using System.Data.Entity;
 using System.Linq;
 using NSubstitute.Core;
+using NSubstitute.ReceivedExtensions;
+using NSubstitute.ReturnsExtensions;
 using PhotobookWebAPI;
 using PhotoBookDatabase.Model;
 using PB.Dto;
@@ -130,10 +132,28 @@ namespace Tests
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
 
             //Act
-            var result = await _uut.CreateEvent(_testEventModel);
+            var response = await _uut.CreateEvent(_testEventModel);
+            var statCode = response as OkObjectResult;
 
             //Assert
-            //Assert.That(_testEventModel.Name().IsEqalsTo(result.));
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task CreateEvent_HostRepo_ReturnsBadRequest()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).ReturnsNull();
+
+            //Act
+            var response = await _uut.CreateEvent(_testEventModel);
+            var statCode = response as BadRequestObjectResult;
+
+            //Assert
+            Assert.That(statCode.StatusCode, Is.EqualTo(400));
         }
     }
 }
