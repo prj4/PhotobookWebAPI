@@ -24,27 +24,14 @@ namespace Tests
 {
 
     [TestFixture]
-    public class AccountControllerTest
-    {
-        //private UserManager<AppUser> _userManager;
-        
-
+    public class EventControllerTest
+    {     
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
         private ICurrentUser _fakeCurrentUser;
 
-        private UserManager<AppUser> _userManager;
-        private SignInManager<AppUser> _signInManager;
-
         private AccountController _uut;
-
-        private List<AppUser> _users = new List<AppUser>
-        {
-            new AppUser() { },
-            new AppUser() { }
-        };
-
 
 
         [SetUp]
@@ -56,14 +43,8 @@ namespace Tests
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
-
-            _userManager = MockUserManager<AppUser>(_users).Object;
-            //_userManager = Mock.Of<UserManager<AppUser>>();
-            //_signInManager = Mock.Of<SignInManager<AppUser>>();
-
-           
             
-            _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo,_fakeCurrentUser);
+            _uut = new EventController(_eventRepo, _hostRepo, _guestRepo, _fakeCurrentUser);
         }
 
         [Test]
