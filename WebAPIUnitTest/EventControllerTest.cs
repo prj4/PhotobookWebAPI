@@ -19,6 +19,8 @@ using System.Data.Entity;
 using System.Linq;
 using NSubstitute.Core;
 using PhotobookWebAPI;
+using PhotoBookDatabase.Model;
+using PB.Dto;
 
 namespace Tests
 {
@@ -30,45 +32,108 @@ namespace Tests
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
         private ICurrentUser _fakeCurrentUser;
+        private EventController _uut;
 
-        private AccountController _uut;
+        private Host _testHost;
+        private EventModel _testEventModel;
+        
 
 
         [SetUp]
         public void Setup()
         {
-
-
+            //Arange
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
             _guestRepo = Substitute.For<IGuestRepository>();
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
-            
-            _uut = new EventController(_eventRepo, _hostRepo, _guestRepo, _fakeCurrentUser);
+
+            _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser);
+
+            _testHost = new Host {Email = "test@test", Events = null, HostId = 1, Name = "test"};
+            _testEventModel = new EventModel
+            {
+                Description = "test fest amok",
+                EndDate = DateTime.Now,
+                StartDate = DateTime.Now,
+                Name = "test fest",
+                Location = "Helvede"
+            };
         }
 
         [Test]
-        public async Task accounts_get_returnsOK()
+        public async Task CreateEvent_CurrentUser_NameCalled()
         {
-            var accounts = await _uut.GetAccounts();
-            Assert.That(accounts.IsNullOrEmpty());
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _fakeCurrentUser.Received(1).Name();
         }
 
-
-        public static Mock<UserManager<AppUser>> MockUserManager<AppUser>(List<AppUser> ls) where AppUser : class
+        [Test]
+        public async Task CreateEvent_HostRepo_GetCurrentHostCalled()
         {
-            var store = new Mock<IUserStore<AppUser>>();
-            var mgr = new Mock<UserManager<AppUser>>(store.Object, null, null, null, null, null, null, null, null);
-            mgr.Object.UserValidators.Add(new UserValidator<AppUser>());
-            mgr.Object.PasswordValidators.Add(new PasswordValidator<AppUser>());
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
 
-            mgr.Setup(x => x.DeleteAsync(It.IsAny<AppUser>())).ReturnsAsync(IdentityResult.Success);
-            mgr.Setup(x => x.CreateAsync(It.IsAny<AppUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<AppUser, string>((x, y) => ls.Add(x));
-            mgr.Setup(x => x.UpdateAsync(It.IsAny<AppUser>())).ReturnsAsync(IdentityResult.Success);
+            //Act
+            await _uut.CreateEvent(_testEventModel);
 
-
-            return mgr;
+            //Assert
+            _hostRepo.Received(1).GetHostByEmail(Arg.Any<string>());
         }
 
+        [Test]
+        public async Task CreateEvent_HostRepo_InsertEventCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _eventRepo.Received(1).InsertEvent(Arg.Any<Event>());
+        }
+
+        [Test]
+        public async Task CreateEvent_HostRepo_GetEventByPinCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _eventRepo.Received(1).GetEventByPin(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task CreateEvent_HostRepo_ReturnsOk()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            var result = await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            //Assert.That(_testEventModel.Name().IsEqalsTo(result.));
+        }
     }
 }
