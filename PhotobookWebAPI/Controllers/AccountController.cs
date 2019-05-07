@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,18 +37,32 @@ namespace PhotobookWebAPI.Controllers
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
+        private ICurrentUser _currentUser;
 
 
 
-        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo)
+        public AccountController(UserManager<AppUser> userManager,  SignInManager<AppUser> signInManager, IEventRepository eventRepo, IHostRepository hostRepo, IGuestRepository guestRepo, ICurrentUser currentUser)
         {            
             _userManager = userManager;
             _signInManager = signInManager;
             _eventRepo = eventRepo;
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
+            _currentUser = currentUser;
         }
 
+
+
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Route("Index")]
+        [Authorize("IsAdmin")]
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var accountList = await _userManager.Users.ToListAsync();
+            return View(accountList);
+        }
 
 
 
@@ -63,9 +78,10 @@ namespace PhotobookWebAPI.Controllers
         /// <returns>Ok, list of AppUser</returns>
         /// <response code="200">Returns list of all AppUsers, empty list if no users</response> 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         public async Task<List<AppUser>> GetAccounts()
         {
+ 
             var accountList = await _userManager.Users.ToListAsync();
             logger.Info("GetAccounts Called");
                 return accountList;
@@ -115,7 +131,7 @@ namespace PhotobookWebAPI.Controllers
         [Authorize("IsHost")]
         public async Task<IActionResult> PutAccount(AppUser newData)
         {
-                AppUser user = await _userManager.FindByNameAsync(User.Identity.Name);
+                AppUser user = await _userManager.FindByNameAsync(_currentUser.Name());
 
                 if (user == null)
                 {
@@ -148,7 +164,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="204"> User Deleted </response>
         /// <response code="404"> User not found </response> 
         [HttpDelete("{UserName}")]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         public async Task<IActionResult> DeleteAccount(string UserName)
         {
             var user = await _userManager.FindByNameAsync(UserName);
@@ -197,7 +213,7 @@ namespace PhotobookWebAPI.Controllers
 
 
         /// <summary>
-        /// Creates Admin user(NOT CURRENTLY WORKING)
+        /// Creates Admin user
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -215,7 +231,7 @@ namespace PhotobookWebAPI.Controllers
         /// <response code="404"> Error in creating admin</response> 
         [HttpPost]
         [AllowAnonymous]
-        [Route("Admin")]
+        [Route("Admin/Create")]
         public async Task<ActionResult> CreateAdmin(RegisterAdminModel model)
         {
             
@@ -228,13 +244,44 @@ namespace PhotobookWebAPI.Controllers
             {
                 var roleClaim = new Claim("Role", "Admin");
                 await _userManager.AddClaimAsync(user, roleClaim);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
 
                 return NoContent();
             }
 
             return NotFound();
+        }
+
+
+
+        [AllowAnonymous]
+        [Route("Admin/Login")]
+        [HttpPost]
+        public async Task<ActionResult> LoginAdmin(RegisterAdminModel model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            string userRole = null;
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            foreach (var userClaim in userClaims)
+            {
+                if (userClaim.Type == "Role")
+                    userRole = userClaim.Value;
+            }
+
+            if (userRole == "Admin")
+            {
+
+                var result = await _signInManager.PasswordSignInAsync(model.UserName,
+                    model.Password, false, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    logger.Info($"admin with login {model.UserName} signed in");
+
+
+                    return NoContent();
+                }
+            }
+
+            return BadRequest();
         }
 
 

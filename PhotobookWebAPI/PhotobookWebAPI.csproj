@@ -55,6 +55,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\site.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="C:\Users\Bruger\.nuget\packages\nlog.config\4.6.2\contentFiles\any\any\NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

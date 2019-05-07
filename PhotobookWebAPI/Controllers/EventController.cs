@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,23 +36,25 @@ namespace PhotobookWebAPI.Controllers
         private IHostRepository _hostRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
 
+        private ICurrentUser _currentUser;
+        
 
-        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager)
+        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager, ICurrentUser currentUser)
         {
-
             _userManager = userManager;
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
+
+            _currentUser = currentUser;
         }
 
 
         [ApiExplorerSettings(IgnoreApi = true)]
         [Route("Index")]
-        [AllowAnonymous]
+        [Authorize("IsAdmin")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-
             return View(await _eventRepo.GetEvents());
         }
 
@@ -117,7 +120,8 @@ namespace PhotobookWebAPI.Controllers
         [Authorize("IsHost")]
         public async Task<IActionResult> GetEvent()
         {
-            Host currentHost =await  GetCurrentHost(User.Identity.Name);
+            
+            Host currentHost = await GetCurrentHost(_currentUser.Name());
 
             var e = await _eventRepo.GetEventsByHostId(currentHost.HostId);
             logger.Info($"GetEvent called with hostId: {currentHost.HostId}");
@@ -192,7 +196,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> DeleteEvent(string pin)
         {
             //Bestemmer den bruger som er logget ind
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(_currentUser.Name());
 
             //bestemmer brugerens rolle
             string userRole = null;
@@ -248,7 +252,7 @@ namespace PhotobookWebAPI.Controllers
         public async Task<IActionResult> CreateEvent(EventModel model)
         {
             //Gets the username of the current AppUser
-            var currentUserName = User.Identity.Name;
+            var currentUserName = _currentUser.Name();
 
             //Gets the corresponding Host in the DB
             var currentHost = await GetCurrentHost(currentUserName);
