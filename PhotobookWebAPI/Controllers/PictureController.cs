@@ -271,7 +271,7 @@ namespace PhotobookWebAPI.Controllers
             {
                 MagicImageProcessor.ProcessImage(inPath, outStream, settings);
             }
-
+            
 
 
             return Ok(new ReturnPictureIdModel()

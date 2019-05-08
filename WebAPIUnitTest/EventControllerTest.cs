@@ -61,8 +61,10 @@ namespace Tests
             };
         }
 
-        #region Dependency Call Testing
+        #region CreatEvent Tests
         
+        #region Dependency Call Testing
+
         [Test]
         public async Task CreateEvent_CurrentUser_NameCalled()
         {
@@ -160,6 +162,42 @@ namespace Tests
             Assert.That(statCode, Is.Not.Null);
             Assert.That(statCode.StatusCode, Is.EqualTo(400));
         }
+
+        #endregion
+
+        #endregion
+
+        #region GetEvent Test
+
+        #region Get All
+
+
+        #endregion
+
+        #region Get Specific
+
+
+        #endregion
+
+        #region Get By Host
+
+
+
+        #endregion
+
+        #endregion
+
+        #region PutEvent Tests
+
+        #region Dependency Call Testing
+
+
+        #endregion
+
+        #region Return Value Testing
+
+        
+        #endregion
 
         #endregion
     }

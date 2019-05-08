@@ -39,6 +39,7 @@ namespace WebAPIUnitTest
 
         private Host _testHost;
         private Guest _testGuest;
+        private InsertPictureModel _testPictureModel;
 
 
 
@@ -54,8 +55,51 @@ namespace WebAPIUnitTest
 
             _uut = new PictureController(_eventRepo, _guestRepo, _hostRepo, _picRepo, _fakeCurrentUser);
 
-            _testHost = new Host { Email = "test@test", Events = null, HostId = 1, Name = "test" };
-            _testGuest = new Guest { Name = "test", Event = null, GuestId = 1, EventPin = null};
+            _testHost = new Host
+            {
+                Email = "test@test",
+                Events = null,
+                HostId = 1,
+                Name = "test"
+            };
+            _testGuest = new Guest
+            {
+                Name = "test",
+                Event = null,
+                GuestId = 1,
+                EventPin = null
+            };
+            _testPictureModel = new InsertPictureModel
+            {
+                EventPin = "1",
+                PictureString = "test"
+
+            };
         }
+
+        #region InsertPicture
+
+        #region Dependency Calls
+
+        [Test]
+        public async Task InsertPicture_CurrentUser_NameCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns("name");
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _guestRepo.GetGuestByNameAndEventPin(Arg.Any<string>(), Arg.Any<string>()).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+
+
+            //Act
+            await _uut.InsertPicture(_testPictureModel);
+
+            //Assert
+            _fakeCurrentUser.Received(1).Name();
+        }
+
+        #endregion
+
+        #endregion
     }
 }
