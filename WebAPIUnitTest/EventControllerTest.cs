@@ -37,7 +37,7 @@ namespace Tests
 
         private Host _testHost;
         private EventModel _testEventModel;
-        
+        private Event _testEvent;
 
 
         [SetUp]
@@ -50,7 +50,13 @@ namespace Tests
 
             _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser);
 
-            _testHost = new Host {Email = "test@test", Events = null, HostId = 1, Name = "test"};
+            _testHost = new Host
+            {
+                Email = "test@test",
+                Events = null,
+                HostId = 1,
+                Name = "test"
+            };
             _testEventModel = new EventModel
             {
                 Description = "test fest amok",
@@ -58,6 +64,15 @@ namespace Tests
                 StartDate = DateTime.Now,
                 Name = "test fest",
                 Location = "Helvede"
+            };
+            _testEvent = new Event
+            {
+                Description = _testEventModel.Description,
+                EndDate = _testEventModel.EndDate,
+                StartDate = _testEventModel.StartDate,
+                Location = _testEventModel.Location,
+                Name = _testEventModel.Name,
+                Pin = "1"
             };
         }
 
@@ -84,7 +99,7 @@ namespace Tests
         public async Task CreateEvent_HostRepo_GetCurrentHostCalled()
         {
             //Arrange
-            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
 
@@ -92,7 +107,7 @@ namespace Tests
             await _uut.CreateEvent(_testEventModel);
 
             //Assert
-            _hostRepo.Received(1).GetHostByEmail(Arg.Any<string>());
+            await _hostRepo.Received(1).GetHostByEmail(Arg.Is(_testHost.Email));
         }
 
         [Test]
@@ -107,7 +122,7 @@ namespace Tests
             await _uut.CreateEvent(_testEventModel);
 
             //Assert
-            _eventRepo.Received(1).InsertEvent(Arg.Any<Event>());
+            await _eventRepo.Received(1).InsertEvent(Arg.Any<Event>());
         }
 
         [Test]
@@ -122,7 +137,7 @@ namespace Tests
             await _uut.CreateEvent(_testEventModel);
 
             //Assert
-            _eventRepo.Received(1).GetEventByPin(Arg.Any<string>());
+            await _eventRepo.Received(1).GetEventByPin(Arg.Any<string>());
         }
 
         #endregion
@@ -191,12 +206,69 @@ namespace Tests
 
         #region Dependency Call Testing
 
+        [Test]
+        public async Task PutEvent__EventRepo_GetEventByPinCalled()
+        {
+            //Arrange
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            await _uut.PutEvent("1", new EditEventModel());
+
+            //Assert
+            _eventRepo.Received(1).GetEventByPin(Arg.Is("1"));
+        }
+
+        [Test]
+        public async Task PutEvent__EventRepo_UpdateEventCalled()
+        {
+            //Arrange
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            await _uut.PutEvent("1", new EditEventModel());
+
+            //Assert
+            _eventRepo.Received(1).UpdateEvent(Arg.Is(_testEvent));
+        }
+
+        #endregion
+
+        #region RouteTesting
+
+        [TestCase("new","new",null)]
+        [TestCase("new","new","new")]
+        [TestCase(null,null,"new")]
+        public async Task PutEvent__EventRepo_FunctioRouting(string nDes, string nLoc, string nNam)
+        {
+            //Arrange
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            await _uut.PutEvent("1", new EditEventModel
+            {
+                Description = nDes,
+                Location = nLoc,
+                Name = nNam
+            });
+
+            //Assert
+            Event assertEvent = _testEvent;
+            assertEvent.Description = nDes;
+            assertEvent.Location = nLoc;
+            assertEvent.Name = nNam;
+            await _eventRepo.Received(1).UpdateEvent(Arg.Is(assertEvent));
+        }
+
 
         #endregion
 
         #region Return Value Testing
 
-        
+
         #endregion
 
         #endregion
