@@ -217,7 +217,7 @@ namespace Tests
             await _uut.PutEvent("1", new EditEventModel());
 
             //Assert
-            _eventRepo.Received(1).GetEventByPin(Arg.Is("1"));
+            await _eventRepo.Received(1).GetEventByPin(Arg.Is("1"));
         }
 
         [Test]
@@ -231,7 +231,7 @@ namespace Tests
             await _uut.PutEvent("1", new EditEventModel());
 
             //Assert
-            _eventRepo.Received(1).UpdateEvent(Arg.Is(_testEvent));
+            await _eventRepo.Received(1).UpdateEvent(Arg.Is(_testEvent));
         }
 
         #endregion
@@ -260,7 +260,8 @@ namespace Tests
             assertEvent.Description = nDes;
             assertEvent.Location = nLoc;
             assertEvent.Name = nNam;
-            await _eventRepo.Received(1).UpdateEvent(Arg.Is(assertEvent));
+            assertEvent.Pin = "100";
+            _eventRepo.Received().UpdateEvent(Arg.Is(assertEvent));
         }
 
 
