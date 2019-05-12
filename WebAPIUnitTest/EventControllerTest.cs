@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NUnit.Framework.Internal;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using NSubstitute.Core;
 using NSubstitute.ReceivedExtensions;
@@ -38,7 +39,7 @@ namespace Tests
         private Host _testHost;
         private EventModel _testEventModel;
         private Event _testEvent;
-
+        private EditEventModel _testEditEventModel;
 
         [SetUp]
         public void Setup()
@@ -72,7 +73,16 @@ namespace Tests
                 StartDate = _testEventModel.StartDate,
                 Location = _testEventModel.Location,
                 Name = _testEventModel.Name,
-                Pin = "1"
+                Pin = "1",
+                HostId = 1
+            };
+            _testEditEventModel = new EditEventModel
+            {
+                Description = "newValue",
+                Location = "newValue",
+                Name = "newValue",
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today
             };
         }
 
@@ -145,7 +155,7 @@ namespace Tests
         #region Return Value Testing
 
         [Test]
-        public async Task CreateEvent_HostRepo_ReturnsOk()
+        public async Task CreateEvent_ReturnsOk()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -162,7 +172,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_ReturnsBadRequest()
+        public async Task CreateEvent_ReturnsBadRequest()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -186,17 +196,192 @@ namespace Tests
 
         #region Get All
 
+        #region Dependedncy Call Testing
+        
+        [Test]
+        public async Task GetEvents_EventRepo_GetEventsCalled()
+        {
+            //Arrange
+            _eventRepo.GetEvents().ReturnsNull();
+
+            
+            //Act
+            await _uut.GetEvents();
+
+            //Assert
+            await _eventRepo.Received(1).GetEvents();
+            }
+
+        #endregion
+
+        #region Return Value Testing
+
+        [Test]
+        public async Task GetEvents_ReturnsEventModels()
+        {
+            //Arrange
+            _eventRepo.GetEvents().Returns(new List<Event>{_testEvent}.AsEnumerable());
+
+            //Act
+            var response = await _uut.GetEvents();
+
+            //Assert
+            var result = response.FirstOrDefault();
+            Assert.That(result.Name, Is.EqualTo(_testEvent.Name));
+        }
+
+        #endregion
 
         #endregion
 
         #region Get Specific
 
+        #region Dependedncy Call Testing
+
+        [Test]
+        public async Task GetEvent_UsingPin_EventRepo_GetEventsByPinCalled()
+        {
+            //Arrange
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            var response = await _uut.GetEvent("1");
+
+            //Assert
+            await _eventRepo.Received(1).GetEventByPin("1");
+        }
+
+        #endregion
+
+        #region Return Value Testing
+
+        [Test]
+        public async Task GetEvent_UsingPin_ReturnsOk()
+        {
+            //Arrange
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            var response = await _uut.GetEvent("1");
+            var statCode = response as OkObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task GetEvent_UsingPin_ReturnsNoContent()
+        {
+            //Arrange
+            _eventRepo.GetEventByPin(Arg.Any<string>()).ReturnsNull();
+
+            //Act
+            var response = await _uut.GetEvent("1");
+            var statCode = response as NoContentResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+        }
+
+        #endregion
 
         #endregion
 
         #region Get By Host
 
+        #region Dependedncy Call Testing
 
+        [Test]
+        public async Task GetEvent_UsingHost_CurrentUser_NameCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventsByHostId(_testHost.HostId)
+                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+
+            //Act
+            await _uut.GetEvent();
+
+            //Assert
+            _fakeCurrentUser.Received(1).Name();
+        }
+
+        [Test]
+        public async Task GetEvent_UsingHost_HostRepo_GetHostByEmailCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventsByHostId(_testHost.HostId)
+                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+
+            //Act
+            await _uut.GetEvent();
+
+            //Assert
+            await _hostRepo.Received(1).GetHostByEmail(_testHost.Name);
+        }
+
+        [Test]
+        public async Task GetEvent_UsingHost_HostRepo_GetEventByHostIdCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventsByHostId(_testHost.HostId)
+                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+
+            //Act
+            await _uut.GetEvent();
+
+            //Assert
+            await _eventRepo.Received(1).GetEventsByHostId(_testHost.HostId);
+        }
+
+        #endregion
+
+        #region Return Value Testing
+
+        [Test]
+        public async Task GetEvent_UsingHost_ReturnsOk()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventsByHostId(_testHost.HostId)
+                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+
+            //Act
+            var response = await _uut.GetEvent();
+            var statCode = response as OkObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(200));
+        }
+
+        [Test]
+        public async Task GetEvent_UsingHost_ReturnsNoContent()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventsByHostId(_testHost.HostId)
+                .ReturnsNull();
+
+            //Act
+            var response = await _uut.GetEvent();
+            var statCode = response as NoContentResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+        }
+
+        #endregion
 
         #endregion
 
@@ -210,7 +395,6 @@ namespace Tests
         public async Task PutEvent__EventRepo_GetEventByPinCalled()
         {
             //Arrange
-            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
 
             //Act
@@ -224,54 +408,169 @@ namespace Tests
         public async Task PutEvent__EventRepo_UpdateEventCalled()
         {
             //Arrange
-            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            
             //Act
-            await _uut.PutEvent("1", new EditEventModel());
+            await _uut.PutEvent("1", _testEditEventModel);
 
             //Assert
-            await _eventRepo.Received(1).UpdateEvent(Arg.Is(_testEvent));
+            await _eventRepo.Received(1).UpdateEvent(Arg.Is<Event>(e =>
+                e.Description == _testEditEventModel.Description &&
+                e.Location == _testEditEventModel.Location &&
+                e.Name == _testEditEventModel.Name &&
+                e.StartDate == _testEditEventModel.StartDate &&
+                e.EndDate == _testEditEventModel.EndDate
+            ));
         }
-
-        #endregion
-
-        #region RouteTesting
-
-        [TestCase("new","new",null)]
-        [TestCase("new","new","new")]
-        [TestCase(null,null,"new")]
-        public async Task PutEvent__EventRepo_FunctioRouting(string nDes, string nLoc, string nNam)
-        {
-            //Arrange
-            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-
-            //Act
-            await _uut.PutEvent("1", new EditEventModel
-            {
-                Description = nDes,
-                Location = nLoc,
-                Name = nNam
-            });
-
-            //Assert
-            Event assertEvent = _testEvent;
-            assertEvent.Description = nDes;
-            assertEvent.Location = nLoc;
-            assertEvent.Name = nNam;
-            assertEvent.Pin = "100";
-            _eventRepo.Received().UpdateEvent(Arg.Is(assertEvent));
-        }
-
 
         #endregion
 
         #region Return Value Testing
 
+        [Test]
+        public async Task PutEvent_ReturnsNoContent()
+        {
+            //Arrange
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            var response = await _uut.PutEvent("1", _testEditEventModel);
+            var statCode = response as NoContentResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+        }
+
+        [Test]
+        public async Task PutEvent_ReturnsNotFound()
+        {
+            //Arrange
+            _eventRepo.GetEventByPin(Arg.Any<string>()).ReturnsNull();
+
+            //Act
+            var response = await _uut.PutEvent("1", _testEditEventModel);
+            var statCode = response as NotFoundObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
+        }
 
         #endregion
 
         #endregion
+
+        #region DeleteEvent Test
+
+        #region Dependency Call Testing
+
+        [Test]
+        public async Task DeleteEvent_CurrentUser_NameCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns();
+
+            //Act
+            await _uut.DeleteEvent("1");
+
+            //Assert
+            _fakeCurrentUser.Received(1).Name();
+        }
+
+        [Test]
+        public async Task DeleteEvent_HostRepo_GetHostByEmailCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
+
+            //Act
+            await _uut.DeleteEvent("1");
+
+            //Assert
+            await _hostRepo.Received(1).GetHostByEmail(_testHost.Name);
+        }
+
+        [Test]
+        public async Task DeleteEvent_EventRepo_GetEventByPinCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
+
+            //Act
+            await _uut.DeleteEvent("1");
+
+            //Assert
+            await _eventRepo.Received(1).GetEventByPin("1");
+        }
+
+        [Test]
+        public async Task DeleteEvent_EventRepo_DeleteEventByPinCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
+
+            //Act
+            await _uut.DeleteEvent("1");
+
+            //Assert
+            await _eventRepo.Received(1).DeleteEventByPin("1");
+        }
+
+        #endregion
+
+        #region Return Value Testing
+
+        [Test]
+        public async Task DeleteEvent_EventRepo_ReturnsNoContent()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            var response = await _uut.DeleteEvent("1");
+            var statCode = response as NoContentResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+        }
+
+        [Test]
+        public async Task DeleteEvent_EventRepo_ReturnsBadRequest()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _testHost.HostId = 2;
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            var response = await _uut.DeleteEvent("1");
+            var statCode = response as BadRequestObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(400));
+        }
+
+        #endregion
+
+        #endregion
+
     }
 }
