@@ -169,12 +169,18 @@ namespace PhotobookWebAPI.Controllers
                 e.Location = newData.Location;
             if (newData.Name != null)
                 e.Name = newData.Name;
-
-                e.EndDate = newData.EndDate;
+            if (newData.StartDate != DateTime.MinValue)
+            {
                 e.StartDate = newData.StartDate;
+            }
+
+            if (newData.EndDate != DateTime.MinValue)
+            {
+                e.EndDate = newData.EndDate;
+            }
 
 
-                logger.Info($"Event with pin: {pin} changed with the new values Description: {newData.Description}, Location: {newData.Location}, Name: {newData.Name}, StartDate: {newData.StartDate}, EndDate: {newData.StartDate}" );
+            logger.Info($"Event with pin: {pin} changed with the new values Description: {newData.Description}, Location: {newData.Location}, Name: {newData.Name}, StartDate: {newData.StartDate}, EndDate: {newData.StartDate}" );
 
             await _eventRepo.UpdateEvent(e);
             return NoContent();
