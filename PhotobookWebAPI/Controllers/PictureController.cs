@@ -147,8 +147,9 @@ namespace PhotobookWebAPI.Controllers
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
             }
+
             logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
-            return NotFound();
+            return NotFound("Picture wasn't found at event");
         }
 
 
@@ -267,12 +268,17 @@ namespace PhotobookWebAPI.Controllers
             string outPath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, "Preview", picId + ".PNG");
             var settings = new ProcessImageSettings { Width = 200 };
 
-            using (var outStream = new FileStream(outPath, FileMode.Create))
+            try
             {
-                MagicImageProcessor.ProcessImage(inPath, outStream, settings);
+                using (var outStream = new FileStream(outPath, FileMode.Create))
+                {
+                    MagicImageProcessor.ProcessImage(inPath, outStream, settings);
+                }
             }
-            
-
+            catch(InvalidDataException e)
+            {
+                logger.Info($"Original file not found, no thumbnail created. Exception caught: {e}");
+            }
 
             return Ok(new ReturnPictureIdModel()
             {
