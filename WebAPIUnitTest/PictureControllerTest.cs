@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -434,6 +435,261 @@ namespace Tests
 
         #endregion
 
+        #region DeletePicture
 
+        #region Dependency Call Testing
+
+        [Test]
+        public async Task DeletePicture_CurrentUser_NameCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeCurrentUser.Received(1).Name();
+        }
+
+        [Test]
+        public async Task DeletePicture_EventRepo_GetEventByPinCalled()
+        {
+            //Arrange
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture>{_testPicture};
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name,_testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            await _eventRepo.Received(1).GetEventByPin(_testEvent.Pin);
+        }
+
+        [Test]
+        public async Task DeletePicture_EventRepo_GetEventByHostIdCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            await _eventRepo.Received(1).GetEventsByHostId(_testHost.HostId);
+        }
+
+        [Test]
+        public async Task DeletePicture_GuestRepo_GetGuestByNameAndEventPinCalled()
+        {
+            //Arrange
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            await _guestRepo.Received(1).GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin);
+        }
+
+        [Test]
+        public async Task DeletePicture_HostRepo_GetHostByEmailCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            await _hostRepo.Received(1).GetHostByEmail(_testHost.Email);
+        }
+
+        [Test] // Ustabil da den afhænger af fysiske filer
+        public async Task DeletePicture_AsGuest_PictureRepo_DeletePictureCalled()
+        {
+            //Arrange
+            //Skaber billede på disk
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+            await _uut.InsertPicture(_testPictureModel);
+
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+            
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            await _picRepo.Received(1).DeletePictureById(_testPicture.PictureId);
+        }
+
+        [Test] // Ustabil da den afhænger af fysiske filer
+        public async Task DeletePicture_AsHost_PictureRepo_DeletePictureCalled()
+        {
+            //Arrange
+            //Skaber billede på disk
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+            await _uut.InsertPicture(_testPictureModel);
+
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            await _picRepo.Received(1).DeletePictureById(_testPicture.PictureId);
+        }
+
+        #endregion
+
+        #region Return Value Testing
+
+        [Test]
+        public async Task DeletePicture_AsHost_ReturnsUnauthorized()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { new Event() }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            var response = await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+            var statCode = response as UnauthorizedObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(401));
+        }
+
+        [Test]
+        public async Task DeletePicture_AsHost_ReturnsNotFound()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            var response = await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+            var statCode = response as NotFoundObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
+        }
+
+        [Test] // Ustabil da den afhænger af fysiske filer
+        public async Task DeletePicture_AsHost_ReturnsNoContent()
+        {
+            //Arrange
+            //Skaber billede på disk
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+            await _uut.InsertPicture(_testPictureModel);
+
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            var response = await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+            var statCode = response as NoContentResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+        }
+
+        [Test] // Ustabil da den afhænger af fysiske filer
+        public async Task DeletePicture_AsGuest_ReturnsUnauthorized()
+        {
+            //Arrange
+            _testPicture.PictureId = 5;
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { new Picture() };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            var response = await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+            var statCode = response as UnauthorizedObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(401));
+        }
+
+        [Test] // Ustabil da den afhænger af fysiske filer
+        public async Task DeletePicture_AsGuest_ReturnsNotFound()
+        {
+            //Arrange
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            var response = await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+            var statCode = response as NotFoundObjectResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
+        }
+
+        [Test] // Ustabil da den afhænger af fysiske filer
+        public async Task DeletePicture_AsGuest_ReturnsNoContent()
+        {
+            //Arrange
+            //Skaber billede på disk
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+            await _uut.InsertPicture(_testPictureModel);
+
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            var response = await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+            var statCode = response as NoContentResult;
+
+            //Assert
+            Assert.That(statCode, Is.Not.Null);
+            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+        }
+        #endregion
+
+        #endregion
     }
 }

@@ -326,16 +326,23 @@ namespace PhotobookWebAPI.Controllers
                     {
                         if (System.IO.File.Exists(filepath))
                         {
-                            System.IO.File.Delete(filepath);
+                            try
+                            {
+                                System.IO.File.Delete(filepath);
+                            }
+                            catch (DirectoryNotFoundException e)
+                            {
+                                logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
+                            }
                             await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
 
-                        return NotFound();
+                        return NotFound("File not found");
                     }
                 }
 
-                return Unauthorized();
+                return Unauthorized("Not your picture");
             }
             if (userName.Contains('@'))
             {
@@ -347,19 +354,26 @@ namespace PhotobookWebAPI.Controllers
                     {
                         if (System.IO.File.Exists(filepath))
                         {
-                            System.IO.File.Delete(filepath);
+                            try
+                            {
+                                System.IO.File.Delete(filepath);
+                            }
+                            catch (DirectoryNotFoundException e)
+                            {
+                                logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
+                            }
                             await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
 
-                        return NotFound();
+                        return NotFound("File not Found");
                     }
                 }
 
-                return Unauthorized();
+                return Unauthorized("Not a picture in hosts events");
             }
             
-            return NotFound();
+            return NotFound("User not found");
         }
         
     }

@@ -215,7 +215,7 @@ namespace PhotobookWebAPI.Controllers
                     }
                     catch (DirectoryNotFoundException e)
                     {
-                        logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
+                        logger.Info($"Directory wasnt found, Database deletion will continue, exception caught: {e}");
                     }   
                     
                     await _eventRepo.DeleteEventByPin(pin);
