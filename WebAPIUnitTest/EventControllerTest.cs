@@ -106,7 +106,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_GetCurrentHostCalled()
+        public async Task CreateEvent_HostRepo_GetHostByEmailCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Email);
@@ -121,7 +121,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_InsertEventCalled()
+        public async Task CreateEvent_EventRepo_InsertEventCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -136,7 +136,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_GetEventByPinCalled()
+        public async Task CreateEvent_EventRepo_GetEventByPinCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -392,7 +392,7 @@ namespace Tests
         #region Dependency Call Testing
 
         [Test]
-        public async Task PutEvent__EventRepo_GetEventByPinCalled()
+        public async Task PutEvent_EventRepo_GetEventByPinCalled()
         {
             //Arrange
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
@@ -405,7 +405,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task PutEvent__EventRepo_UpdateEventCalled()
+        public async Task PutEvent_EventRepo_UpdateEventCalled()
         {
             //Arrange
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
@@ -472,7 +472,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns();
 
             //Act
             await _uut.DeleteEvent("1");
@@ -488,7 +487,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
 
             //Act
             await _uut.DeleteEvent("1");
@@ -504,7 +502,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
 
             //Act
             await _uut.DeleteEvent("1");
@@ -520,7 +517,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
 
             //Act
             await _uut.DeleteEvent("1");
@@ -534,7 +530,7 @@ namespace Tests
         #region Return Value Testing
 
         [Test]
-        public async Task DeleteEvent_EventRepo_ReturnsNoContent()
+        public async Task DeleteEvent_ReturnsNoContent()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -551,7 +547,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task DeleteEvent_EventRepo_ReturnsBadRequest()
+        public async Task DeleteEvent_ReturnsBadRequest()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);

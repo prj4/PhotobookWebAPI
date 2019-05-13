@@ -178,9 +178,6 @@ namespace PhotobookWebAPI.Controllers
 
             await _eventRepo.UpdateEvent(e);
             return NoContent();
-            //Hvorfor no content? Kunne det ikke være ok og så den nu opdaterede event?
-            //den ændrer ALTID eventets tidspunkt, er det meningen??..
-            //er der en måde at sortere det fra på, ligesom ved null på de andre??
         }
 
         /// <summary>
