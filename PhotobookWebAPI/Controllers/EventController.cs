@@ -100,8 +100,7 @@ namespace PhotobookWebAPI.Controllers
             {
                 return Ok(toEventModel(e));
             }
-            return NoContent();
-            //Skal den virkelig returnere no content, burde 
+            return NotFound("No event found");
         }
 
         /// <summary>
@@ -130,7 +129,7 @@ namespace PhotobookWebAPI.Controllers
             {
                 return Ok(toEventModels(e));
             }
-            return NoContent();
+            return NotFound("Could not find any events");
         }
 
         /// <summary>
