@@ -44,7 +44,7 @@ namespace Tests
             new AppUser() { },
             new AppUser() { }
         };
-
+        
 
 
         [SetUp]
@@ -61,7 +61,7 @@ namespace Tests
             //_userManager = Mock.Of<UserManager<AppUser>>();
             //_signInManager = Mock.Of<SignInManager<AppUser>>();
 
-           
+            
             
             _uut = new AccountController(_userManager, _signInManager, _eventRepo, _hostRepo, _guestRepo,_fakeCurrentUser);
         }
