@@ -101,6 +101,7 @@ namespace PhotobookWebAPI.Controllers
                 return Ok(toEventModel(e));
             }
             return NoContent();
+            //Skal den virkelig returnere no content, burde 
         }
 
         /// <summary>
@@ -157,9 +158,9 @@ namespace PhotobookWebAPI.Controllers
         {
             Event e = await _eventRepo.GetEventByPin(pin);
 
-            if (e== null)
+            if (e == null)
             {
-                return NotFound();
+                return NotFound("No Event");
             }
 
             if (newData.Description != null)
@@ -177,6 +178,9 @@ namespace PhotobookWebAPI.Controllers
 
             await _eventRepo.UpdateEvent(e);
             return NoContent();
+            //Hvorfor no content? Kunne det ikke være ok og så den nu opdaterede event?
+            //den ændrer ALTID eventets tidspunkt, er det meningen??..
+            //er der en måde at sortere det fra på, ligesom ved null på de andre??
         }
 
         /// <summary>
@@ -203,15 +207,22 @@ namespace PhotobookWebAPI.Controllers
                     CurrentDirectoryHelpers.SetCurrentDirectory();
                     string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
 
-                    System.IO.Directory.Delete(filepath,true);
-
+                    try //kan ske det skal fjernes igen, men det kan vi jo lige kigge på..
+                    {
+                        System.IO.Directory.Delete(filepath, true);
+                    }
+                    catch (DirectoryNotFoundException e)
+                    {
+                        logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
+                    }   
+                    
                     await _eventRepo.DeleteEventByPin(pin);
 
                     logger.Info($"Deleted Event with pin: {pin}");
 
                     return NoContent();
                 }
-            return BadRequest();
+            return BadRequest("Permission Issue: Not Hosts Event");
 
         }
 
@@ -266,7 +277,7 @@ namespace PhotobookWebAPI.Controllers
             await _eventRepo.InsertEvent(newEvent);
 
             //Validating that it is in the DB
-            Event testEvent = await  _eventRepo.GetEventByPin(pin);
+            Event testEvent = await _eventRepo.GetEventByPin(pin);
             if (testEvent!=null)
             {
                 CurrentDirectoryHelpers.SetCurrentDirectory();
@@ -285,7 +296,7 @@ namespace PhotobookWebAPI.Controllers
             }
 
          
-            return BadRequest();
+            return BadRequest("Event Not Created");
         }
 
 
