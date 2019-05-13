@@ -271,18 +271,18 @@ namespace Tests
         }
 
         [Test]
-        public async Task GetEvent_UsingPin_ReturnsNoContent()
+        public async Task GetEvent_UsingPin_ReturnsNotFound()
         {
             //Arrange
             _eventRepo.GetEventByPin(Arg.Any<string>()).ReturnsNull();
 
             //Act
             var response = await _uut.GetEvent("1");
-            var statCode = response as NoContentResult;
+            var statCode = response as NotFoundObjectResult;
 
             //Assert
             Assert.That(statCode, Is.Not.Null);
-            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
         }
 
         #endregion
@@ -364,7 +364,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task GetEvent_UsingHost_ReturnsNoContent()
+        public async Task GetEvent_UsingHost_ReturnsNotFound()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -374,11 +374,11 @@ namespace Tests
 
             //Act
             var response = await _uut.GetEvent();
-            var statCode = response as NoContentResult;
+            var statCode = response as NotFoundObjectResult;
 
             //Assert
             Assert.That(statCode, Is.Not.Null);
-            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
         }
 
         #endregion
