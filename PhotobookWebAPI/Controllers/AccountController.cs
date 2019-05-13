@@ -191,14 +191,11 @@ namespace PhotobookWebAPI.Controllers
             {
                    if (userRole == "Host")
                    {
-                       
                        await _hostRepo.DeleteHostByEmail(user.Email);
                       logger.Info($"Host with Email {user.Email} is deleted");
-
                    }
                    else if (userRole == "Guest")
                    {
-
                     string[] guestStrings = user.UserName.Split(";");
 
                     await _guestRepo.DeleteGuestByNameAndEventPin(guestStrings[0], guestStrings[1]);
@@ -206,7 +203,6 @@ namespace PhotobookWebAPI.Controllers
 
                    }
             }
-
             return NoContent();
 
         }
