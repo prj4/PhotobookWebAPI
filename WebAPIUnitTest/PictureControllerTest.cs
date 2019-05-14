@@ -407,7 +407,7 @@ namespace Tests
             //Act
             var response = _uut.GetPicture(_testEvent.Pin, _testPicture.PictureId);
             var statCode = response as PhysicalFileResult;
-
+            
             //Assert
             Assert.That(statCode, Is.Not.Null);
             Assert.That(statCode.ContentType, Is.EqualTo("image/PNG"));
