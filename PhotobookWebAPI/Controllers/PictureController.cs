@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using PB.Dto;
 using PhotobookWebAPI.Data;
+using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -32,16 +33,17 @@ namespace PhotobookWebAPI.Controllers
         private IPictureRepository _picRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
         private ICurrentUser _currentUser;
+        private IFileSystem _fileSystem;
 
         public PictureController( IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
-            IPictureRepository picRepo, ICurrentUser currentUser)
+            IPictureRepository picRepo, ICurrentUser currentUser, IFileSystem fileSystem)
         {
             _eventRepo = eventRepo;
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
             _picRepo = picRepo;
             _currentUser = currentUser;
-
+            _fileSystem = fileSystem;
         }
 
         /// <summary>
@@ -142,7 +144,7 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId + ".PNG"));
 
-            if (System.IO.File.Exists(file))
+            if (_fileSystem.FileExists(file))//(System.IO.File.Exists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
@@ -180,7 +182,7 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin, "Preview",
                 (PictureId + ".PNG"));
 
-            if (System.IO.File.Exists(file))
+            if (_fileSystem.FileExists(file))//(System.IO.File.Exists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
@@ -240,15 +242,17 @@ namespace PhotobookWebAPI.Controllers
 
             //Creating subdirectories for events
             var subdir = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin);
-            if (!Directory.Exists(subdir))
+            if (!_fileSystem.DirectoryExists(subdir))//(!Directory.Exists(subdir))
             {
-                Directory.CreateDirectory(subdir);
+                _fileSystem.DirectoryCreate(subdir);
+                //Directory.CreateDirectory(subdir);
                 logger.Info($"Subdir created for Event: {model.EventPin}");
             }
             var subdirPreview = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,"Preview");
-            if (!Directory.Exists(subdirPreview))
+            if (!_fileSystem.DirectoryExists(subdirPreview))//(!Directory.Exists(subdirPreview))
             {
-                Directory.CreateDirectory(subdirPreview);
+                _fileSystem.DirectoryCreate(subdirPreview);
+                //Directory.CreateDirectory(subdirPreview);
                 logger.Info($"Subdir created for Event: {model.EventPin}, Preview");
             }
 
@@ -256,12 +260,15 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, picId+".PNG");
 
             var bytes = Convert.FromBase64String(model.PictureString);
+            _fileSystem.FileCreate(file, bytes);
+            /*
             using (var imageFile = new FileStream(file, FileMode.Create))
             {
                 imageFile.Write(bytes, 0, bytes.Length);
                 imageFile.Flush();
                 logger.Info($"Picture with Id: {picId} saved in  event subdir: {model.EventPin}");
             }
+            */
 
             //Creating Smaller image
             string inPath = file;
@@ -270,10 +277,13 @@ namespace PhotobookWebAPI.Controllers
 
             try
             {
+                _fileSystem.SmallFileCreate(inPath,outPath, settings);
+                /*
                 using (var outStream = new FileStream(outPath, FileMode.Create))
                 {
                     MagicImageProcessor.ProcessImage(inPath, outStream, settings);
                 }
+                */
             }
             catch(InvalidDataException e)
             {
@@ -324,11 +334,12 @@ namespace PhotobookWebAPI.Controllers
                 {
                     if ((picture.PictureId == PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
                     {
-                        if (System.IO.File.Exists(filepath))
+                        if (_fileSystem.FileExists(filepath))//(System.IO.File.Exists(filepath))
                         {
                             try
                             {
-                                System.IO.File.Delete(filepath);
+                                _fileSystem.FileDelete(filepath);
+                                //System.IO.File.Delete(filepath);
                             }
                             catch (DirectoryNotFoundException e)
                             {
@@ -352,11 +363,12 @@ namespace PhotobookWebAPI.Controllers
                 {
                     if (event_.Pin == EventPin) //Hvis Hosten er host af dette event
                     {
-                        if (System.IO.File.Exists(filepath))
+                        if (_fileSystem.FileExists(filepath))
                         {
                             try
                             {
-                                System.IO.File.Delete(filepath);
+                                _fileSystem.FileDelete(filepath);
+                                //System.IO.File.Delete(filepath);
                             }
                             catch (DirectoryNotFoundException e)
                             {

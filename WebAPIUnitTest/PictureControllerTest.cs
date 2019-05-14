@@ -24,7 +24,9 @@ using NSubstitute.ReturnsExtensions;
 using PhotobookWebAPI;
 using PhotoBookDatabase.Model;
 using PB.Dto;
+using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.PictureRepository;
+using PhotoSauce.MagicScaler;
 
 namespace Tests
 {
@@ -35,6 +37,7 @@ namespace Tests
         private IHostRepository _hostRepo;
         private IGuestRepository _guestRepo;
         private ICurrentUser _fakeCurrentUser;
+        private IFileSystem _fakeFileSystem;
         private IPictureRepository _picRepo;
         private PictureController _uut;
 
@@ -54,8 +57,9 @@ namespace Tests
             _guestRepo = Substitute.For<IGuestRepository>();
             _picRepo = Substitute.For<IPictureRepository>();
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
+            _fakeFileSystem = Substitute.For<IFileSystem>();
 
-            _uut = new PictureController(_eventRepo, _guestRepo, _hostRepo, _picRepo, _fakeCurrentUser);
+            _uut = new PictureController(_eventRepo, _guestRepo, _hostRepo, _picRepo, _fakeCurrentUser, _fakeFileSystem);
 
             _testHost = new Host
             {
@@ -111,6 +115,78 @@ namespace Tests
 
             //Assert
             _fakeCurrentUser.Received(1).Name();
+        }
+
+        [Test]
+        public async Task InsertPicture_FileSystem_DirectoryExistsCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _guestRepo.GetGuestByNameAndEventPin(Arg.Any<string>(), Arg.Any<string>()).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+
+
+            //Act
+            await _uut.InsertPicture(_testPictureModel);
+
+            //Assert
+            _fakeFileSystem.Received(2).DirectoryExists(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task InsertPicture_FileSystem_DirectoryCreateCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _guestRepo.GetGuestByNameAndEventPin(Arg.Any<string>(), Arg.Any<string>()).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+
+
+            //Act
+            await _uut.InsertPicture(_testPictureModel);
+
+            //Assert
+            _fakeFileSystem.Received(2).DirectoryCreate(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task InsertPicture_FileSystem_FileCreateCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _guestRepo.GetGuestByNameAndEventPin(Arg.Any<string>(), Arg.Any<string>()).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+
+
+            //Act
+            await _uut.InsertPicture(_testPictureModel);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileCreate(Arg.Any<string>(), Arg.Any<byte[]>());
+        }
+
+        [Test]
+        public async Task InsertPicture_FileSystem_SmallFileCreateCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _guestRepo.GetGuestByNameAndEventPin(Arg.Any<string>(), Arg.Any<string>()).Returns(_testGuest);
+            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
+
+
+            //Act
+            await _uut.InsertPicture(_testPictureModel);
+
+            //Assert
+            _fakeFileSystem.Received(1).SmallFileCreate(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<ProcessImageSettings>());
         }
 
         [Test]
@@ -272,6 +348,19 @@ namespace Tests
             await _picRepo.Received(1).GetPictureById(_testPicture.PictureId);
         }
 
+        public async Task GetPicture_FileSystem_FileExistsCalled()
+        {
+            //Arrange
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(false);
+            _picRepo.GetPictureById(_testPicture.PictureId).Returns(_testPicture);
+
+            //Act
+            _uut.GetPicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileExists(Arg.Any<string>());
+        }
+
         [Test]
         public async Task GetPicture_GuestRepo_GetGuestByIdCalled()
         {
@@ -305,24 +394,7 @@ namespace Tests
         #endregion
 
         #region Return Value Testing
-
-        [Test] //Fungerer ikke optimalt
-        public async Task GetPicture_ReturnsPhysicalFile()
-        {
-            //Arrange
-            _testPicture.HostId = _testHost.HostId;
-            _picRepo.GetPictureById(_testPicture.PictureId).Returns(_testPicture);
-            _hostRepo.GetHostById(_testHost.HostId).Returns(_testHost);
-
-            //Act
-            var response = _uut.GetPicture(_testEvent.Pin, _testPicture.PictureId);
-            var statCode = response as PhysicalFileResult;
-            
-            //Assert
-            Assert.That(statCode, Is.Not.Null);
-            Assert.That(statCode.ContentType, Is.EqualTo("image/PNG"));
-        }
-
+        
         [Test]
         public async Task GetPicture_ReturnsNotFound()
         {
@@ -362,6 +434,19 @@ namespace Tests
             await _picRepo.Received(1).GetPictureById(_testPicture.PictureId);
         }
 
+        public async Task GetPicturePreview_FileSystem_FileExistsCalled()
+        {
+            //Arrange
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(false);
+            _picRepo.GetPictureById(_testPicture.PictureId).Returns(_testPicture);
+
+            //Act
+            _uut.GetPicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileExists(Arg.Any<string>());
+        }
+
         [Test]
         public async Task GetPicturePreview_GuestRepo_GetGuestByIdCalled()
         {
@@ -395,24 +480,7 @@ namespace Tests
         #endregion
 
         #region Return Value Testing
-
-        [Test] //Fungerer ikke optimalt
-        public async Task GetPicturePreview_ReturnsPhysicalFile()
-        {
-            //Arrange
-            _testPicture.HostId = _testHost.HostId;
-            _picRepo.GetPictureById(_testPicture.PictureId).Returns(_testPicture);
-            _hostRepo.GetHostById(_testHost.HostId).Returns(_testHost);
-
-            //Act
-            var response = _uut.GetPicture(_testEvent.Pin, _testPicture.PictureId);
-            var statCode = response as PhysicalFileResult;
-            
-            //Assert
-            Assert.That(statCode, Is.Not.Null);
-            Assert.That(statCode.ContentType, Is.EqualTo("image/PNG"));
-        }
-
+        
         [Test]
         public async Task GetPicturePreview_ReturnsNotFound()
         {
@@ -518,16 +586,47 @@ namespace Tests
             await _hostRepo.Received(1).GetHostByEmail(_testHost.Email);
         }
 
-        [Test] // Ustabil da den afhænger af fysiske filer
+        [Test]
+        public async Task DeletePicture_AsGuest_FileSystem_FileExistsCalled()
+        {
+            //Arrange
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileExists(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task DeletePicture_AsGuest_FileSystem_FileDeleteCalled()
+        {
+            //Arrange
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
+            _testPicture.GuestId = _testGuest.GuestId;
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testGuest.Name);
+            _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
+            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testGuest.EventPin).Returns(_testGuest);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileDelete(Arg.Any<string>());
+        }
+
+        [Test]
         public async Task DeletePicture_AsGuest_PictureRepo_DeletePictureCalled()
         {
             //Arrange
-            //Skaber billede på disk
-            _fakeCurrentUser.Name().Returns(_testGuest.Name);
-            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
-            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
-            await _uut.InsertPicture(_testPictureModel);
-
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
             _testPicture.GuestId = _testGuest.GuestId;
             _testEvent.Pictures = new List<Picture> { _testPicture };
             _fakeCurrentUser.Name().Returns(_testGuest.Name);
@@ -541,16 +640,45 @@ namespace Tests
             await _picRepo.Received(1).DeletePictureById(_testPicture.PictureId);
         }
 
-        [Test] // Ustabil da den afhænger af fysiske filer
+        [Test]
+        public async Task DeletePicture_AsHost_FileSystem_FileExistCalled()
+        {
+            //Arrange
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileExists(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task DeletePicture_AsHost_FileSystem_FileDeleteCalled()
+        {
+            //Arrange
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
+            _testEvent.Pictures = new List<Picture> { _testPicture };
+            _fakeCurrentUser.Name().Returns(_testHost.Email);
+            _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
+            _hostRepo.GetHostByEmail(_testHost.Email).Returns(_testHost);
+
+            //Act
+            await _uut.DeletePicture(_testEvent.Pin, _testPicture.PictureId);
+
+            //Assert
+            _fakeFileSystem.Received(1).FileDelete(Arg.Any<string>());
+        }
+
+        [Test]
         public async Task DeletePicture_AsHost_PictureRepo_DeletePictureCalled()
         {
             //Arrange
-            //Skaber billede på disk
-            _fakeCurrentUser.Name().Returns(_testGuest.Name);
-            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
-            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
-            await _uut.InsertPicture(_testPictureModel);
-
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
             _testEvent.Pictures = new List<Picture> { _testPicture };
             _fakeCurrentUser.Name().Returns(_testHost.Email);
             _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
@@ -601,16 +729,11 @@ namespace Tests
             Assert.That(statCode.StatusCode, Is.EqualTo(404));
         }
 
-        [Test] // Ustabil da den afhænger af fysiske filer
+        [Test]
         public async Task DeletePicture_AsHost_ReturnsNoContent()
         {
             //Arrange
-            //Skaber billede på disk
-            _fakeCurrentUser.Name().Returns(_testGuest.Name);
-            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
-            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
-            await _uut.InsertPicture(_testPictureModel);
-
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
             _testEvent.Pictures = new List<Picture> { _testPicture };
             _fakeCurrentUser.Name().Returns(_testHost.Email);
             _eventRepo.GetEventsByHostId(_testHost.HostId).Returns(new List<Event> { _testEvent }.AsEnumerable());
@@ -625,7 +748,7 @@ namespace Tests
             Assert.That(statCode.StatusCode, Is.EqualTo(204));
         }
 
-        [Test] // Ustabil da den afhænger af fysiske filer
+        [Test]
         public async Task DeletePicture_AsGuest_ReturnsUnauthorized()
         {
             //Arrange
@@ -645,7 +768,7 @@ namespace Tests
             Assert.That(statCode.StatusCode, Is.EqualTo(401));
         }
 
-        [Test] // Ustabil da den afhænger af fysiske filer
+        [Test]
         public async Task DeletePicture_AsGuest_ReturnsNotFound()
         {
             //Arrange
@@ -664,16 +787,11 @@ namespace Tests
             Assert.That(statCode.StatusCode, Is.EqualTo(404));
         }
 
-        [Test] // Ustabil da den afhænger af fysiske filer
+        [Test]
         public async Task DeletePicture_AsGuest_ReturnsNoContent()
         {
             //Arrange
-            //Skaber billede på disk
-            _fakeCurrentUser.Name().Returns(_testGuest.Name);
-            _guestRepo.GetGuestByNameAndEventPin(_testGuest.Name, _testPictureModel.EventPin).Returns(_testGuest);
-            _picRepo.InsertPicture(Arg.Any<Picture>()).Returns(1);
-            await _uut.InsertPicture(_testPictureModel);
-
+            _fakeFileSystem.FileExists(Arg.Any<string>()).Returns(true);
             _testPicture.GuestId = _testGuest.GuestId;
             _testEvent.Pictures = new List<Picture> { _testPicture };
             _fakeCurrentUser.Name().Returns(_testGuest.Name);

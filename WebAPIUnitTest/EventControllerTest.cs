@@ -24,6 +24,7 @@ using NSubstitute.ReturnsExtensions;
 using PhotobookWebAPI;
 using PhotoBookDatabase.Model;
 using PB.Dto;
+using PhotobookWebAPI.Wrappers;
 
 namespace Tests
 {
@@ -34,6 +35,7 @@ namespace Tests
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private ICurrentUser _fakeCurrentUser;
+        private IFileSystem _fakeFileSystem;
         private EventController _uut;
 
         private Host _testHost;
@@ -48,8 +50,9 @@ namespace Tests
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
+            _fakeFileSystem = Substitute.For<IFileSystem>();
 
-            _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser);
+            _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser, _fakeFileSystem);
 
             _testHost = new Host
             {
@@ -103,6 +106,38 @@ namespace Tests
 
             //Assert
             _fakeCurrentUser.Received(1).Name();
+        }
+
+        [Test]
+        public async Task CreateEvent_FileSystem_DirectoryExistsCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _fakeFileSystem.Received(1).DirectoryExists(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task CreateEvent_FileSystem_DirectoryCreateCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _fakeFileSystem.Received(1).DirectoryCreate(Arg.Any<string>());
         }
 
         [Test]
@@ -224,9 +259,10 @@ namespace Tests
 
             //Act
             var response = await _uut.GetEvents();
+            var result = response.FirstOrDefault();
 
             //Assert
-            var result = response.FirstOrDefault();
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Name, Is.EqualTo(_testEvent.Name));
         }
 
@@ -326,7 +362,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task GetEvent_UsingHost_HostRepo_GetEventByHostIdCalled()
+        public async Task GetEvent_UsingHost_EventRepo_GetEventByHostIdCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -508,6 +544,21 @@ namespace Tests
 
             //Assert
             await _eventRepo.Received(1).GetEventByPin("1");
+        }
+
+        [Test]
+        public async Task DeleteEvent_FileSystem_DirecoryDeleteCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            await _uut.DeleteEvent("1");
+
+            //Assert
+            _fakeFileSystem.Received(1).DirectoryDelete(Arg.Any<string>(), true);
         }
 
         [Test]

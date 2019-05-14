@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PhotobookWebAPI.Data;
+using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -137,8 +138,11 @@ namespace PhotobookWebAPI
                 {
                     return new CurrentUser(new HttpContextAccessor().HttpContext);
                 });
+            services.AddScoped<IFileSystem, FileSystem>(fs =>
+            {
+                return new FileSystem();
+            });
 
-            
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<AppUser>, AppClaimsPrincipalFactory>();
         }
 

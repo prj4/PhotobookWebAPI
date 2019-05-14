@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 using PB.Dto;
 using PhotobookWebAPI.Data;
+using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -37,15 +38,16 @@ namespace PhotobookWebAPI.Controllers
         private Logger logger = LogManager.GetCurrentClassLogger();
 
         private ICurrentUser _currentUser;
-        
+        private IFileSystem _fileSystem;
 
-        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, ICurrentUser currentUser)
+        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, ICurrentUser currentUser, IFileSystem fileSystem)
         {
 
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
 
             _currentUser = currentUser;
+            _fileSystem = fileSystem;
         }
 
 
@@ -209,14 +211,8 @@ namespace PhotobookWebAPI.Controllers
                     CurrentDirectoryHelpers.SetCurrentDirectory();
                     string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
 
-                    try //kan ske det skal fjernes igen, men det kan vi jo lige kigge på..
-                    {
-                        System.IO.Directory.Delete(filepath, true);
-                    }
-                    catch (DirectoryNotFoundException e)
-                    {
-                        logger.Info($"Directory wasnt found, Database deletion will continue, exception caught: {e}");
-                    }   
+                    _fileSystem.DirectoryDelete(filepath, true);
+                    //Directory.Delete(filepath, true);
                     
                     await _eventRepo.DeleteEventByPin(pin);
 
@@ -284,9 +280,10 @@ namespace PhotobookWebAPI.Controllers
             {
                 CurrentDirectoryHelpers.SetCurrentDirectory();
                 var subdir = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
-                if (!Directory.Exists(subdir))
+                if (!_fileSystem.DirectoryExists(subdir))//(!Directory.Exists(subdir))
                 {
-                    Directory.CreateDirectory(subdir);
+                    _fileSystem.DirectoryCreate(subdir);
+                    //Directory.CreateDirectory(subdir);
                     logger.Info($"Subdir created for Event: {pin}");
                 }
 
