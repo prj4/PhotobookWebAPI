@@ -40,7 +40,11 @@ namespace PhotobookWebAPI.Controllers
         private ICurrentUser _currentUser;
         private IFileSystem _fileSystem;
 
-        public EventController(IEventRepository eventRepo, IHostRepository hostRepo, ICurrentUser currentUser, IFileSystem fileSystem)
+        public EventController(
+            IEventRepository eventRepo, 
+            IHostRepository hostRepo, 
+            ICurrentUser currentUser, 
+            IFileSystem fileSystem)
         {
 
             _eventRepo = eventRepo;
