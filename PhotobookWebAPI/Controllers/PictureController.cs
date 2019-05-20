@@ -129,11 +129,11 @@ namespace PhotobookWebAPI.Controllers
             string pictureTakerName = "";
             Host h = new Host();
             Guest g = new Guest();
-            if (guestId != null)
+            if (guestId != 0)
             {
                 g = _guestRepo.GetGuestById((int)guestId).Result;
                 pictureTakerName = g.Name;
-            }else if (hostId!=null)
+            }else if (hostId!=0)
             {
                 h = _hostRepo.GetHostById((int)hostId).Result;
                 pictureTakerName = h.Name;
