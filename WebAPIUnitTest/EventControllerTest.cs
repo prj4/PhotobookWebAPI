@@ -27,6 +27,7 @@ using PhotoBookDatabase.Model;
 using PB.Dto;
 using PhotobookWebAPI.Wrappers;
 
+
 namespace Tests
 {
 
@@ -41,7 +42,7 @@ namespace Tests
 
         private Host _testHost;
         private EventModel _testEventModel;
-        private Event _testEvent;
+        private PhotoBookDatabase.Model.Event _testEvent;
         private EditEventModel _testEditEventModel;
 
         [SetUp]
@@ -70,7 +71,7 @@ namespace Tests
                 Name = "test fest",
                 Location = "Helvede"
             };
-            _testEvent = new Event
+            _testEvent = new PhotoBookDatabase.Model.Event
             {
                 Description = _testEventModel.Description,
                 EndDate = _testEventModel.EndDate,
@@ -100,7 +101,7 @@ namespace Tests
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
             
             //Act
             await _uut.CreateEvent(_testEventModel);
@@ -116,7 +117,7 @@ namespace Tests
             _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             await _uut.CreateEvent(_testEventModel);
@@ -132,7 +133,7 @@ namespace Tests
             _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             await _uut.CreateEvent(_testEventModel);
@@ -147,7 +148,7 @@ namespace Tests
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Email);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             await _uut.CreateEvent(_testEventModel);
@@ -162,13 +163,13 @@ namespace Tests
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             await _uut.CreateEvent(_testEventModel);
 
             //Assert
-            await _eventRepo.Received(1).InsertEvent(Arg.Any<Event>());
+            await _eventRepo.Received(1).InsertEvent(Arg.Any<PhotoBookDatabase.Model.Event>());
         }
 
         [Test]
@@ -177,7 +178,7 @@ namespace Tests
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             await _uut.CreateEvent(_testEventModel);
@@ -196,7 +197,7 @@ namespace Tests
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             var response = await _uut.CreateEvent(_testEventModel);
@@ -256,7 +257,7 @@ namespace Tests
         public async Task GetEvents_ReturnsEventModels()
         {
             //Arrange
-            _eventRepo.GetEvents().Returns(new List<Event>{_testEvent}.AsEnumerable());
+            _eventRepo.GetEvents().Returns(new List<PhotoBookDatabase.Model.Event>{_testEvent}.AsEnumerable());
 
             //Act
             var response = await _uut.GetEvents();
@@ -337,7 +338,7 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
             _eventRepo.GetEventsByHostId(_testHost.HostId)
-                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+                .Returns(new List<PhotoBookDatabase.Model.Event> { _testEvent }.AsEnumerable());
 
             //Act
             await _uut.GetEvent();
@@ -353,7 +354,7 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
             _eventRepo.GetEventsByHostId(_testHost.HostId)
-                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+                .Returns(new List<PhotoBookDatabase.Model.Event> { _testEvent }.AsEnumerable());
 
             //Act
             await _uut.GetEvent();
@@ -369,7 +370,7 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
             _eventRepo.GetEventsByHostId(_testHost.HostId)
-                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+                .Returns(new List<PhotoBookDatabase.Model.Event> { _testEvent }.AsEnumerable());
 
             //Act
             await _uut.GetEvent();
@@ -389,7 +390,7 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
             _eventRepo.GetEventsByHostId(_testHost.HostId)
-                .Returns(new List<Event> { _testEvent }.AsEnumerable());
+                .Returns(new List<PhotoBookDatabase.Model.Event> { _testEvent }.AsEnumerable());
 
             //Act
             var response = await _uut.GetEvent();
@@ -445,13 +446,13 @@ namespace Tests
         public async Task PutEvent_EventRepo_UpdateEventCalled()
         {
             //Arrange
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
             
             //Act
             await _uut.PutEvent("1", _testEditEventModel);
 
             //Assert
-            await _eventRepo.Received(1).UpdateEvent(Arg.Is<Event>(e =>
+            await _eventRepo.Received(1).UpdateEvent(Arg.Is<PhotoBookDatabase.Model.Event>(e =>
                 e.Description == _testEditEventModel.Description &&
                 e.Location == _testEditEventModel.Location &&
                 e.Name == _testEditEventModel.Name &&
@@ -468,7 +469,7 @@ namespace Tests
         public async Task PutEvent_ReturnsNoContent()
         {
             //Arrange
-            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new PhotoBookDatabase.Model.Event());
 
             //Act
             var response = await _uut.PutEvent("1", _testEditEventModel);
