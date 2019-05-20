@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using PB.Dto;
 using PhotobookWebAPI.Data;
+using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
@@ -32,16 +33,17 @@ namespace PhotobookWebAPI.Controllers
         private IPictureRepository _picRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
         private ICurrentUser _currentUser;
+        private IFileSystem _fileSystem;
 
         public PictureController( IEventRepository eventRepo, IGuestRepository guestRepo, IHostRepository hostRepo,
-            IPictureRepository picRepo, ICurrentUser currentUser)
+            IPictureRepository picRepo, ICurrentUser currentUser, IFileSystem fileSystem)
         {
             _eventRepo = eventRepo;
             _guestRepo = guestRepo;
             _hostRepo = hostRepo;
             _picRepo = picRepo;
             _currentUser = currentUser;
-
+            _fileSystem = fileSystem;
         }
 
         /// <summary>
@@ -142,13 +144,14 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId + ".PNG"));
 
-            if (System.IO.File.Exists(file))
+            if (_fileSystem.FileExists(file))//(System.IO.File.Exists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
             }
+
             logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
-            return NotFound();
+            return NotFound("Picture wasn't found at event");
         }
 
 
@@ -179,7 +182,7 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin, "Preview",
                 (PictureId + ".PNG"));
 
-            if (System.IO.File.Exists(file))
+            if (_fileSystem.FileExists(file))//(System.IO.File.Exists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
@@ -239,15 +242,17 @@ namespace PhotobookWebAPI.Controllers
 
             //Creating subdirectories for events
             var subdir = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin);
-            if (!Directory.Exists(subdir))
+            if (!_fileSystem.DirectoryExists(subdir))//(!Directory.Exists(subdir))
             {
-                Directory.CreateDirectory(subdir);
+                _fileSystem.DirectoryCreate(subdir);
+                //Directory.CreateDirectory(subdir);
                 logger.Info($"Subdir created for Event: {model.EventPin}");
             }
             var subdirPreview = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,"Preview");
-            if (!Directory.Exists(subdirPreview))
+            if (!_fileSystem.DirectoryExists(subdirPreview))//(!Directory.Exists(subdirPreview))
             {
-                Directory.CreateDirectory(subdirPreview);
+                _fileSystem.DirectoryCreate(subdirPreview);
+                //Directory.CreateDirectory(subdirPreview);
                 logger.Info($"Subdir created for Event: {model.EventPin}, Preview");
             }
 
@@ -255,24 +260,35 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, picId+".PNG");
 
             var bytes = Convert.FromBase64String(model.PictureString);
+            _fileSystem.FileCreate(file, bytes);
+            /*
             using (var imageFile = new FileStream(file, FileMode.Create))
             {
                 imageFile.Write(bytes, 0, bytes.Length);
                 imageFile.Flush();
                 logger.Info($"Picture with Id: {picId} saved in  event subdir: {model.EventPin}");
             }
+            */
 
             //Creating Smaller image
             string inPath = file;
             string outPath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, "Preview", picId + ".PNG");
             var settings = new ProcessImageSettings { Width = 200 };
 
-            using (var outStream = new FileStream(outPath, FileMode.Create))
+            try
             {
-                MagicImageProcessor.ProcessImage(inPath, outStream, settings);
+                _fileSystem.SmallFileCreate(inPath,outPath, settings);
+                /*
+                using (var outStream = new FileStream(outPath, FileMode.Create))
+                {
+                    MagicImageProcessor.ProcessImage(inPath, outStream, settings);
+                }
+                */
             }
-            
-
+            catch(InvalidDataException e)
+            {
+                logger.Info($"Original file not found, no thumbnail created. Exception caught: {e}");
+            }
 
             return Ok(new ReturnPictureIdModel()
             {
@@ -318,18 +334,26 @@ namespace PhotobookWebAPI.Controllers
                 {
                     if ((picture.PictureId == PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
                     {
-                        if (System.IO.File.Exists(filepath))
+                        if (_fileSystem.FileExists(filepath))//(System.IO.File.Exists(filepath))
                         {
-                            System.IO.File.Delete(filepath);
+                            try
+                            {
+                                _fileSystem.FileDelete(filepath);
+                                //System.IO.File.Delete(filepath);
+                            }
+                            catch (DirectoryNotFoundException e)
+                            {
+                                logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
+                            }
                             await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
 
-                        return NotFound();
+                        return NotFound("File not found");
                     }
                 }
 
-                return Unauthorized();
+                return Unauthorized("Not your picture");
             }
             if (userName.Contains('@'))
             {
@@ -339,21 +363,29 @@ namespace PhotobookWebAPI.Controllers
                 {
                     if (event_.Pin == EventPin) //Hvis Hosten er host af dette event
                     {
-                        if (System.IO.File.Exists(filepath))
+                        if (_fileSystem.FileExists(filepath))
                         {
-                            System.IO.File.Delete(filepath);
+                            try
+                            {
+                                _fileSystem.FileDelete(filepath);
+                                //System.IO.File.Delete(filepath);
+                            }
+                            catch (DirectoryNotFoundException e)
+                            {
+                                logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
+                            }
                             await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
 
-                        return NotFound();
+                        return NotFound("File not Found");
                     }
                 }
 
-                return Unauthorized();
+                return Unauthorized("Not a picture in hosts events");
             }
             
-            return NotFound();
+            return NotFound("User not found");
         }
         
     }

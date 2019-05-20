@@ -25,6 +25,7 @@ using NUnit.Framework.Internal.Execution;
 using PhotobookWebAPI;
 using PhotoBookDatabase.Model;
 using PB.Dto;
+using PhotobookWebAPI.Wrappers;
 
 namespace Tests
 {
@@ -35,6 +36,7 @@ namespace Tests
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private ICurrentUser _fakeCurrentUser;
+        private IFileSystem _fakeFileSystem;
         private EventController _uut;
 
         private Host _testHost;
@@ -49,8 +51,9 @@ namespace Tests
             _eventRepo = Substitute.For<IEventRepository>();
             _hostRepo = Substitute.For<IHostRepository>();
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
+            _fakeFileSystem = Substitute.For<IFileSystem>();
 
-            _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser);
+            _uut = new EventController(_eventRepo, _hostRepo, _fakeCurrentUser, _fakeFileSystem);
 
             _testHost = new Host
             {
@@ -107,7 +110,39 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_GetCurrentHostCalled()
+        public async Task CreateEvent_FileSystem_DirectoryExistsCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _fakeFileSystem.Received(1).DirectoryExists(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task CreateEvent_FileSystem_DirectoryCreateCalled()
+        {
+            //Arrange
+            _fakeFileSystem.DirectoryExists(Arg.Any<string>()).Returns(false);
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(Arg.Any<string>()).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
+
+            //Act
+            await _uut.CreateEvent(_testEventModel);
+
+            //Assert
+            _fakeFileSystem.Received(1).DirectoryCreate(Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task CreateEvent_HostRepo_GetHostByEmailCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Email);
@@ -122,7 +157,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_InsertEventCalled()
+        public async Task CreateEvent_EventRepo_InsertEventCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -137,7 +172,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task CreateEvent_HostRepo_GetEventByPinCalled()
+        public async Task CreateEvent_EventRepo_GetEventByPinCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -225,9 +260,10 @@ namespace Tests
 
             //Act
             var response = await _uut.GetEvents();
+            var result = response.FirstOrDefault();
 
             //Assert
-            var result = response.FirstOrDefault();
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Name, Is.EqualTo(_testEvent.Name));
         }
 
@@ -272,18 +308,18 @@ namespace Tests
         }
 
         [Test]
-        public async Task GetEvent_UsingPin_ReturnsNoContent()
+        public async Task GetEvent_UsingPin_ReturnsNotFound()
         {
             //Arrange
             _eventRepo.GetEventByPin(Arg.Any<string>()).ReturnsNull();
 
             //Act
             var response = await _uut.GetEvent("1");
-            var statCode = response as NoContentResult;
+            var statCode = response as NotFoundObjectResult;
 
             //Assert
             Assert.That(statCode, Is.Not.Null);
-            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
         }
 
         #endregion
@@ -327,7 +363,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task GetEvent_UsingHost_HostRepo_GetEventByHostIdCalled()
+        public async Task GetEvent_UsingHost_EventRepo_GetEventByHostIdCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -365,7 +401,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task GetEvent_UsingHost_ReturnsNoContent()
+        public async Task GetEvent_UsingHost_ReturnsNotFound()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -375,11 +411,11 @@ namespace Tests
 
             //Act
             var response = await _uut.GetEvent();
-            var statCode = response as NoContentResult;
+            var statCode = response as NotFoundObjectResult;
 
             //Assert
             Assert.That(statCode, Is.Not.Null);
-            Assert.That(statCode.StatusCode, Is.EqualTo(204));
+            Assert.That(statCode.StatusCode, Is.EqualTo(404));
         }
 
         #endregion
@@ -393,7 +429,7 @@ namespace Tests
         #region Dependency Call Testing
 
         [Test]
-        public async Task PutEvent__EventRepo_GetEventByPinCalled()
+        public async Task PutEvent_EventRepo_GetEventByPinCalled()
         {
             //Arrange
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
@@ -406,7 +442,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task PutEvent__EventRepo_UpdateEventCalled()
+        public async Task PutEvent_EventRepo_UpdateEventCalled()
         {
             //Arrange
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(new Event());
@@ -473,7 +509,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns();
 
             //Act
             await _uut.DeleteEvent("1");
@@ -489,7 +524,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
 
             //Act
             await _uut.DeleteEvent("1");
@@ -505,7 +539,6 @@ namespace Tests
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
 
             //Act
             await _uut.DeleteEvent("1");
@@ -515,13 +548,27 @@ namespace Tests
         }
 
         [Test]
+        public async Task DeleteEvent_FileSystem_DirecoryDeleteCalled()
+        {
+            //Arrange
+            _fakeCurrentUser.Name().Returns(_testHost.Name);
+            _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
+            _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
+
+            //Act
+            await _uut.DeleteEvent("1");
+
+            //Assert
+            _fakeFileSystem.Received(1).DirectoryDelete(Arg.Any<string>(), true);
+        }
+
+        [Test]
         public async Task DeleteEvent_EventRepo_DeleteEventByPinCalled()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
             _hostRepo.GetHostByEmail(_testHost.Name).Returns(_testHost);
             _eventRepo.GetEventByPin(Arg.Any<string>()).Returns(_testEvent);
-            //_eventRepo.DeleteEventByPin(Arg.Any<string>()).Returns()
 
             //Act
             await _uut.DeleteEvent("1");
@@ -535,7 +582,7 @@ namespace Tests
         #region Return Value Testing
 
         [Test]
-        public async Task DeleteEvent_EventRepo_ReturnsNoContent()
+        public async Task DeleteEvent_ReturnsNoContent()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
@@ -552,7 +599,7 @@ namespace Tests
         }
 
         [Test]
-        public async Task DeleteEvent_EventRepo_ReturnsBadRequest()
+        public async Task DeleteEvent_ReturnsBadRequest()
         {
             //Arrange
             _fakeCurrentUser.Name().Returns(_testHost.Name);
