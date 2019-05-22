@@ -122,7 +122,7 @@ namespace PhotobookWebAPI.Controllers
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
 
-            Picture pic =  _picRepo.GetPictureById(PictureId).Result;
+            Picture pic = _picRepo.GetPictureById(PictureId).Result;
 
             int? guestId = pic.GuestId;
             int? hostId = pic.HostId;
@@ -212,11 +212,12 @@ namespace PhotobookWebAPI.Controllers
 
             string userName = _currentUser.Name();
             Picture newPicture = new Picture();
-
+            string[] strArray = new string[2];
+               strArray = userName.Split(';');
             //Getting guest or host
             if (!userName.Contains('@'))
             {
-                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(userName, model.EventPin);
+                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(strArray[0], model.EventPin);
                 //Creating picture for database if a guest took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.GuestId = guest.GuestId;
