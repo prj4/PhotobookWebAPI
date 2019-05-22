@@ -151,7 +151,7 @@ namespace PhotobookWebAPI.Controllers
             }
 
             logger.Info($"Picture at Event: {EventPin}, with Id: {PictureId} requested but not found");
-            return NotFound("Picture wasn't found at event");
+            return NotFound("Picture file wasn't found");
         }
 
 
