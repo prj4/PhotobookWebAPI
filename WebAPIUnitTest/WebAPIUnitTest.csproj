@@ -37,7 +37,7 @@
       <HintPath>..\PhotobookWebAPI\DAL\PhotoBook.Repository.dll</HintPath>
     </Reference>
     <Reference Include="PhotoBookDatabase">
-      <HintPath>..\..\Database\PhotoBookDatabase\bin\Debug\netcoreapp2.2\PhotoBookDatabase.dll</HintPath>
+      <HintPath>..\PhotobookWebAPI\DAL\PhotoBookDatabase.dll</HintPath>
     </Reference>
   </ItemGroup>
 

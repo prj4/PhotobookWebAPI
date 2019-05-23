@@ -49,7 +49,7 @@ namespace PhotobookWebAPI.Controllers
 
             _eventRepo = eventRepo;
             _hostRepo = hostRepo;
-
+            
             _currentUser = currentUser;
             _fileSystem = fileSystem;
         }

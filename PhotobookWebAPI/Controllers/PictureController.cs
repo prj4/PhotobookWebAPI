@@ -122,20 +122,20 @@ namespace PhotobookWebAPI.Controllers
             CurrentDirectoryHelpers.SetCurrentDirectory();
 
 
-            Picture pic =  _picRepo.GetPictureById(PictureId).Result;
+            Picture pic = _picRepo.GetPictureById(PictureId).Result;
 
-            int guestId = pic.GuestId;
-            int hostId = pic.HostId;
+            int? guestId = pic.GuestId;
+            int? hostId = pic.HostId;
             string pictureTakerName = "";
             Host h = new Host();
             Guest g = new Guest();
             if (guestId != 0)
             {
-                g = _guestRepo.GetGuestById(guestId).Result;
+                g = _guestRepo.GetGuestById((int)guestId).Result;
                 pictureTakerName = g.Name;
             }else if (hostId!=0)
             {
-                h = _hostRepo.GetHostById(hostId).Result;
+                h = _hostRepo.GetHostById((int)hostId).Result;
                 pictureTakerName = h.Name;
             }
 
@@ -163,19 +163,19 @@ namespace PhotobookWebAPI.Controllers
 
             Picture pic = _picRepo.GetPictureById(PictureId).Result;
 
-            int guestId = pic.GuestId;
-            int hostId = pic.HostId;
+            int? guestId = pic.GuestId;
+            int? hostId = pic.HostId;
             string pictureTakerName = "";
             Host h;
             Guest g;
             if (guestId != 0)
             {
-                g = _guestRepo.GetGuestById(guestId).Result;
+                g = _guestRepo.GetGuestById((int)guestId).Result;
                 pictureTakerName = g.Name;
             }
             else if (hostId != 0)
             {
-                h = _hostRepo.GetHostById(hostId).Result;
+                h = _hostRepo.GetHostById((int)hostId).Result;
                 pictureTakerName = h.Name;
             }
 
@@ -212,14 +212,16 @@ namespace PhotobookWebAPI.Controllers
 
             string userName = _currentUser.Name();
             Picture newPicture = new Picture();
-
+            string[] strArray = new string[2];
+               strArray = userName.Split(';');
             //Getting guest or host
             if (!userName.Contains('@'))
             {
-                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(userName, model.EventPin);
+                Guest guest = await _guestRepo.GetGuestByNameAndEventPin(strArray[0], model.EventPin);
                 //Creating picture for database if a guest took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.GuestId = guest.GuestId;
+                newPicture.HostId = 0;
             }
             else if (userName.Contains('@'))
             {
@@ -227,6 +229,7 @@ namespace PhotobookWebAPI.Controllers
                 //Creating picture for database if host took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.HostId = host.HostId;
+                newPicture.GuestId = 0;
             }
 
             
