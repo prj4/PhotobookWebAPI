@@ -334,17 +334,9 @@ namespace PhotobookWebAPI.Controllers
                 {
                     if ((picture.PictureId == PictureId) && (picture.GuestId == guest.GuestId)) //Hvis billedet findes i Guestens samling af billeder
                     {
-                        if (_fileSystem.FileExists(filepath))//(System.IO.File.Exists(filepath))
+                        if (_fileSystem.FileExists(filepath))
                         {
-                            try
-                            {
-                                _fileSystem.FileDelete(filepath);
-                                //System.IO.File.Delete(filepath);
-                            }
-                            catch (DirectoryNotFoundException e)
-                            {
-                                logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
-                            }
+                            _fileSystem.FileDelete(filepath);
                             await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
@@ -365,15 +357,7 @@ namespace PhotobookWebAPI.Controllers
                     {
                         if (_fileSystem.FileExists(filepath))
                         {
-                            try
-                            {
-                                _fileSystem.FileDelete(filepath);
-                                //System.IO.File.Delete(filepath);
-                            }
-                            catch (DirectoryNotFoundException e)
-                            {
-                                logger.Info($"Picture Directory wasnt found, Database deletion will continue, exception caught: {e}");
-                            }
+                            _fileSystem.FileDelete(filepath);
                             await _picRepo.DeletePictureById(PictureId);
                             return NoContent();
                         }
