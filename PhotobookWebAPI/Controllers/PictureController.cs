@@ -129,11 +129,11 @@ namespace PhotobookWebAPI.Controllers
             string pictureTakerName = "";
             Host h = new Host();
             Guest g = new Guest();
-            if (guestId != 0)
+            if (guestId != null)
             {
                 g = _guestRepo.GetGuestById((int)guestId).Result;
                 pictureTakerName = g.Name;
-            }else if (hostId!=0)
+            }else if (hostId!=null)
             {
                 h = _hostRepo.GetHostById((int)hostId).Result;
                 pictureTakerName = h.Name;
@@ -168,12 +168,12 @@ namespace PhotobookWebAPI.Controllers
             string pictureTakerName = "";
             Host h;
             Guest g;
-            if (guestId != 0)
+            if (guestId != null)
             {
                 g = _guestRepo.GetGuestById((int)guestId).Result;
                 pictureTakerName = g.Name;
             }
-            else if (hostId != 0)
+            else if (hostId != null)
             {
                 h = _hostRepo.GetHostById((int)hostId).Result;
                 pictureTakerName = h.Name;
@@ -221,7 +221,7 @@ namespace PhotobookWebAPI.Controllers
                 //Creating picture for database if a guest took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.GuestId = guest.GuestId;
-                newPicture.HostId = 0;
+               // newPicture.HostId = 0;
             }
             else if (userName.Contains('@'))
             {
@@ -229,7 +229,7 @@ namespace PhotobookWebAPI.Controllers
                 //Creating picture for database if host took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.HostId = host.HostId;
-                newPicture.GuestId = 0;
+               // newPicture.GuestId = 0;
             }
 
             
