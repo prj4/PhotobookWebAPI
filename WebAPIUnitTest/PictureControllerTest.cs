@@ -59,7 +59,13 @@ namespace Tests
             _fakeCurrentUser = Substitute.For<ICurrentUser>();
             _fakeFileSystem = Substitute.For<IFileSystem>();
 
-            _uut = new PictureController(_eventRepo, _guestRepo, _hostRepo, _picRepo, _fakeCurrentUser, _fakeFileSystem);
+            _uut = new PictureController(
+                _eventRepo, 
+                _guestRepo, 
+                _hostRepo, 
+                _picRepo, 
+                _fakeCurrentUser, 
+                _fakeFileSystem);
 
             _testHost = new Host
             {
@@ -275,7 +281,6 @@ namespace Tests
         public async Task GetPictureIds_EventRepo_GetEventByPinCalled()
         {
             //Arrange
-            //_testEvent.Pictures = new List<Picture> {_testPicture};
             _eventRepo.GetEventByPin(_testEvent.Pin).Returns(_testEvent);
 
             
