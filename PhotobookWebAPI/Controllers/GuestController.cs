@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PhotobookWebAPI.Data;
-using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
-using PhotoBook.Repository.HostRepository;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -18,17 +11,11 @@ namespace PhotobookWebAPI.Controllers
     public class GuestController:Controller
     {
 
-
-
         private IGuestRepository _guestRepo;
-
-
-
 
         public GuestController(IGuestRepository guestRepo)
         {
- 
-            _guestRepo = guestRepo;
+             _guestRepo = guestRepo;
 
         }
 

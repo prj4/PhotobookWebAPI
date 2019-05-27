@@ -1,27 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using NLog;
 using PB.Dto;
-using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.EventRepository;
-using PhotoBook.Repository.GuestRepository;
 using PhotoBook.Repository.HostRepository;
 using PhotoBookDatabase.Model;
-using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace PhotobookWebAPI.Controllers
 {
@@ -30,13 +19,9 @@ namespace PhotobookWebAPI.Controllers
     [Authorize]
     public class EventController : Controller
     {
-
-
-
         private IEventRepository _eventRepo;
         private IHostRepository _hostRepo;
         private Logger logger = LogManager.GetCurrentClassLogger();
-
         private ICurrentUser _currentUser;
         private IFileSystem _fileSystem;
 

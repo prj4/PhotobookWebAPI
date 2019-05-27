@@ -14,13 +14,6 @@
 <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\$(Configuration)\Comments.xml</DocumentationFile>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <Compile Remove="Pictures\yypy7597cm\**" />
-    <Content Remove="Pictures\yypy7597cm\**" />
-    <EmbeddedResource Remove="Pictures\yypy7597cm\**" />
-    <None Remove="Pictures\yypy7597cm\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.2" />
@@ -50,8 +43,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PB.Dto\" />
     <Folder Include="Pictures\" />
+    <Folder Include="PB.Dto\" />
   </ItemGroup>
 
   <ItemGroup>

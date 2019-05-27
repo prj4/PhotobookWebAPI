@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-
+/// <summary>
+/// Source https://adrientorris.github.io/aspnet-core/identity/extend-user-model.html?fbclid=IwAR0yNKk07kV26OX_ztxHBf32SPFw9Exp6A5NRyEsnMdixdabs9Va_eOR6gM
+/// </summary>
 
 namespace PhotobookWebAPI.Data
 {

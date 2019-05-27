@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using PB.Dto;
-using PhotobookWebAPI.Data;
 using PhotobookWebAPI.Wrappers;
 using PhotoBook.Repository.EventRepository;
 using PhotoBook.Repository.GuestRepository;
