@@ -115,7 +115,7 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>A physical file, a picture.</returns>
         /// <response code='200'>Physical file, the requested picture.</response>
-        /// /// <response code='404'>Picture file not found</response>
+        /// <response code='404'>Picture file not found</response>
         [HttpGet("{EventPin}/{PictureId}")]
         public IActionResult GetPicture(string EventPin, int PictureId)
         {
@@ -144,7 +144,7 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin,
                 (PictureId + ".PNG"));
 
-            if (_fileSystem.FileExists(file))//(System.IO.File.Exists(file))
+            if (_fileSystem.FileExists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
@@ -154,7 +154,19 @@ namespace PhotobookWebAPI.Controllers
             return NotFound("Picture file wasn't found");
         }
 
-
+        /// <summary>
+        /// Gets a Preview picture from the server.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/Picture/{EventPin}/Preview/{PictureId}
+        ///     
+        ///{
+        /// </remarks>
+        /// <returns>A physical file, a picture.</returns>
+        /// <response code='200'>Physical file, the requested preview picture.</response>
+        /// <response code='404'> Preview picture file not found</response>
         [HttpGet]
         [Route("Preview/{EventPin}/{PictureId}")]
         public IActionResult GetPicturePreview(string EventPin, int PictureId)
@@ -182,7 +194,7 @@ namespace PhotobookWebAPI.Controllers
             var file = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", EventPin, "Preview",
                 (PictureId + ".PNG"));
 
-            if (_fileSystem.FileExists(file))//(System.IO.File.Exists(file))
+            if (_fileSystem.FileExists(file))
             {
                 logger.Info($"Returning picture at Event: {EventPin}, with Id: {PictureId}");
                 return PhysicalFile(file, "image/PNG", pictureTakerName);
@@ -221,7 +233,6 @@ namespace PhotobookWebAPI.Controllers
                 //Creating picture for database if a guest took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.GuestId = guest.GuestId;
-               // newPicture.HostId = 0;
             }
             else if (userName.Contains('@'))
             {
@@ -229,7 +240,6 @@ namespace PhotobookWebAPI.Controllers
                 //Creating picture for database if host took the picture
                 newPicture.EventPin = model.EventPin;
                 newPicture.HostId = host.HostId;
-               // newPicture.GuestId = 0;
             }
 
             
@@ -245,17 +255,15 @@ namespace PhotobookWebAPI.Controllers
 
             //Creating subdirectories for events
             var subdir = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin);
-            if (!_fileSystem.DirectoryExists(subdir))//(!Directory.Exists(subdir))
+            if (!_fileSystem.DirectoryExists(subdir))
             {
                 _fileSystem.DirectoryCreate(subdir);
-                //Directory.CreateDirectory(subdir);
                 logger.Info($"Subdir created for Event: {model.EventPin}");
             }
             var subdirPreview = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin,"Preview");
-            if (!_fileSystem.DirectoryExists(subdirPreview))//(!Directory.Exists(subdirPreview))
+            if (!_fileSystem.DirectoryExists(subdirPreview))
             {
                 _fileSystem.DirectoryCreate(subdirPreview);
-                //Directory.CreateDirectory(subdirPreview);
                 logger.Info($"Subdir created for Event: {model.EventPin}, Preview");
             }
 
@@ -264,34 +272,13 @@ namespace PhotobookWebAPI.Controllers
 
             var bytes = Convert.FromBase64String(model.PictureString);
             _fileSystem.FileCreate(file, bytes);
-            /*
-            using (var imageFile = new FileStream(file, FileMode.Create))
-            {
-                imageFile.Write(bytes, 0, bytes.Length);
-                imageFile.Flush();
-                logger.Info($"Picture with Id: {picId} saved in  event subdir: {model.EventPin}");
-            }
-            */
-
+            
             //Creating Smaller image
             string inPath = file;
             string outPath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", model.EventPin, "Preview", picId + ".PNG");
             var settings = new ProcessImageSettings { Width = 200 };
 
-            try
-            {
-                _fileSystem.SmallFileCreate(inPath,outPath, settings);
-                /*
-                using (var outStream = new FileStream(outPath, FileMode.Create))
-                {
-                    MagicImageProcessor.ProcessImage(inPath, outStream, settings);
-                }
-                */
-            }
-            catch(InvalidDataException e)
-            {
-                logger.Info($"Original file not found, no thumbnail created. Exception caught: {e}");
-            }
+            _fileSystem.SmallFileCreate(inPath,outPath, settings);
 
             return Ok(new ReturnPictureIdModel()
             {

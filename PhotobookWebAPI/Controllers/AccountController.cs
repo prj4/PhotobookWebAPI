@@ -244,7 +244,23 @@ namespace PhotobookWebAPI.Controllers
         }
 
 
-
+        /// <summary>
+        /// Creates Admin user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST api/Account/Admin
+        ///     {
+        ///        "UserName": "admin",
+        ///        "Password": "admin"
+        ///     }
+        ///     
+        ///
+        /// </remarks>
+        /// <returns>NoContent</returns>
+        /// <response code="204"> Admin created </response>
+        /// <response code="400"> Not an Admin</response> 
         [AllowAnonymous]
         [Route("Admin/Login")]
         [HttpPost]
@@ -481,7 +497,7 @@ namespace PhotobookWebAPI.Controllers
         }
 
         /// <summary>
-        /// Change password [IsHost]
+        /// Change password
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -496,8 +512,8 @@ namespace PhotobookWebAPI.Controllers
         ///
         /// </remarks>
         /// <returns>NoContent</returns>
-        /// <response code="204"> Success </response>
-        /// <response code="404"> Error</response> 
+        /// <response code="204"> Success, password changed </response>
+        /// <response code="404"> Error, password didnt change</response> 
         [Route("Password")]
         [Authorize("IsHost")]
         [HttpPut]
@@ -513,58 +529,6 @@ namespace PhotobookWebAPI.Controllers
             }
             return NotFound();
         }
-
-        /*
-        //[HttpPost]
-        [AllowAnonymous]
-        [Route("InitChangeEmail")]
-        [HttpPut]
-        public async Task<ActionResult> InitChangeEmail(AccountModels.ChangeEmailModel model)
-        {
-            var user = await _userManager.FindByEmailAsync(model.OldEmail);
-
-            string resettoken;
-            try
-            {
-                resettoken = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                throw;
-            }
-            
-
-            var resetLink = Url.Action("Email", "Account",
-                new {token = resettoken, oldEmail = user.Email, newEmail = model.NewEmail},
-                protocol: HttpContext.Request.Scheme);
-
-            var result = await _userManager.ChangeEmailAsync(user, model.NewEmail, resettoken);
-            if (result.Succeeded)
-            {
-                return Ok();
-            }
-            return NotFound();
-        //return Ok();
-    }
-
-        [AllowAnonymous]
-        [Route("ChangeEmail")]
-        [HttpPut]
-        public async Task<ActionResult> Email([FromQuery]string token, [FromQuery]string oldEmail, [FromQuery]string newEmail)
-        {
-            var user = await _userManager.FindByEmailAsync(oldEmail);
-
-            var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
-            if (result.Succeeded)
-            {
-                return Ok();
-            }
-            return NotFound();
-        }
-        */
-
-
     }
 }
 

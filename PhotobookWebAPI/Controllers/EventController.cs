@@ -126,7 +126,6 @@ namespace PhotobookWebAPI.Controllers
         [Authorize("IsHost")]
         public async Task<IActionResult> GetEvent()
         {
-            
             Host currentHost = await GetCurrentHost(_currentUser.Name());
 
             var e = await _eventRepo.GetEventsByHostId(currentHost.HostId);
@@ -202,7 +201,7 @@ namespace PhotobookWebAPI.Controllers
         /// </remarks>
         /// <returns>NoContent</returns>
         /// <response code="204">Event with specified pin has been deleted</response>
-        /// <response code="400">Event</response>
+        /// <response code="400">Not the hosts event</response>
         [Authorize("IsHost")]
         [HttpDelete("{pin}")]
         public async Task<IActionResult> DeleteEvent(string pin)
@@ -210,20 +209,20 @@ namespace PhotobookWebAPI.Controllers
             //Bestemmer den bruger som er logget ind
             string userName = _currentUser.Name();
 
-                if (_hostRepo.GetHostByEmail(userName).Result.HostId == _eventRepo.GetEventByPin(pin).Result.HostId)
-                {
-                    CurrentDirectoryHelpers.SetCurrentDirectory();
-                    string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
+            if (_hostRepo.GetHostByEmail(userName).Result.HostId == _eventRepo.GetEventByPin(pin).Result.HostId)
+            {
+                CurrentDirectoryHelpers.SetCurrentDirectory();
+                string filepath = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
 
-                    _fileSystem.DirectoryDelete(filepath, true);
-                    //Directory.Delete(filepath, true);
-                    
-                    await _eventRepo.DeleteEventByPin(pin);
+                _fileSystem.DirectoryDelete(filepath, true);
+                
+                await _eventRepo.DeleteEventByPin(pin);
 
-                    logger.Info($"Deleted Event with pin: {pin}");
+                logger.Info($"Deleted Event with pin: {pin}");
 
-                    return NoContent();
-                }
+                return NoContent();
+            }
+
             return BadRequest("Permission Issue: Not Hosts Event");
 
         }
@@ -284,10 +283,9 @@ namespace PhotobookWebAPI.Controllers
             {
                 CurrentDirectoryHelpers.SetCurrentDirectory();
                 var subdir = Path.Combine(Directory.GetCurrentDirectory(), "Pictures", pin);
-                if (!_fileSystem.DirectoryExists(subdir))//(!Directory.Exists(subdir))
+                if (!_fileSystem.DirectoryExists(subdir))
                 {
                     _fileSystem.DirectoryCreate(subdir);
-                    //Directory.CreateDirectory(subdir);
                     logger.Info($"Subdir created for Event: {pin}");
                 }
 
